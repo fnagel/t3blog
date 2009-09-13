@@ -43,8 +43,8 @@ require_once(PATH_t3lib.'class.t3lib_scbase.php');
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */
- 
- 
+
+
 class  tx_t3blog_module2 extends t3lib_SCbase {
 	var $pageinfo;
 	var $blogfunctions;
@@ -72,10 +72,10 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 	 * Main function of the module. Write the content to $this->content
 	 * If you chose "web" as main module, you will need to consider the $this->id parameter which will contain the uid-number of the page clicked in the page tree
 	 */
-	function main()	{	
-		
+	function main()	{
+
 		global $BE_USER, $LANG, $BACK_PATH, $TCA_DESCR, $TCA, $CLIENT, $TYPO3_CONF_VARS;
-		
+
 
 		if(t3lib_div::GPVar('pid')){
 			$this->id = t3lib_div::GPVar('pid');
@@ -106,7 +106,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 					}
 				</script>
 			';
-			
+
 			$this->doc->postCode='
 				<script language="javascript" type="text/javascript">
 					script_ended = 1;
@@ -186,14 +186,14 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 			// "Delete" link:
 		$params = '&cmd['.$table.']['.$row['uid'].'][delete]=1';
 		$cells .= '<a href="#" onclick="'.htmlspecialchars('if (confirm('.$GLOBALS['LANG']->JScharCode('Are you sure you want to delete this record?'.t3lib_BEfunc::referenceCount($table,$row['uid'],' (There are %s reference(s) to this record!)')).')) {jumpToUrl(\''.$GLOBALS['SOBE']->doc->issueCommand($params).'\');} return false;').'">'.
-					'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="Delete" alt="Delete" />'.	
+					'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="Delete" alt="Delete" />'.
 					'</a>';
 
 			// Add comment link:
 		$cells .= '<a href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::editOnClick('&edit[tx_t3blog_com]['.$this->id.']=new&defVals[tx_t3blog_com][fk_post]='.$row['uid'],$this->doc->backPath)).'">'.
 				'<img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/comment_add.png','width="16" height="16"').' title="Add comment" alt="Add comment" />'.
 				'</a>';
-			
+
 			// Preview link:
 		$cells .= '<a href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::viewOnClick($this->id,$this->doc->backPath,'','#blogentry'.$row['uid'])).'">'.
 				'<img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/magnifier.png','width="16" height="16"').' title="Preview" alt="Preview" />'.
@@ -292,7 +292,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 
 				if(t3lib_div::GPVar('search') == 'Search'){	// Redirect to the first page after a search
 					$curPage = 1;
-			 	}
+				}
 
 				// FILTERING
 				// Reads all category names from the database
@@ -320,7 +320,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 						'&sortDir='.t3lib_div::GPVar('sortDir').
 						'&cat='.$dsAllFilters['catname'].
 						'&pid='.$this->id.
-						'" '.$selected. '>'. $dsAllFilters['catname']. '</option>';
+						'" '.$selected. '>' . htmlspecialchars($dsAllFilters['catname']) . '</option>';
 				}
 				$categoryFilters .= '</select>';
 
@@ -333,7 +333,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				$rslimitMax = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 						'count(distinct tx_t3blog_post.uid) as counter',	// select
 						'tx_t3blog_post'.($filter?', tx_t3blog_post_cat_mm, tx_t3blog_cat':''),	//from
-						'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid='.$this->id.' '.$queryPart.' '.$filter, //where 
+						'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid='.$this->id.' '.$queryPart.' '.$filter, //where
 						'',	//group by
 						'' //order by
 					);
@@ -344,26 +344,26 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				// Calculate the first post on the current page
 				$limitStart 	= ($curPage-1)*$limitSize;
 				$limitStartShow	= $limitMax == 0 ? $limitStart : $limitStart+1;
-				
+
 				// Calculate the last post on the current page
 				$limitEnd 		= $curPage*$limitSize;
-				
+
 				// Calculates the number of records on the 'last' page
 				if($limitEnd > $limitMax){
-					
+
 					$limitEffSize 	= $limitMax%$limitSize;
 					$limitEnd 		= $limitMax;
-					
+
 				}else{
-					
+
 					$limitEffSize 	= $limitSize;
-					
+
 				}
-				
+
 				if(!isset($limitStart)) {
 					$limitStart=1;
 				}
-				
+
 				$recordFrame = '<div class="pagecount">'.$LANG->getLL('showRecords').' '.$limitStartShow.'-'.$limitEnd.' ('.$limitMax.') </div>';
 				$limit = $limitStart.','.$limitEffSize;
 				$numPages = ceil($limitMax/$limitSize);	// Calculate the number of pages
@@ -425,7 +425,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				while($dsNormalList=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsNormalList)){
 					$i++;
 					$oddeven = 'odd';
-										
+
 					// only if not hidden
 					if($dsNormalList['hidden'] == 0){
 						$trackbacksSent = $this->blogfunctions->sendTrackbacks($dsNormalList['uid'],$this->id);
@@ -442,13 +442,13 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				}
 
 				$fullTable .= '</table>';
-				
+
 				// Create new Post link
 				$createNewRecord = '<a class="newRecord" href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::editOnClick('&edit[tx_t3blog_post]['.$this->id.']=new',$this->doc->backPath)).'">'.
 								'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,t3lib_extMgm::extRelPath('t3blog').'icons/page_add.png','width="16" height="16"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />&nbsp;'.$LANG->getLL('createNewBlogPost').'</a>';
-				
+
 				// Building the content
-				$content .= 	
+				$content .=
 					$createNewRecord.
 					$categoryFilters.
 					$fullTable.
