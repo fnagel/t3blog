@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: adding suggested dependency on ext:sfpantispam
 	* Review: #4597 - blogList widget susceptible to XSS
 	* Review: #4593 - blogList widget susceptible to XSS
 	* Review: #4592 - blogList widget susceptible to XSS
