@@ -532,7 +532,7 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 					<td width="120">'.$this->blogfunctions->truncate($dsNormalList['title'],20).'</td>
 					<td >'.$this->blogfunctions->truncate($dsNormalList['text'],50).'</td>
 					<td width="80">'.$dsNormalList['author'].'</td>
-					<td width="110">'.$dsNormalList['post_title'].' ('.$dsNormalList['fk_post'].')</td>
+					<td width="110">' . htmlspecialchars($dsNormalList['post_title']) . ' ('.$dsNormalList['fk_post'].')</td>
 					<td width="100">'.$this->getFunctions('tx_t3blog_com', $dsNormalList).'</td>
 				</tr>';
 			}
