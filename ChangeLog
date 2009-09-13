@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Bugfix: Comments RSS feed - removed double slash from link & guid URIs
 	* Review: #4604 - rss widget (feed) susceptible to XSS
 	* Bugfix: Comments RSS feed - MySQL Error in author retrieval
 	* Review: #4601 - calendar widget susceptible to XSS

@@ -415,7 +415,7 @@ class rss extends tslib_pibase {
 			$where.= ' AND '.$table.'.fe_group = "0"';
 		} else {
 			$where.= ' AND ('.$table.'.fe_group = 0 OR '.$table.'.fe_group = '.$fe_groupCheck['1'].')';
-		}		
+		}
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where);
 		$catlist = '';
@@ -542,9 +542,9 @@ class rss extends tslib_pibase {
 				$day 	= strftime('%d', $date);
 				$month 	= strftime('%m', $date);
 				$year	= strftime('%Y', $date);
-													
-				return '<link>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST').'/'.tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid)).'</link>
-	<guid>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST').'/'.tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid)).'</guid>
+
+				return '<link>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST') . tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid)).'</link>
+	<guid>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST') . tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid)).'</guid>
 	<description></description>';
 								break;
 
