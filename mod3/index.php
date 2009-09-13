@@ -390,7 +390,7 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 				// Default page
 				$curPage = 1;
 			}else{
-				$curPage = t3lib_div::GPVar('curPage');	// Page from parameter
+				$curPage = intval(t3lib_div::GPVar('curPage'));	// Page from parameter
 			}
 
 			if(!t3lib_div::GPVar('search') && !t3lib_div::GPVar('search_field')){	// Add the search parameter to the query
