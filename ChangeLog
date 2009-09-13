@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4527 - blogList widget susceptible to SQLi (piVars [blogList][category])
 	* Review: #4526 - BE Module 4 susceptible to SQLi and XSS
 	* Review: adding required dependency on ext:dam
 

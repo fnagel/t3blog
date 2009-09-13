@@ -38,8 +38,8 @@ class listFunctions extends blogList {
 	var $prevPrefixId = 'blogList';
 	var $localPiVars;
 	var $globalPiVars;
-	
-	
+
+
 	/**
 	 * The main method of the PlugIn
 	 * @author 	Manu Oehler <moehler@snowflake.ch>
@@ -52,16 +52,16 @@ class listFunctions extends blogList {
 		$this->localPiVars = $piVars[$this->prevPrefixId]; //blogList pvars
 		$this->conf = $conf;
 		$this->init();
-        
+
 		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";		
+		//$this->piVars['widgetname']['action'] = "value";
 		$content = $this->getListItems();
-		
+
 		$data = array(
 			'pageBrowser' 	=> t3blog_div::getPageBrowser($this->getListItems(true), 'tx_t3blog_post', $this->prefixId, array('previous' => $this->pi_getLL('previous'), 'next' => $this->pi_getLL('next')), $this->localPiVars, $this->conf, $this->conf['numberOfRecords'], $this->conf['maxPages']),
 			'listItems'		=> $content,
 		);
-		
+
 		return t3blog_div::getSingle($data,'list');
 	}
 
@@ -69,9 +69,9 @@ class listFunctions extends blogList {
 	/**
 	 * lists the blog entries and prepares the data.
 	 * possible piVars: groupBy, orderBy, orderByDir, catIn, datefrom, dateto, pointer
-	 * 
+	 *
 	 * @author 	Manu Oehler <moehler@snowflake.ch>
-	 * 
+	 *
 	 * @param 	boolean 	$justNumOfItems
 	 * @param 	boolean 	$justItemArray
 	 *
@@ -85,15 +85,15 @@ class listFunctions extends blogList {
 		$additionalTables = ' JOIN be_users ON be_users.uid = tx_t3blog_post.author ';
 		$where = 'tx_t3blog_post.pid = '. $GLOBALS['TSFE']->id; // only from current page
 		$where .= $this->localcObj->enableFields($table);
-		
+
 		// Add category filter
-		if($this->localPiVars['category'])	{
+		if(is_numeric($this->localPiVars['category']))	{
 			$additionalTables .= ', tx_t3blog_post_cat_mm as mm';
 			$uidList = $this->localPiVars['category'];
 			$this->getCommaSeparatedCategories($uidList, $uidList);
 			$where .= ' AND tx_t3blog_post.uid = mm.uid_local AND mm.uid_foreign IN ('. $GLOBALS['TYPO3_DB']->quoteStr($uidList, 'tx_t3blog_post_cat_mm'). ')';
 		}
-		
+
 		// Add filter by Author
 		if($this->localPiVars['author']){
 			$where .= ' AND tx_t3blog_post.author = '.intval($this->localPiVars['author']);
@@ -109,25 +109,25 @@ class listFunctions extends blogList {
 			$tagtitle = '';
 			$back = '';
 		}
-		
+
 		// Add search to where
 		if($this->globalPiVars['sword']){
 			$searchWord = $this->globalPiVars['sword'];
 			$searchWord = $GLOBALS['TYPO3_DB']->quoteStr($searchWord,$table);
-			
-			// add search over tt_content		
+
+			// add search over tt_content
 			$additionalTables .= ' JOIN tt_content ON (tt_content.irre_parentid = tx_t3blog_post.uid AND tt_content.irre_parenttable = \'tx_t3blog_post\')';
-			
+
 			$where .= ' AND (';
 			$where .= ' tt_content.header LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' OR tt_content.bodytext LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' OR tx_t3blog_post.title LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' OR tx_t3blog_post.tagClouds LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' ) ';
-			
-			
-		}		
-		
+
+
+		}
+
 		// SET  group by and order by
 		$groupBy = 'tx_t3blog_post.uid';
 		$orderBy = 'tx_t3blog_post.date DESC';
@@ -142,22 +142,22 @@ class listFunctions extends blogList {
 			|| mb_strtolower($this->localPiVars['orderByDir'])=='desc')){
 			$orderBy .= ' '. mb_strtoupper($GLOBALS['TYPO3_DB']->fullQuoteStr($this->localPiVars['orderByDir'],$table));
 		}
-		
+
 		//where additions
 		$this->localPiVars['catIn'];
-		
+
 		//add DATEfrom and DATEto ->  where
 		//convert url paramter datefrom and dateto in timestamp
 		list ($yearFromdate, $monthFromdate, $dayFromdate) = explode('-', $this->localPiVars['datefrom']);
 		if ($dayFromdate != ''){
 			$fromdate = mktime(0, 0, 0, $monthFromdate, $dayFromdate, $yearFromdate);
 		}
-		
-		list ($yearTodate ,$monthTodate, $dayTodate ) = explode('-', $this->localPiVars['dateto']);		
+
+		list ($yearTodate ,$monthTodate, $dayTodate ) = explode('-', $this->localPiVars['dateto']);
 		if ($dayTodate != ''){
 			$todate = mktime(0, 0, 0, $monthTodate, $dayTodate, $yearTodate);
 		}
-		
+
 		if($todate || $fromdate){
 			if(!$fromdate){
 				$fromdate = 1;
@@ -177,10 +177,10 @@ class listFunctions extends blogList {
 			}
 			$where .= ' AND date >= '.$fromdate.' AND date <= '.$todate.' ';
 		}
-		
+
 		//add limit
 		$limit = ($justNumOfItems == false) ? (intval($_GET['tx_t3blog_post_pointer']) ? intval($_GET['tx_t3blog_post_pointer']) * $this->conf['numberOfRecords'] : 0). ','. ($this->conf['numberOfRecords'] ? $this->conf['numberOfRecords'] : '10') : '';
-		
+
 		$RES = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			$fields,
 			$table.$additionalTables,
@@ -189,8 +189,8 @@ class listFunctions extends blogList {
 			$orderBy,
 			$limit
 		);
-	
-		
+
+
 		// if only num of results is requested jump in this.
 		if($justNumOfItems == true)	{
 			return $GLOBALS['TYPO3_DB']->sql_num_rows($RES);
@@ -199,20 +199,20 @@ class listFunctions extends blogList {
 		$singleData['tags'] = $tagtitle;
 		if($this->globalPiVars){
 			if($this->globalPiVars['sword']){
-				$singleData['filtered'] = $this->globalPiVars['sword'];	
+				$singleData['filtered'] = $this->globalPiVars['sword'];
 			}else if ($this->localPiVars['tags']){
 				$singleData['filtered'] = $this->localPiVars['tags'];
 			}else if ($this->localPiVars['author']){
 				$singleData['filtered'] = t3blog_div::getAuthorByUid($this->localPiVars['author']);
 			}else if ($this->localPiVars['category']) {
-				
+
 				$singleData['filtered'] = t3blog_div::getCategoryNameByUid($this->localPiVars['category']);
 			}
-			
+
 			$singleData['text']	= $this->pi_getLL('filteredByText');
 			$singleData['resetText'] = $this->pi_getLL('resetText');
 		}
-		
+
 		$content .= t3blog_div::getSingle($singleData, 'titelListItem');
 
 		$itemArray = array();
@@ -228,7 +228,7 @@ class listFunctions extends blogList {
 			}else{
 				$gravatar = '';
 			}
-		
+
 			// get all content elemenets
 			$resContent = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 				'uid, CType, bodytext',		// SELECT ...
@@ -240,18 +240,18 @@ class listFunctions extends blogList {
 			$uidContentList = '';
 			$divider = false;
 			while ( ($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resContent)) && !$divider) {
-				
-				// seperate by divider				
+
+				// seperate by divider
 				$dividerInText 		= stripos($rowContent['bodytext'], '###MORE###');
 				$textBeforeDivider	= $result = substr($rowContent['bodytext'], 0, strpos($rowContent['bodytext'], '###MORE###'));
-				
+
 				if($dividerInText > 0 ){
 					$divider = true;
 				} else {
 					$uidContentList .= intval($rowContent['uid']).',';
 				}
 			}
-			
+
 			//print_r($row);
 			if(strlen($uidContentList)>1){
 				$uidContentList = substr($uidContentList,0,strlen($uidContentList)-1);
@@ -282,10 +282,10 @@ class listFunctions extends blogList {
 		if($justItemArray)	{
 			return $itemArray;
 		}
-		
+
 		// if no results have been found and any kind of filters have been sent...
 		if($numRows<1 and (count($this->globalPiVars)>0 or count($this->localPiVars)>0)){
-			$content .= t3blog_div::getSingle(array('text'=>$this->pi_getLL('noResult')),'noResultWrap');	
+			$content .= t3blog_div::getSingle(array('text'=>$this->pi_getLL('noResult')),'noResultWrap');
 		}
 		return $content;
 	}
