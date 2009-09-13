@@ -836,6 +836,7 @@ plugin.tx_t3blog_pi1 {
 					20 {
 						dataWrap = <div class="formField"><input type="text" id="commentauthor" class="text" name="tx_t3blog_pi1[blogList][commentauthor]" {field:readOnly} value=" | " /></div>
 						field = commentauthor
+						htmlSpecialChars = 1
 					}
 				}
 
@@ -852,6 +853,7 @@ plugin.tx_t3blog_pi1 {
 					10 {
 						dataWrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commentauthoremail]" {field:readOnly} value = " | " /></div>
 						field = commentauthoremail
+						htmlSpecialChars = 1
 					}
 
 
@@ -871,6 +873,7 @@ plugin.tx_t3blog_pi1 {
 					10 {
 						dataWrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commentauthorwebsite]" {field:readOnly} value = " | " /></div>
 						field = commentauthorwebsite
+						htmlSpecialChars = 1
 					}
 
 
@@ -889,6 +892,7 @@ plugin.tx_t3blog_pi1 {
 					10 {
 						wrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commenttitle]" value = " | " /></div>
 						field = commenttitle
+						htmlSpecialChars = 1
 					}
 
 
