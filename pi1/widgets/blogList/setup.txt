@@ -1,7 +1,7 @@
 plugin.tx_t3blog_pi1 {
-	
+
 	gravatarsize = 50
-	
+
 	image {
 		big {
 			imageLinkWrap = 1
@@ -28,52 +28,52 @@ plugin.tx_t3blog_pi1 {
 	#list
 	blogList {
 		# send email notification about received blog comments to admin ?
-		mailReceivedCommentsToAdmin = 1  
+		mailReceivedCommentsToAdmin = 1
 		adminsCommentsEmail = {$plugin.tx_t3blog_pi1.blogList.adminsCommentsEmail}
 		adminsCommentMailTemplate = EXT:t3blog/pi1/widgets/blogList/adminemail.txt
 		approved = 0
-		
+
 		substitutePagetitle = 1
-		
+
 		loginPid = {$PID.feuser.loginPid}
-		
+
 		numberOfRecords = 5
 		maxPages = 1000
 		dateformat = %Y.%m.%d
-		
+
 		#gravatar | ratings: g, pg, r, or x
 		gravatar = 1
 		gravatarAtComments = 1
 		gravatarRating = g
-		
+
 		#captcha
 		useCaptcha = 1
 		captchaFont = x-files.ttf
 		captchaFontSize = 25
 		captchaFontColor = 000000
-		captchaEreg	= A-Za-z		
-		captchaBackgroundColor = E3E3E3 
+		captchaEreg	= A-Za-z
+		captchaBackgroundColor = E3E3E3
 		captchaShowImage = 1
 		captchaBackgroundPNGImage = captcha.png
 		captchaLines = 3
-		
+
 		splitLongWordsInComment = 0
-		
+
 		#make comment fields readonly if fe-user is logged in
 		readOnly = 1
-		
+
 		#allow to comment comments
 		commentComments = 1
-		
+
 		#allow to subscribe for comments
 		subscribeForComments = 1
-		
+
 		#senderEmail
 		senderEmail = example@example.org
-		
+
 		## Possible fields would be: commentauthor, commenttext, commentauthoremail, commenttitle, commentauthorwebsite, captcha
 		requiredFields = commentauthor, commenttext, commentauthoremail, commenttitle, captcha
-		
+
 		# if you want to use this, make sure you have installed the extension and the specified pid (see constants) points to the correct page
 		useTipAFriend = {$CONFIGURATION.useTipAFriend}
 
@@ -107,7 +107,7 @@ plugin.tx_t3blog_pi1 {
 				dataWrap = <div id="blogentry{field:uid}" class="item">|</div>
 			}
 
-			# Top of a Entry. 
+			# Top of a Entry.
 			5 = COA
 			5 {
 				wrap = <div class="itemTop">|<div class="clear"><!-- clear --></div></div>
@@ -121,7 +121,7 @@ plugin.tx_t3blog_pi1 {
 				}
 				30 = TEXT
 				30 {
-				
+
 					field = time
 				}
 			}
@@ -138,16 +138,16 @@ plugin.tx_t3blog_pi1 {
 					20 = COA
 					20 {
 						if.isTrue.field = contentUids
-						10 < styles.content.get						
+						10 < styles.content.get
 						10.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid} AND uid in ( {field:contentUids} )
 					}
 					30 = TEXT
 					30 {
 						field = showMore
 						if.isTrue.field = showMore
-						
+
 					}
-					
+
 				}
 			}
 			20 = COA
@@ -162,14 +162,14 @@ plugin.tx_t3blog_pi1 {
 						additionalParams.dataWrap = &tx_t3blog_pi1[blogList][author]={field:authorId}
 						useCacheHash = 1
 					}
-										
+
 				}
 
 				12 = TEXT
 				12 {
 					if.isTrue.field = email
 					wrap = <span class="authoremail">(|)</span>
-					field= email 
+					field= email
 				}
 
 				14 = TEXT
@@ -193,7 +193,7 @@ plugin.tx_t3blog_pi1 {
 				16 {
 					field = comments
 				}
-				
+
 				#show gravatar if email is set
 				20 = TEXT
 				20 {
@@ -259,17 +259,17 @@ plugin.tx_t3blog_pi1 {
 					10 {
 						10 = TEXT
 						10 {
-						
+
 							field = title
 						}
-						
-						
+
+
 						20 < styles.content.get
 						20.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid}
 					}
 				}
-								
-				
+
+
 				15 = COA
 				15 {
 					wrap = <div class="itemNav">|<div class="clear"><!-- clear --></div></div>
@@ -281,14 +281,14 @@ plugin.tx_t3blog_pi1 {
 							parameter.data = TSFE:id
 							additionalParams.dataWrap = &tx_t3blog_pi1[blogList][author]={field:authorId}
 							useCacheHash = 1
-						}						
+						}
 					}
 
 					12 = TEXT
 					12 {
 						if.isTrue.field = email
 						wrap = <span class="authoremail">(|)</span>
-						field = email						
+						field = email
 					}
 
 					15 = TEXT
@@ -341,9 +341,9 @@ plugin.tx_t3blog_pi1 {
 			50 {
 				if.isTrue.field = message
 				wrap = <p class="blogCommentMessage">|</p>
-				field = message	
+				field = message
 			}
-			
+
 			60 = TEXT
 			60 {
 				field = addcomment
@@ -414,6 +414,7 @@ plugin.tx_t3blog_pi1 {
 			10 {
 				wrap = <h3>|</h3>
 				field = title
+				htmlSpecialChars = 1
 				typolink {
 					parameter.data = TSFE:id
 					useCacheHash = 1
@@ -423,7 +424,7 @@ plugin.tx_t3blog_pi1 {
 
 			99 = RESTORE_REGISTER
 		}
-		
+
 		moreLink = COA
 		moreLink {
 			#load register
@@ -499,9 +500,9 @@ plugin.tx_t3blog_pi1 {
 				parseFunc < lib.parseFunc_RTE
 				parseFunc {
 					nonTypoTagStdWrap.encapsLines {
-        				nonWrappedTag =
-        			}
-        		}
+								nonWrappedTag =
+							}
+						}
 			}
 			20 = TEXT
 			20 {
@@ -607,35 +608,35 @@ plugin.tx_t3blog_pi1 {
 			wrap = <p>|</p>
 			field = text
 		}
-		
+
 		mediaField < plugin.tx_t3blog_pi1.global.mediaField
 		imgField < plugin.tx_t3blog_pi1.global.imgField
 		imgFieldList < plugin.tx_t3blog_pi1.global.imgFieldList
 		#pageBrowser < plugin.tx_t3blog_pi1.global.pageBrowser
 		#pageBrowserElement < plugin.tx_t3blog_pi1.global.pageBrowserElement
-		
-		
-		pageBrowser = TEXT 
+
+
+		pageBrowser = TEXT
 		pageBrowser {
 			wrap = <ul class="pageBrowser">|</ul>
 			field = pbitems
-		}	
-		
+		}
+
 		pageBrowserElement = COA
 		pageBrowserElement {
 			5 = TEXT
 			5 {
 				wrap = <li class="|">
 				field = pbitemclass
-			}	
-			
+			}
+
 			10 = TEXT
 			10 {
 				wrap = |</li>
 				field = link
 			}
 		}
-	
+
 
 		#single tile link for navigation
 		singleNavTitleLink = COA
@@ -807,27 +808,27 @@ plugin.tx_t3blog_pi1 {
 				10 {
 					wrap = <div class="formElement text">|<div class="formClear"><!-- clear --></div></div>
 
-					5 = TEXT 
-		            5 { 
-		 
- 		            	wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor" >|</label></div> 
- 		                field = comParentId_label 
- 		                required = 1 
- 		            } 
- 		                                         
- 		            10 = TEXT 
- 		            10 { 
- 		                dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div> 
- 		                field = comParentId 
- 		                required = 1 
- 		            } 
- 		                                                 
- 		            15 = TEXT 
- 		            15 { 
- 		 
-	                   wrap = <div class="formLabel"><label for="commentauthor" >|</label></div> 
-	                   field = commentauthor_label 
-	                }
+					5 = TEXT
+								5 {
+
+									 wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor" >|</label></div>
+										 field = comParentId_label
+										 required = 1
+								 }
+
+								 10 = TEXT
+								 10 {
+										 dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div>
+										 field = comParentId
+										 required = 1
+								 }
+
+								 15 = TEXT
+								 15 {
+
+										 wrap = <div class="formLabel"><label for="commentauthor" >|</label></div>
+										 field = commentauthor_label
+									}
 
 					20 = TEXT
 					20 {
@@ -906,7 +907,7 @@ plugin.tx_t3blog_pi1 {
 						field = commenttext
 					}
 				}
-				
+
 				#captchaimage
 				60 = COA
 				60 {
@@ -925,7 +926,7 @@ plugin.tx_t3blog_pi1 {
 						required = 1
 					}
 				}
-				
+
 				#captchatext
 				70 = COA
 				70 {
@@ -944,7 +945,7 @@ plugin.tx_t3blog_pi1 {
 						required = 1
 					}
 				}
-				
+
 				#subscribe
 				80 = COA
 				80 {
@@ -1027,23 +1028,23 @@ plugin.tx_t3blog_pi1 {
 			stdWrap {
 				dataWrap = <div class="item {field:odd}" id="comment_{field:uid}" style="margin-left:{field:margin}">|</div>
 			}
-			
+
 			5 = TEXT
-			5 {	
-				
-				dataWrap        = <div class="commentComments">|</div><div class="clear"></div> 
- 	            		field           	= parentcom
- 	            		required        = 1
-				typolink { 
- 		                        parameter.field = blog_uid
- 		                        useCacheHash = 1 	
- 		                        additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
-								section.dataWrap = comment 
- 		        }	
-				 
-				 		
+			5 {
+
+				dataWrap        = <div class="commentComments">|</div><div class="clear"></div>
+									 field           	= parentcom
+									 required        = 1
+				typolink {
+														 parameter.field = blog_uid
+														 useCacheHash = 1
+														 additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
+								section.dataWrap = comment
+						 }
+
+
 			}
-			
+
 			10 = TEXT
 			10 {
 				value (
@@ -1069,7 +1070,7 @@ plugin.tx_t3blog_pi1 {
 					parameter.field = website
 				}
 			}
-			
+
 			30 = COA
 			30 {
 				if.isTrue.field = edit
@@ -1090,24 +1091,24 @@ plugin.tx_t3blog_pi1 {
 				}
 				10 = TEXT
 				10 {
-					wrap = <div class="editComment">|</div> 
+					wrap = <div class="editComment">|</div>
 					field = edit
 					typolink {
 						parameter.data = TSFE:id
 						useCacheHash = 1
 						additionalParams.dataWrap = &tx_t3blog_pi1[blogList][showUid]={field:blogUid}&tx_t3blog_pi1[blogList][editCommentUid]={field:uid}&tx_t3blog_pi1[blogList][year]={register:year}&tx_t3blog_pi1[blogList][month]={register:month}&tx_t3blog_pi1[blogList][day]={register:day}
 					}
-				}	
-				99 = RESTORE_REGISTER					
+				}
+				99 = RESTORE_REGISTER
 			}
 
 		}
-		
-		
+
+
 		noCommentAllowedWrap = COA
 		noCommentAllowedWrap {
 			wrap = <p>|</p>
-			10 = TEXT 
+			10 = TEXT
 			10 {
 				field = text
 			}
@@ -1116,12 +1117,12 @@ plugin.tx_t3blog_pi1 {
 				if.isTrue.field = loginPid
 				field = loginLinkText
 				typolink {
-					parameter.field = loginPid					
+					parameter.field = loginPid
 					additionalParams.dataWrap = &redirect_url={field:redirect_url}
 				}
 			}
 		}
-		
+
 		####################
 		# trackback listing
 		####################
