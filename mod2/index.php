@@ -434,7 +434,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 					$fullTable .= chr(10).
 					'<tr class="'.$oddeven.'">
 						<td width="110">'. date("d.m.y H:i:s",$dsNormalList['date']).'</td>
-						<td width="350">'. $dsNormalList['title'].'</td>
+						<td width="350">' . htmlspecialchars($dsNormalList['title']) . '</td>
 						<td width="100">'. $this->blogfunctions->getCategoryNames('tx_t3blog_post', $dsNormalList).'</td>
 						<td width="" align="center"><a href="../mod3/index.php?linkCom='.$dsNormalList['uid'].'&pid='.$this->id.'" title="'.$GLOBALS['LANG']->getLL('seeComments').'">'.$dsNormalList['comments'].' <img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/comments.png','width="16" height="16"').' title="'.$GLOBALS['LANG']->getLL('seeComments').'" alt="'.$GLOBALS['LANG']->getLL('seeComments').'" /></a></td>
 						<td width="100">'. $this->getFunctions('tx_t3blog_post', $dsNormalList).' <!-- trackbacks sent: '.$trackbacksSent.'--></td>
