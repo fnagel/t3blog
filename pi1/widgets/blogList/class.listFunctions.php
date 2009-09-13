@@ -201,7 +201,7 @@ class listFunctions extends blogList {
 			if($this->globalPiVars['sword']){
 				$singleData['filtered'] = htmlspecialchars($this->globalPiVars['sword']);
 			}else if ($this->localPiVars['tags']){
-				$singleData['filtered'] = $this->localPiVars['tags'];
+				$singleData['filtered'] = htmlspecialchars($this->localPiVars['tags']);
 			}else if ($this->localPiVars['author']){
 				$singleData['filtered'] = t3blog_div::getAuthorByUid($this->localPiVars['author']);
 			}else if ($this->localPiVars['category']) {
