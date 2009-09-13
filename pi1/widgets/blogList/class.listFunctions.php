@@ -199,7 +199,7 @@ class listFunctions extends blogList {
 		$singleData['tags'] = $tagtitle;
 		if($this->globalPiVars){
 			if($this->globalPiVars['sword']){
-				$singleData['filtered'] = $this->globalPiVars['sword'];
+				$singleData['filtered'] = htmlspecialchars($this->globalPiVars['sword']);
 			}else if ($this->localPiVars['tags']){
 				$singleData['filtered'] = $this->localPiVars['tags'];
 			}else if ($this->localPiVars['author']){
