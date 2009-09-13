@@ -151,7 +151,7 @@ class blogfunctions extends t3lib_SCbase {
 
 		// If search-fields were defined (and there always are) we create the query:
 			if (count($sfields)) {
-				$like = ' LIKE \'%'.$GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::GPVar('search_field'), '$table').'%\'';		// Free-text searching...
+				$like = ' LIKE \'%'.$GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('search_field'), '$table').'%\'';		// Free-text searching...
 				$queryPart = ' AND ('.implode($like.' OR ',$sfields).$like.')';
 			}
 
@@ -169,7 +169,7 @@ class blogfunctions extends t3lib_SCbase {
 		// Setting form-elements, if applicable:
 		$formElements=array('','');
 		if ($formFields)	{
-			$formElements=array('<form action="'.htmlspecialchars($this->listURL().'&curPage=1').'.&sort=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('sort'))) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid=' . intval(t3lib_div::GPVar('pid')) . '" method="post">','</form>');
+			$formElements=array('<form action="'.htmlspecialchars($this->listURL().'&curPage=1').'.&sort=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('sort'))) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid=' . intval(t3lib_div::_GP('pid')) . '" method="post">','</form>');
 		}
 
 		// Table with the search box:
@@ -181,7 +181,7 @@ class blogfunctions extends t3lib_SCbase {
 				-->
 				<table border="0" cellpadding="0" cellspacing="0" class="bgColor4" id="typo3-dblist-search">
 					<tr>
-						<td>'.$GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.enterSearchString',1).'<input type="text" name="search_field" value="'.htmlspecialchars(t3lib_div::GPVar('search_field')).'"'.$GLOBALS['TBE_TEMPLATE']->formWidth(10).' /></td>
+						<td>'.$GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.enterSearchString',1).'<input type="text" name="search_field" value="'.htmlspecialchars(t3lib_div::_GP('search_field')).'"'.$GLOBALS['TBE_TEMPLATE']->formWidth(10).' /></td>
 						<td>'.$lMenu.'</td>
 						<td><input type="submit" name="search" value="'.$GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.search',1).'" /></td>
 					</tr>
