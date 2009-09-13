@@ -1200,6 +1200,7 @@ plugin.tx_t3blog_pi1 {
 				10 {
 					wrap = <h5>|</h5>
 					field = title
+					htmlSpecialChars = 1
 					typolink {
 						parameter.field = url
 					}
@@ -1208,6 +1209,7 @@ plugin.tx_t3blog_pi1 {
 				20 {
 					wrap = <p>|</p>
 					field = text
+					htmlSpecialChars = 1
 				}
 			}
 
