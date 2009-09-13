@@ -219,7 +219,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 
 			// SORTING
 			// Table-header & Sorting links
-			$i = (t3lib_div::_GP('curPage')?t3lib_div::_GP('curPage'):0);
+			$i = (t3lib_div::_GP('curPage')?intval(t3lib_div::_GP('curPage')):0);
 			$fullTable=
 				'<table cellspacing="0" cellpadding="0" class="recordlist">
 				<tr>
@@ -281,7 +281,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				if(!t3lib_div::GPVar('curPage')){	// Set the current page with parameter or default
 					$curPage = 1;	// Default
 				}else{
-					$curPage = t3lib_div::GPVar('curPage');	// Page from parameter
+					$curPage = intval(t3lib_div::GPVar('curPage'));	// Page from parameter
 				}
 
 				if(!t3lib_div::GPVar('search') && !t3lib_div::GPVar('search_field')){	// Add the search parameter to the query
