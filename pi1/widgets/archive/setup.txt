@@ -45,7 +45,7 @@ plugin.tx_t3blog_pi1 {
 				}
 			}
 		}
-		
+
 		titleLink = COA
 		titleLink {
 			1 = LOAD_REGISTER
@@ -68,6 +68,7 @@ plugin.tx_t3blog_pi1 {
 			10 {
 				wrap = |
 				field = title
+				htmlSpecialChars = 1
 				typolink {
 					parameter.field = blogUid
 					useCacheHash = 1
@@ -77,13 +78,13 @@ plugin.tx_t3blog_pi1 {
 
 			99 = RESTORE_REGISTER
 		}
-		
+
 		itemWrap = TEXT
 		itemWrap {
 			dataWrap = <li class="{field:class}">|</li>
 			field = text
 		}
-		
+
 		listWrap = COA
 		listWrap {
 			10 = TEXT
@@ -94,17 +95,17 @@ plugin.tx_t3blog_pi1 {
 			30 = TEXT
 			30 {
 				wrap = <script type="text/javascript">|</script>
-				required = 1 
+				required = 1
 				field = js
-				
+
 			}
 		}
-		
+
 		globalWrap = COA
 		globalWrap {
 			wrap = <div id="archive">|</div>
 			10 = TEXT
-			10 { 
+			10 {
 				wrap = <h3>|</h3>
 				field = title
 			}
@@ -112,7 +113,7 @@ plugin.tx_t3blog_pi1 {
 			20 {
 				field = categoryTree
 			}
-			
+
 		}
-	}	
+	}
 }
