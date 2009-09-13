@@ -240,7 +240,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 		if (t3lib_div::_GP('move') == 'moveup' && t3lib_div::_GP('uid') && t3lib_div::_GP('currSorting')) {
 			$resUp = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 				'uid,sorting',																				// SELECT
-				'`'. t3lib_div::_GP('table'). '`',															// FROM
+				'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',															// FROM
 				(t3lib_div::_GP('currSorting') ? ' sorting < ' . t3lib_div::intval_positive(t3lib_div::_GP('currSorting')) . ' AND ' : '').
 				' pid = '. $this->id. ' AND deleted = 0 ' ,													// WHERE
 				'',																							// GROUP BY
@@ -250,12 +250,12 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			$rowUp = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resUp);
 			if($rowUp){
 				$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-					'`'. t3lib_div::_GP('table'). '`',							// FROM ...
+					'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',							// FROM ...
 					'uid='. t3lib_div::intval_positive(t3lib_div::_GP('uid')),	// WHERE
 					array('sorting' => $rowUp['sorting'])						// FIELDS
 				);
 				$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-					'`'. t3lib_div::_GP('table'). '`',		// FROM ...
+					'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',		// FROM ...
 					'uid='. $rowUp['uid'],
 					array('sorting'	=>	t3lib_div::intval_positive(t3lib_div::_GP('currSorting')))	//fields
 				);
@@ -266,7 +266,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 		if (t3lib_div::_GP('move') == 'movedown' && t3lib_div::_GP('uid')) {
 			$resDown = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 				'uid,sorting',		// SELECT ...
-				'`'.t3lib_div::_GP('table').'`',		// FROM ...
+				'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',		// FROM ...
 				'sorting > ' . t3lib_div::intval_positive(t3lib_div::_GP('currSorting')) . ' AND pid = '. $this->id. ' AND deleted = 0 ' ,		// WHERE ...
 				'',		// GROUP BY ...
 				'sorting ASC',		// ORDER BY ...
@@ -275,12 +275,12 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			$rowDown = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resDown);
 			if($rowDown){
 				$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-					'`'.t3lib_div::_GP('table').'`',		// FROM ...
+					'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',		// FROM ...
 					'uid='. t3lib_div::intval_positive(t3lib_div::_GP('uid')),	//where
 					array('sorting'	=>	$rowDown['sorting'])	//fields
 				);
 				$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-					'`'. t3lib_div::_GP('table'). '`',		// FROM ...
+					'`' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('table'), 'tx_t3blog_post') . '`',		// FROM ...
 					'uid='. $rowDown['uid'],
 					array('sorting'	=> t3lib_div::intval_positive(t3lib_div::_GP('currSorting')))	//fields
 				);
