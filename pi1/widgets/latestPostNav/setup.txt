@@ -14,7 +14,7 @@ plugin.tx_t3blog_pi1 {
 				wrap = <dl class="latestPostList">|</dl>
 				field = listItems
 			}
-			
+
 			30 = TEXT
 			30 {
 				wrap= |
@@ -28,7 +28,7 @@ plugin.tx_t3blog_pi1 {
 				}
 			}
 		}
-		
+
 		listItem = COA
 		listItem {
 			10 = TEXT
@@ -41,9 +41,9 @@ plugin.tx_t3blog_pi1 {
 				wrap = <dd>|</dd>
 				field = date
 				strftime = %d.%m.%Y %R
-			}		
+			}
 		}
-	
+
 		link = COA
 		link {
 			#load register
@@ -62,11 +62,12 @@ plugin.tx_t3blog_pi1 {
 					strftime = %d
 				}
 			}
-			
+
 			10 = TEXT
 			10 {
 				wrap= |
 				field = text
+				htmlSpecialChars = 1
 				crop = 60 | ... | 1
 				typolink {
 					parameter.field = blogUid
@@ -75,10 +76,10 @@ plugin.tx_t3blog_pi1 {
 					additionalParams.dataWrap = &tx_t3blog_pi1[blogList][showUid]={field:uid}&tx_t3blog_pi1[blogList][year]={register:year}&tx_t3blog_pi1[blogList][month]={register:month}&tx_t3blog_pi1[blogList][day]={register:day}
 				}
 			}
-			
+
 			99 = RESTORE_REGISTER
-			
+
 		}
-	
+
 	}
 }
