@@ -662,6 +662,7 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				field = title
+				htmlSpecialChars = 1
 				typolink {
 					parameter.data = TSFE:id
 					useCacheHash = 1
