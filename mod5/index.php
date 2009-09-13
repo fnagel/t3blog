@@ -71,7 +71,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 		if(t3lib_div::GPVar('pid')){	// get the page id from the extension config
 			$this->id = t3lib_div::GPVar('pid');
 		}else{
-			$this->id = $_GET['id'];
+			$this->id = is_numeric(t3lib_div::_GET('id')) ? intval(t3lib_div::_GET('id')) : null;
 		}
 
 		/* access check!
@@ -155,7 +155,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 		*/
 
 		$baseUrl = $this->blogfunctions->listURL($this->id, 'tx_t3blog_blogroll');
-		
+
 		// "edit" link: ( only if permissions to edit the page-record of the content of the parent page ($this->id)
 		$params = '&edit['. $table. ']['. $row['uid']. ']=edit';
 		$cells .= '<a href="'. $baseUrl. '#" onclick="'. htmlspecialchars(t3lib_BEfunc::editOnClick($params, $this->doc->backPath)). '">'.
@@ -200,9 +200,9 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 
 		return $cells;
 	}
-	
-	
-	
+
+
+
 
 	/**
 	 * Prints out the module HTML
@@ -382,32 +382,32 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			while($dslimitMax = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($rslimitMax)){
 				$limitMax = $dslimitMax['counter'];
 			}
-			
+
 			// calculate the first category on the current page
 			$limitStart 	= ($curPage-1)*$limitSize;
 			$limitStartShow	= $limitMax == 0 ? $limitStart : $limitStart+1;
-			
-			
+
+
 			// calculate the last category on the current page
-			$limitEnd 		= $curPage*$limitSize;		
-			
-			
+			$limitEnd 		= $curPage*$limitSize;
+
+
 			// calculates the number of records on the 'last' page
 			if($limitEnd > $limitMax){
-				
+
 				$limitEffSize 	= $limitMax%$limitSize;
 				$limitEnd 		= $limitMax;
-				
+
 			}else {
-				
+
 				$limitEffSize 	= $limitSize;
-				
+
 			}
-			
+
 			if(!isset($limitStart)) {
 				$limitStart=1;
 			}
-			
+
 			$recordFrame =
 				'<div class="pagecount">'.
 						$LANG->getLL('showRecords').': '.$limitStartShow.'-'.$limitEnd.' ('.$limitMax.') '.
@@ -478,9 +478,9 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 				$sort,													// SORT
 				$limit													// LIMIT
 			);
-			
-				
-			
+
+
+
 			for ($i = 0; $dsNormalList = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsNormalList);$i++){
 				$oddeven = 'odd';
 				if($i % 2)$oddeven = 'even';
@@ -499,16 +499,16 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			$createNewRecord  .= '<a href="#" class="newRecord" onclick="'. htmlspecialchars(t3lib_BEfunc::editOnClick('&edit[tx_t3blog_blogroll]['. $this->id. ']=new', $this->doc->backPath)).'">'.
 							'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,t3lib_extMgm::extRelPath('t3blog'). 'icons/link_add.png', 'width="16" height="16"').' title="'. $GLOBALS['LANG']->getLL('new'. ($table == 'pages' ? 'Page' : 'Record'), 1). '" alt="" />&nbsp;'. $LANG->getLL('createNewBlogroll').
 							'</a>';
-			
+
 			// building the content
-			$content .=	
+			$content .=
 				$createNewRecord.
 				$fullTable.
 				$recordFrame.
 				$paging.
 				$curSettings.
 				$this->blogfunctions->getSearchBox();
-				
+
 
 			$this->content .= $this->doc->section(''. $LANG->getLL('sectionTitle'), $content, 0, 1);
 
