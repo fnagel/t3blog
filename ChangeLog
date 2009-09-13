@@ -1,6 +1,7 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4562 - BE Module 2 susceptible to SQLi
 	* Review: #4561 - BE Module 2 susceptible to XSS
-	* Review: #4559 - BE Module 2 susceptible to XSS
+	* Review: #4560 - BE Module 2 susceptible to XSS
 	* Review: #4559 - Class blogfunctions susceptible to XSS
 	* Review: #4558 - Class blogfunctions susceptible to XSS
 	* Review: #4557 - Class blogfunctions susceptible to XSS

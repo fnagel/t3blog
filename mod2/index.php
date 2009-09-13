@@ -267,12 +267,12 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 							AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign
 							AND tx_t3blog_cat.catname  =\'' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::GPVar('cat'), 'tx_t3blog_post') .'\')' ;
 				}else{	// Use a selected category from the "Categories" module as filter
-					if(t3lib_div::GPVar('linkCat')){
+					if(t3lib_div::GPVar('linkCat') && is_numeric(t3lib_div::GPVar('linkCat'))){
 						$filter .= 'AND tx_t3blog_post.uid IN (SELECT tx_t3blog_post.uid
 							FROM tx_t3blog_post, tx_t3blog_cat, tx_t3blog_post_cat_mm
 							WHERE tx_t3blog_post.uid = tx_t3blog_post_cat_mm.uid_local
 							AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign
-							AND tx_t3blog_post_cat_mm.uid_foreign ='.t3lib_div::GPVar('linkCat').')';
+							AND tx_t3blog_post_cat_mm.uid_foreign =' . intval(t3lib_div::GPVar('linkCat')) . ')';
 					}else{	// Otherwise disable the filter
 						$filter = '';
 					}
