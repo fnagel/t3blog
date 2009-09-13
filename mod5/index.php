@@ -486,7 +486,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 				if($i % 2)$oddeven = 'even';
 				$fullTable .= chr(10).
 				'<tr class="'.$oddeven.'">
-					<td width="100">'. $this->blogfunctions->truncate($dsNormalList['title'], 80). '</td>
+					<td width="100">' . htmlspecialchars($this->blogfunctions->truncate($dsNormalList['title'], 80)) . '</td>
 					<td>'. $this->blogfunctions->truncate($dsNormalList['description'], 50). '&nbsp;</td>
 					<td width="110">'. $dsNormalList['url']. '</td>
 					<td width="120" title="'. $this->getXfnNames($dsNormalList['xfn']). '">'. $this->blogfunctions->truncate($this->getXfnNames($dsNormalList['xfn']), 50). '&nbsp;</td>
