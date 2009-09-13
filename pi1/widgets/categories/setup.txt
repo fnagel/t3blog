@@ -3,62 +3,63 @@ plugin.tx_t3blog_pi1 {
 		categories = COA
 		categories {
 			wrap = <div id="categories">|</div>
-			
+
 			5 = TEXT
 			5 {
 				wrap = <h3>|</h3>
 				field = header
 			}
-			
-			10 = TEXT 
+
+			10 = TEXT
 			10 {
 				field = content
 			}
 		}
-		
+
 		list = COA
 		list {
-			
+
 			5 = TEXT
 			5 {
 				wrap = <ul class="level | "
 				field = level
 			}
-			
-			7 = TEXT 
+
+			7 = TEXT
 			7 {
 				wrap =  id=" | " >
 				field = id
 			}
-			
+
 			10 = TEXT
 			10 {
 				wrap = |</ul>
 				field = content
 			}
 		}
-		
+
 		listItem = COA
 		listItem {
-			
+
 			wrap = <li>|</li>
-			
-			10 = TEXT 
+
+			10 = TEXT
 			10 {
-				
+
 				field = catname
 			}
-			
-			15 = TEXT 
+
+			15 = TEXT
 			15 {
 				wrap = <span class="postnum">(|)</span>
 				field = postnum
 			}
 		}
-		
+
 		catLink = TEXT
 		catLink {
 			field = catname
+			htmlSpecialChars = 1
 			typolink {
 				parameter.field = blogPid
 				additionalParams.dataWrap = &tx_t3blog_pi1[blogList][category]={field:uid}
