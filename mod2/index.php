@@ -299,7 +299,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 
 				// Create a select option form
 				$categoryFilters = '<select onchange="window.location.href=this.options[this.selectedIndex].value">';
-				$categoryFilters .= '<option value="'.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort='.t3lib_div::GPVar('sort').'&sortDir='.t3lib_div::GPVar('sortDir').'&pid='.$this->id.'">'.$LANG->getLL('filterByCat').'</option>';
+				$categoryFilters .= '<option value="'.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&pid='.$this->id.'">'.$LANG->getLL('filterByCat').'</option>';
 				// We also want to see the hidden and times records, but not the deleted ones
 				$rsAllFilters=$GLOBALS['TYPO3_DB']->exec_SELECTquery('catname','tx_t3blog_cat','deleted=0 AND pid='.$this->id,'','catname');
 
@@ -375,7 +375,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 					if ($i == $curPage){
 						$paging .= '<strong>'.$i.'</strong>';
 					}else{
-						$paging .= '<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort='.t3lib_div::GPVar('sort').'&sortDir='.t3lib_div::GPVar('sortDir').'&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.$this->id.'>'.$i.'</a>';
+						$paging .= '<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.$this->id.'>'.$i.'</a>';
 					}
 				}
 				$paging .= '</div>';
@@ -391,7 +391,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 				$curSettings = '<table><tr>';
 				if(t3lib_div::GPVar('search_field')) {
 					$curSettings .= '<td class="highlight">
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search=Paging&sort='.t3lib_div::GPVar('sort').'&sortDir='.t3lib_div::GPVar('sortDir').'&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.$this->id.'>'.
+						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.$this->id.'>'.
 							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'),1).'" alt="" />'.
 						'</a> <strong>'.$LANG->getLL('search').'</strong>: ' . htmlspecialchars(t3lib_div::GPVar('search_field')) . '</td>';
 				}
@@ -400,12 +400,12 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 					$curSettings .= '<td class="highlight">
 						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.$this->id.'>'.
 							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />'.
-						'</a> <strong>'.$LANG->getLL('sortBy').'</strong>: '.t3lib_div::GPVar('sort').' '.$sortDirFull .'</td>';
+						'</a> <strong>'.$LANG->getLL('sortBy').'</strong>: ' . htmlspecialchars(t3lib_div::GPVar('sort')) . ' '.$sortDirFull .'</td>';
 				}
 
 				if(t3lib_div::GPVar('cat')) {
 					$curSettings .= '<td class="highlight">
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort='.t3lib_div::GPVar('sort').'&sortDir='.t3lib_div::GPVar('sortDir').'&pid='.$this->id.'>'.
+						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&pid='.$this->id.'>'.
 							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />'.
 						'</a> <strong>'.$LANG->getLL('filterCategory').'</strong>: ' . htmlspecialchars(t3lib_div::GPVar('cat')) . '</td>';
 				}
@@ -417,7 +417,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 					'tx_t3blog_post LEFT JOIN tx_t3blog_com ON(tx_t3blog_post.uid = tx_t3blog_com.fk_post AND tx_t3blog_com.deleted=0)', //from
 					'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid='.$this->id.' '.$queryPart.' '.$filter, //where
 					'uid',	//group by
-					$sort,	// order by
+					$GLOBALS['TYPO3_DB']->quoteStr($sort, 'tx_t3blog_post'),	// order by
 					$limit	//limit
 				);
 
