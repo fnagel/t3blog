@@ -304,38 +304,38 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 				<tr>
 					<!--th>
 						<b>'. $LANG->getLL('sorting'). '</b>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. t3lib_div::GPVar('search_field'). '&search=Paging'. $i. '&sort=sorting&sortDir=ASC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'. $i. '&sort=sorting&sortDir=ASC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="ASC" alt="" />
 						</a>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='. $i. '&search_field='. t3lib_div::GPVar('search_field'). '&search=Paging'. $i. '&sort=sorting&sortDir=DESC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='. $i. '&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'. $i. '&sort=sorting&sortDir=DESC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif', 'width="11" height="12"'). ' title="DESC" alt="" />
 						</a>
 					</th-->
 					<th>
 						<b>'.$LANG->getLL('title').'</b>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'. $i. '&sort=title&sortDir=ASC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'. $i. '&sort=title&sortDir=ASC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="ASC" alt="" />
 						</a>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'. $i. '&sort=title&sortDir=DESC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'. $i. '&sort=title&sortDir=DESC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="11" height="12"').' title="'. $LANG->getLL('DESC'). '" alt="" />
 						</a>
 					</th>
 					<th>
 						<b>'.$LANG->getLL('description').'</b>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'.$i.'&sort=description&sortDir=ASC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'.$i.'&sort=description&sortDir=ASC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="'. $LANG->getLL('ASC'). '" alt="" />
 						</a>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'.$i.'&sort=description&sortDir=DESC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) . '&search=Paging'.$i.'&sort=description&sortDir=DESC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/reddown.gif', 'width="11" height="12"'). ' title="'. $LANG->getLL('DESC'). '" alt="" />
 						</a>
 					</th>
 
 					<th>
 						<b>'. $LANG->getLL('url'). '</b>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'.$i.'&sort=url&sortDir=ASC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) .'&search=Paging'.$i.'&sort=url&sortDir=ASC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/redup.gif', 'width="11" height="12"'). ' title="ASC" alt="" />
 						</a>
-						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. t3lib_div::GPVar('search_field').'&search=Paging'.$i.'&sort=url&sortDir=DESC&pid='. $this->id. '>
+						<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $i. '&search_field='. htmlspecialchars(t3lib_div::GPVar('search_field')) .'&search=Paging'.$i.'&sort=url&sortDir=DESC&pid='. $this->id. '>
 							<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="11" height="12"').' title="DESC" alt="" />
 						</a>
 					</th>
@@ -450,7 +450,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 				'<td  width="33%">
 					<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $curPage. '&search=Paging&sort='. t3lib_div::GPVar('sort').'&sortDir='. t3lib_div::GPVar('sortDir').'&pid='. $this->id. '>'.
 						'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1). '" alt="" />'.
-					'</a> <b>'.$LANG->getLL('search').'</b>: '.t3lib_div::GPVar('search_field').'</td>';
+					'</a> <b>'.$LANG->getLL('search').'</b>: '.htmlspecialchars(t3lib_div::GPVar('search_field')).'</td>';
 			}
 
 			if(t3lib_div::GPVar('sort')) {
