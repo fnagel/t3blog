@@ -408,10 +408,10 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 			}
 
 			// Only show comments for a post selected in the "Posts" module
-			if(t3lib_div::_GP('linkCom')){
+			if(t3lib_div::_GP('linkCom') && is_numeric(t3lib_div::_GP('linkCom'))){
 
 				// Partial query string
-				$linkCom = 'AND tx_t3blog_com.fk_post = '.t3lib_div::_GP('linkCom');
+				$linkCom = 'AND tx_t3blog_com.fk_post = ' . intval(t3lib_div::_GP('linkCom'));
 			}
 
 			// Default

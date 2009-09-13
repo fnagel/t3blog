@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4573 - BE Module 3 susceptible to SQLi
 	* Feature: remove deprecated calls to t3lib_div::GPVar()
 	* Review: #4566 - BE Module 3 susceptible to XSS
 	* Review: #4565 - BE Module 5 susceptible to XSS
