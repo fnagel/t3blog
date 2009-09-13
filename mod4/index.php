@@ -75,7 +75,7 @@ class  tx_t3blog_module4 extends t3lib_SCbase {
 	 */
 	function menuConfig()	{
 		global $LANG;
-		
+
 		parent::menuConfig();
 	}
 
@@ -90,7 +90,7 @@ class  tx_t3blog_module4 extends t3lib_SCbase {
 		// The page will show only if there is a valid page and if this page may be viewed by the user
 		$this->pageinfo = t3lib_BEfunc::readPageAccess($this->id, $this->perms_clause);
 		$access = is_array($this->pageinfo) ? 1 : 0;
-		
+
 
 		if (($this->id && $access) || ($BE_USER->user['admin'] && !$this->id))	{
 			$this->blogfunctions = t3lib_div::makeInstance('blogfunctions');	// Initialize Blog function class
@@ -155,11 +155,11 @@ class  tx_t3blog_module4 extends t3lib_SCbase {
 	 * Generates the module content
 	 */
 	function moduleContent()	{
-		$this->id = $_GET['id'];
+		$this->id = is_numeric(t3lib_div::_GET('id')) ? intval(t3lib_div::_GET('id')) : null;
 		$content='
 				<!-- CATEGORY SELECTION made by karrer nicolas -->
 				<hr />';
-		if($this->id)	{
+		if(!is_null($this->id))	{
 			$content.=
 				'<a href="#" class="newRecord" onclick="'.t3lib_BEfunc::editOnClick('&edit[tx_t3blog_cat]['.$this->id. ']=new', $GLOBALS['BACK_PATH']). '">'.
 					'<img '.t3lib_iconWorks::skinImg($GLOBALS['BACK_PATH'], t3lib_extMgm::extRelPath('t3blog'). 'icons/chart_organisation_add.png'). ' title="'.$GLOBALS['LANG']->getLL('newCategory').'" width="16px" height="16px" style="margin-right: 5px;"/>'.
