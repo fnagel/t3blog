@@ -64,7 +64,7 @@ class tagCloud extends tslib_pibase {
 	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
-	 * 
+	 *
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
@@ -87,7 +87,7 @@ class tagCloud extends tslib_pibase {
 		$this->link_title = '%count% items';
 		$this->distribution = $conf['renderingAlgorithm'];
 		$this->string = FALSE;
-		
+
 		global $TSFE;
 		mb_internal_encoding($TSFE->renderCharset);
 
@@ -152,11 +152,11 @@ class tagCloud extends tslib_pibase {
 				);
 			}
 		}
-		
+
 		return array_values($tagArray);
 	}
-	
-	
+
+
 	/**
 	 * main function to calculate tags size and color
 	 *
@@ -166,14 +166,14 @@ class tagCloud extends tslib_pibase {
 		if(  !is_array( $this->_tags )|| empty( $this->_tags[0]['tag'] )|| empty( $this->_tags[0]['count'] )|| empty( $this->minsize )|| empty( $this->maxsize )|| empty( $this->unit )|| !is_string( $this->unit )){
 			return FALSE;
 		}
-			
+
 		$_tags = $this->_tags;
-		
+
 		if( $this->count>0 && count($_tags) > $this->count ){
 			usort( $_tags, array( $this, "CountCompare" ) );
 			array_splice( $_tags, $this->count );
 		}
-		
+
 		if( mb_strtolower($this->sort) == 'tag' ){
 			$_tags = $this->ArraySort2D( $_tags, 'tag', $this->descasc );
 		} elseif( mb_strtolower($this->sort) == 'count' ){
@@ -186,37 +186,37 @@ class tagCloud extends tslib_pibase {
 				if( empty($maxcount) || $_v['count']>$maxcount ) $maxcount=$_v['count'];
 				if( empty($mincount) || $_v['count']<$mincount ) $mincount=$_v['count'];
 		}
-		
+
 		if( in_array( mb_strtolower($this->unit), array('em','ex','cm','in') ) ) {
 			$this->maxsize *= 100;
 			$this->minsize *= 100;
 		}
-		
+
 		if( empty($this->thresholds) ) {
-			$this->thresholds = $this->maxsize - $this->minsize + 1;		
-		} 
-		
+			$this->thresholds = $this->maxsize - $this->minsize + 1;
+		}
+
 		if( !in_array( mb_strtolower($this->unit), array('em','ex','cm','in','pt','px','mm','pc','%') ) ) {
 			$this->maxsize = $this->minsize + $this->thresholds - 1;
 		} elseif( !empty($this->mincolor) && !empty($this->maxcolor) ) {
 				$_colors = $this->GetColorThresholds( $this->mincolor, $this->maxcolor, $this->thresholds );
 		}
-		
+
 		$_s = array();
 		$_c = array();
 		$cloud = '';
-		
-		// Added 23.12.2008 | Thomas Imboden <timboden@snowflake.ch> 
+
+		// Added 23.12.2008 | Thomas Imboden <timboden@snowflake.ch>
 		// Begin
 		// to sort the array by count values
 		function sortByCountValue ($a, $b) {
-			return ($b['count'] > $a['count'] ? 1 : -1);		
+			return ($b['count'] > $a['count'] ? 1 : -1);
 		}
-		
+
 		uasort($_tags, 'sortByCountValue');
 		array_splice($_tags, $this->maxTagsToShow);
 		// End
-		
+
 		foreach($_tags as $k=>$_v ) {
 			if( empty($_s[$_v['count']]) ) {
 				if( $this->distribution=='lin' ) {
@@ -232,7 +232,7 @@ class tagCloud extends tslib_pibase {
 					}
 				}
 			}
-			
+
 			$l 	= str_replace( '%tag%', $_v['tag'], $this->link );
 			$lt = str_replace( '%tag%', $_v['tag'], $this->link_title );
 			$lt = str_replace( '%count%', $_v['count'], $lt );
@@ -249,7 +249,7 @@ class tagCloud extends tslib_pibase {
 				$cloud .= t3blog_div::getSingle(array('text'=>$this->getLink($_v['tag'], array('tags' => $l), $s.(empty($lt)?"":" title=\"".$lt."\""))),'item');
 			}
 		}
-		
+
 		$cloud = t3blog_div::getSingle(array('text'=>$cloud),'list');
 		if( $this->string ) return $cloud;
 		else return $cloud;
@@ -258,14 +258,14 @@ class tagCloud extends tslib_pibase {
 
 	/**
 	 * Gets link to cloud
-	 * 
+	 *
 	 * @param 	string		$str: name of the cloud
 	 * @param	array		$overrulePIVars
 	 * @param	string		$additionalATagParams
-	 * 
+	 *
 	 * @return	link to cloud
-	 * 
- 	*/ 
+	 *
+	 */
 	function getLink($str, $overrulePIVars, $additionalATagParams) {
 		$overrulePIVars = t3lib_div::array_merge_recursive_overrule($this->piVars, $overrulePIVars);
 		$conf = array(
@@ -275,20 +275,20 @@ class tagCloud extends tslib_pibase {
 			'useCacheHash' => 1
 		);
 
-		return $this->cObj->typoLink($str, $conf, 1);
+		return $this->cObj->typoLink(htmlspecialchars($str), $conf, 1);
 	}
-	
-	
+
+
 	/**
 	 * Sorts an array
-	 * 
+	 *
 	 * @param 	array		$_array: array to be sorted
 	 * @param	string		$key
 	 * @param	string		$descasc
-	 * 
+	 *
 	 * @return	sorted array
-	 * 
- 	*/ 
+	 *
+	 */
 	function ArraySort2D($_array, $key, $descasc='asc' ) {
 		if( !is_array($_array) || empty($_array) ) return FALSE;
 		$_a = array();
@@ -305,16 +305,16 @@ class tagCloud extends tslib_pibase {
 		}
 		return $_arr;
 	}
-	
-	
+
+
 	/**
 	 * Compares counts
-	 * 
+	 *
 	 * @param 	array		$_a
 	 * @param	array		$_b
-	 * 
-	 * @return	amount 
- 	*/ 
+	 *
+	 * @return	amount
+	 */
 	function CountCompare($_a, $_b) {
 		if( $_a['count']==$_b['count'] ) {
 			return strnatcasecmp( $_a['tag'], $_b['tag'] );
@@ -323,20 +323,20 @@ class tagCloud extends tslib_pibase {
 			return ( $_a['count'] < $_b['count'] ) ? -1*$da : 1*$da;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Gets tag size
-	 * 
+	 *
 	 * @param 	string		$count
 	 * @param	string		$mincount
 	 * @param	string		$maxcount
 	 * @param	string		$minsize
 	 * @param	string		$maxsize
 	 * @param	string		$thresholds
-	 * 
-	 * @return	rounded tag size 
- 	*/ 
+	 *
+	 * @return	rounded tag size
+	 */
 	function GetTagSizeLinear($count, $mincount, $maxcount, $minsize, $maxsize, $thresholds) {
 		if( !is_int($thresholds) || $thresholds<2 ) {
 			$thresholds = $maxsize-$minsize;
@@ -355,16 +355,16 @@ class tagCloud extends tslib_pibase {
 
 	/**
 	 * Gets tag size logarithmic
-	 * 
+	 *
 	 * @param 	string		$count
 	 * @param	string		$mincount
 	 * @param	string		$maxcount
 	 * @param	string		$minsize
 	 * @param	string		$maxsize
 	 * @param	string		$thresholds
-	 * 
-	 * @return	rounded tag size 
- 	*/ 
+	 *
+	 * @return	rounded tag size
+	 */
 	function GetTagSizeLogarithmic($count, $mincount, $maxcount, $minsize, $maxsize, $thresholds) {
 		if( !is_int($thresholds) || $thresholds<2 ) {
 			$thresholds = $maxsize-$minsize;
@@ -379,13 +379,13 @@ class tagCloud extends tslib_pibase {
 
 	/**
 	 * Gets color of threshold
-	 * 
+	 *
 	 * @param 	string		$c1
 	 * @param	string		$c2
 	 * @param	string		$thresholds
-	 * 
+	 *
 	 * @return	color of threshold
- 	*/ 
+	 */
 	function GetColorThresholds($c1, $c2, $thresholds) {
 		$c1 = str_replace("#","",$c1);
 		$c2 = str_replace("#","",$c2);
