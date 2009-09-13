@@ -169,7 +169,7 @@ class blogfunctions extends t3lib_SCbase {
 		// Setting form-elements, if applicable:
 		$formElements=array('','');
 		if ($formFields)	{
-			$formElements=array('<form action="'.htmlspecialchars($this->listURL().'&curPage=1').'.&sort=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('sort'))) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid='.t3lib_div::GPVar('pid').'" method="post">','</form>');
+			$formElements=array('<form action="'.htmlspecialchars($this->listURL().'&curPage=1').'.&sort=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('sort'))) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('cat'))) . '&pid=' . intval(t3lib_div::GPVar('pid')) . '" method="post">','</form>');
 		}
 
 		// Table with the search box:
