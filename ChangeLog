@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4590 - blogList widget susceptible to XSS
 	* Review: #4589 - blogList widget susceptible to XSS
 	* Review: #4588 - tagClound widget susceptible to XSS
 	* Review: #4587 - archive widget susceptible to XSS

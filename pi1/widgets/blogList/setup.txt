@@ -577,6 +577,7 @@ plugin.tx_t3blog_pi1 {
 		catLink{
 			wrap = |
 			field = text
+			htmlSpecialChars = 1
 			typolink {
 				parameter.data = TSFE:id
 				useCacheHash = 1
@@ -811,23 +812,23 @@ plugin.tx_t3blog_pi1 {
 					5 = TEXT
 								5 {
 
-									 wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor" >|</label></div>
-										 field = comParentId_label
-										 required = 1
-								 }
+									wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor" >|</label></div>
+										field = comParentId_label
+										required = 1
+								}
 
-								 10 = TEXT
-								 10 {
-										 dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div>
-										 field = comParentId
-										 required = 1
-								 }
+								10 = TEXT
+								10 {
+										dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div>
+										field = comParentId
+										required = 1
+								}
 
-								 15 = TEXT
-								 15 {
+								15 = TEXT
+								15 {
 
-										 wrap = <div class="formLabel"><label for="commentauthor" >|</label></div>
-										 field = commentauthor_label
+										wrap = <div class="formLabel"><label for="commentauthor" >|</label></div>
+										field = commentauthor_label
 									}
 
 					20 = TEXT
@@ -1033,14 +1034,14 @@ plugin.tx_t3blog_pi1 {
 			5 {
 
 				dataWrap        = <div class="commentComments">|</div><div class="clear"></div>
-									 field           	= parentcom
-									 required        = 1
+									field           	= parentcom
+									required        = 1
 				typolink {
-														 parameter.field = blog_uid
-														 useCacheHash = 1
-														 additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
+														parameter.field = blog_uid
+														useCacheHash = 1
+														additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
 								section.dataWrap = comment
-						 }
+						}
 
 
 			}
