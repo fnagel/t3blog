@@ -316,7 +316,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 						'&curPage='.$i.
 						'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) .
 						'&search=Paging'.
-						'&sort='.t3lib_div::GPVar('sort').
+						'&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) .
 						'&sortDir='.t3lib_div::GPVar('sortDir').
 						'&cat=' . htmlspecialchars(rawurlencode($dsAllFilters['catname'])) .
 						'&pid='.$this->id.
