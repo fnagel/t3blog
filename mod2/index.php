@@ -78,7 +78,7 @@ class  tx_t3blog_module2 extends t3lib_SCbase {
 
 
 		if(t3lib_div::GPVar('pid')){
-			$this->id = t3lib_div::GPVar('pid');
+			$this->id = is_numeric(t3lib_div::GPVar('pid')) ? intval(t3lib_div::GPVar('pid')) : null;
 		}else{
 			$this->id = is_numeric(t3lib_div::_GET('id')) ? intval(t3lib_div::_GET('id')) : null;
 		}
