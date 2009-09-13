@@ -478,7 +478,7 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 					$paging .= '<strong>'.$i.'</strong>';
 				}
 				else{
-					$paging .= '<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&cat='.t3lib_div::GPVar('cat').'&pid='.$this->id.'>'.$i.'</a>';
+					$paging .= '<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::GPVar('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&cat='.t3lib_div::GPVar('cat').'&pid='.$this->id.'>'.$i.'</a>';
 					}
 			}
 			$paging .= '</div>';
@@ -492,7 +492,7 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 
 			$curSettings = '<table class="highlight"><tr>';
 			if(t3lib_div::GPVar('search_field'))$curSettings .='<td style="border-style:none;border-width:2px;" bgcolor="#CBDFC4" width="33%">
-					<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='.t3lib_div::GPVar('sortDir').'&pid='.$this->id.'>'.
+					<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search=Paging&sort=' . htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&pid='.$this->id.'>'.
 						'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />'.
 					'</a> <b>'.$LANG->getLL('search').'</b>: ' . htmlspecialchars(t3lib_div::GPVar('search_field')) . '</td>';
 
