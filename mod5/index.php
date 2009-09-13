@@ -448,16 +448,16 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			if(t3lib_div::GPVar('search_field')) {
 					$curSettings  .=
 				'<td  width="33%">
-					<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $curPage. '&search=Paging&sort='. t3lib_div::GPVar('sort').'&sortDir='. t3lib_div::GPVar('sortDir').'&pid='. $this->id. '>'.
+					<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $curPage. '&search=Paging&sort='. htmlentities(t3lib_div::GPVar('sort')) . '&sortDir='. t3lib_div::GPVar('sortDir').'&pid='. $this->id. '>'.
 						'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1). '" alt="" />'.
-					'</a> <b>'.$LANG->getLL('search').'</b>: '.htmlspecialchars(t3lib_div::GPVar('search_field')).'</td>';
+					'</a> <b>'.$LANG->getLL('search').'</b>: ' . htmlspecialchars(t3lib_div::GPVar('search_field')) . '</td>';
 			}
 
 			if(t3lib_div::GPVar('sort')) {
 				$curSettings  .= '<td  width="33%">
-					<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='. $curPage.'&search_field='. t3lib_div::GPVar('search_field').'&search=Paging&pid='. $this->id.'>'.
+					<a href='. htmlspecialchars($this->blogfunctions->listURL()).'&curPage='. $curPage.'&search_field='. htmlentities(t3lib_div::GPVar('search_field')) . '&search=Paging&pid='. $this->id.'>'.
 						'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'),1).'" alt="" />'.
-					'</a> <b>'. $LANG->getLL('sortBy').'</b>: '.t3lib_div::GPVar('sort').' '.$sortDirFull .'</td>';
+					'</a> <b>'. $LANG->getLL('sortBy').'</b>: ' . htmlspecialchars(t3lib_div::GPVar('sort')) . ' '.$sortDirFull .'</td>';
 			}
 			$curSettings .= '</tr></table>';
 
@@ -469,14 +469,14 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 				' tx_t3blog_blogroll.title as title,'.
 				' tx_t3blog_blogroll.url as url,'.
 				' tx_t3blog_blogroll.description as description,'.
-				' tx_t3blog_blogroll.hidden as hidden',					// SELECT
-				'tx_t3blog_blogroll',									// TABLE
-				'tx_t3blog_blogroll.deleted=0 '.						// WHERE
+				' tx_t3blog_blogroll.hidden as hidden',					    // SELECT
+				'tx_t3blog_blogroll',									    // TABLE
+				'tx_t3blog_blogroll.deleted=0 '.						    // WHERE
 				'AND tx_t3blog_blogroll.pid='. $this->id.
 				' '. $queryPart.' ',
-				'',														// ORDER
-				$sort,													// SORT
-				$limit													// LIMIT
+				'',														    // ORDER
+				$GLOBALS['TYPO3_DB']->quoteStr($sort, 'tx_t3blog_blogroll'),// SORT
+				$limit													    // LIMIT
 			);
 
 
