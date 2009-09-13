@@ -448,7 +448,7 @@ class  tx_t3blog_module5 extends t3lib_SCbase {
 			if(t3lib_div::GPVar('search_field')) {
 					$curSettings  .=
 				'<td  width="33%">
-					<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $curPage. '&search=Paging&sort='. htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir='. t3lib_div::GPVar('sortDir').'&pid='. $this->id. '>'.
+					<a href='. htmlspecialchars($this->blogfunctions->listURL()). '&curPage='. $curPage. '&search=Paging&sort='. htmlspecialchars(t3lib_div::GPVar('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::GPVar('sortDir')) . '&pid='. $this->id. '>'.
 						'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1). '" alt="" />'.
 					'</a> <b>'.$LANG->getLL('search').'</b>: ' . htmlspecialchars(t3lib_div::GPVar('search_field')) . '</td>';
 			}
