@@ -205,8 +205,7 @@ class listFunctions extends blogList {
 			}else if ($this->localPiVars['author']){
 				$singleData['filtered'] = t3blog_div::getAuthorByUid($this->localPiVars['author']);
 			}else if ($this->localPiVars['category']) {
-
-				$singleData['filtered'] = t3blog_div::getCategoryNameByUid($this->localPiVars['category']);
+				$singleData['filtered'] = htmlspecialchars(t3blog_div::getCategoryNameByUid($this->localPiVars['category']));
 			}
 
 			$singleData['text']	= $this->pi_getLL('filteredByText');
