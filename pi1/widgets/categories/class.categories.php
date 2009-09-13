@@ -107,7 +107,7 @@ class categories extends tslib_pibase {
 			//set the category informations
 			//$row['catname'] = $this->pi_linkTP_keepPIvars($row['catname'],array('blogList' => array('category' => $row['uid'])), 0, 1,t3blog_div::getBlogPid());
 			$dataLink = array(
-				'catname'	=>	htmlentities($row['catname']),
+				'catname'	=>	htmlspecialchars($row['catname']),
 				'uid'		=>	$row['uid'],
 				'blogPid'	=>	t3blog_div::getBlogPid()
 			);
