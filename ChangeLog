@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4541 - BE Module 3 susceptible to SQLi and XSS
 	* Review: #4540 - BE Module 3 susceptible to SQLi and XSS
 	* Review: #4537 - blogList widget susceptible to XSS
 	* Review: #4536 - categories widget susceptible to XSS

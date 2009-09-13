@@ -70,7 +70,7 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 
 
 		if(t3lib_div::GPVar('pid')){	// Get the page ID from the extension config
-			$this->id = t3lib_div::GPVar('pid');
+			$this->id = is_numeric(t3lib_div::GPVar('pid')) ? intval(t3lib_div::GPVar('pid')) : null;
 		}else {
 			$this->id = is_numeric(t3lib_div::_GET('id')) ? intval(t3lib_div::_GET('id')) : null;
 		}
@@ -221,17 +221,17 @@ class  tx_t3blog_module3 extends t3lib_SCbase {
 							// assemble email
 							$unsubscribe	= '<http://'.$_SERVER["SERVER_NAME"].'/index.php?id='.$this->id.'&tx_t3blog_pi1[blogList][showUidPerma]='.$postuid.'&tx_t3blog_pi1[blogList][unsubscribe]=1&tx_t3blog_pi1[blogList][code]='.$value['code'].'>' ."\n";
 							$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']).'"'. "\n";
-										 $address		= str_replace(array('\\n', '\\r'), '', $value['email']);
-										 $receiver   	= $address;
+										$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
+										$receiver   	= $address;
 											$subject		= $LANG->getLL('subscribe.newComment').': '.$posttitle;
 											$headers    	= 'From: ' . $TYPO3_CONF_VARS['EXTCONF']['t3blog']['sendermail'];
 
-										 $message       .= $LANG->getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
-										 $message       .= $LANG->getLL('subscribe.notification') . "\n\n";
-										 $message       .= $text . "\n";
+										$message       .= $LANG->getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
+										$message       .= $LANG->getLL('subscribe.notification') . "\n\n";
+										$message       .= $text . "\n";
 
-										 // unsubscribe
-										 $message       .= $LANG->getLL('subscribe.unsubscribe') ."\n";
+										// unsubscribe
+										$message       .= $LANG->getLL('subscribe.unsubscribe') ."\n";
 							$message	   .= $unsubscribe;
 
 											// send
