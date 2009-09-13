@@ -22,8 +22,8 @@ class calendar extends tslib_pibase {
 	var $day;
 	var $month;
 	var $year;
-	
-	
+
+
 	/**
 	* 	Constructor for the Calendar class
 	*/
@@ -60,7 +60,8 @@ class calendar extends tslib_pibase {
 			$year = $d['year'];
 		}
 
-		$data['calendar'] = $this->getMonthView($month, $year);
+		if (!empty($this->day))  intval($this->day);
+		$data['calendar'] = $this->getMonthView(intval($month), intval($year));
 
 		return t3blog_div::getSingle($data, 'calendaroutput');
 	}
@@ -74,7 +75,7 @@ class calendar extends tslib_pibase {
 		$this->pi_loadLL();
 	}
 
-	
+
 
 	/**
 	 * Get the array of strings used to label the days of the week. This array contains seven
@@ -92,7 +93,7 @@ class calendar extends tslib_pibase {
 	 * elements, one for each day of the week. The first entry in this array represents Sunday.
 	 *
 	 * @param 	array 	$names: number of the days
-	 * @return	name of the day 
+	 * @return	name of the day
 	 */
 	function setDayNames($names){
 		$this->dayNames = $names;
@@ -112,7 +113,7 @@ class calendar extends tslib_pibase {
 	 * Set the array of strings used to label the months of the year. This array must contain twelve
 	 * elements, one for each month of the year. The first entry in this array represents January.
 	 *
-	 * @param array		$names: name of the mounts 
+	 * @param array		$names: name of the mounts
 	 */
 	function setMonthNames($names){
 		$this->monthNames = $names;
@@ -123,7 +124,7 @@ class calendar extends tslib_pibase {
 	 * Gets the start day of the week. This is the day that appears in the first column
 	 * of the calendar. Sunday = 0.
 	 *
-	 * @return daynumber 
+	 * @return daynumber
 	 */
 	function getStartDay(){
 		return $this->startDay;
@@ -132,7 +133,7 @@ class calendar extends tslib_pibase {
 	/**
 	* Sets the start day of the week. This is the day that appears in the first column
 	* of the calendar. Sunday = 0.
-	* 
+	*
 	* @param	int	$day: number of the day
 	*/
 	function setStartDay($day){
@@ -143,7 +144,7 @@ class calendar extends tslib_pibase {
 	/**
 	* Gets the start month of the year. This is the month that appears first in the year
 	* view. January = 1.
-	* 
+	*
 	* @return	monthnumber
 	*/
 	function getStartMonth(){
@@ -168,14 +169,15 @@ class calendar extends tslib_pibase {
 	* be displayed. This is the default behaviour.
 	*
 	* If the calendar is being displayed in "year" view, $month will be set to zero.
-	* 
+	*
 	* @param	int		$month: number of the mount
 	* @param	int		$year: number of the year
-	* 
+	*
 	* @return	returns the url
 	*/
 	function getCalendarLink($month, $year) {
-		$data =  array('month' => $month, 'year' => $year);
+		$data =  array( 'month' => sprintf('%02u', $month),
+						'year'  => sprintf('%04u', $year));
 		$returnVar = t3blog_div::getSingle($data,'navLink');
 		return $returnVar;
 	}
@@ -193,10 +195,10 @@ class calendar extends tslib_pibase {
 	 * @return	String	Url to the dayview
 	 */
 	function getDateLink($day, $month, $year){
-		$datefrom = $year.'-'.$month.'-'.$day;
+		$datefrom = sprintf('%04u-%02u-%02u', $year, $month, $day);
 		return t3blog_div::getSingle(
 			array(
-				'day' => $day, 
+				'day' => $day,
 				'date'=> $datefrom,
 				'blogUid'=>t3blog_div::getBlogPid()
 			),'dateLink');
@@ -205,7 +207,7 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Return the HTML for the current month
-	* 
+	*
 	* @return 	returns html for the current month
 	*/
 	function getCurrentMonthView(){
@@ -216,7 +218,7 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Return the HTML for the current year
-	* 
+	*
 	* @param	returns html for the current year
 	*/
 	function getCurrentYearView(){
@@ -227,10 +229,10 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Return the HTML for a specified month
-	* 
+	*
 	* @param	int		$month: specific month
 	* @param	int		$year: specific year
-	* 
+	*
 	* @return	the html for a specific month
 	*/
 	function getMonthView($month, $year){
@@ -240,9 +242,9 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Return the HTML for a specified year
-	* 
+	*
 	* @param	int		$year: specific year
-	* 
+	*
 	* @return	the html for a specific year
 	*/
 	function getYearView($year){
@@ -261,10 +263,10 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Calculate the number of days in a month, taking into account leap years.
-	* 
+	*
 	* @param	int		$month: month
 	* @param	int		$year: year
-	* 
+	*
 	* @return	calculated number of days in a month
 	*/
 	function getDaysInMonth($month, $year){
@@ -294,12 +296,12 @@ class calendar extends tslib_pibase {
 
 	/**
 	 * returns the month name from the locallang
-	 * 
+	 *
 	 * @param  	int		$monthNr: month
-	 * 
+	 *
 	 * @return 	month as string
 	 */
-	
+
 	function getMonthName($monthNr){
 		$monthNr = intval($monthNr);
 		return $this->pi_getLL('month_'.$monthNr);
@@ -307,11 +309,11 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Generate the HTML for a given month
-	* 
+	*
 	* @param	int		$m: month
 	* @param	int		$y: year
 	* @param	int		$showYear: show or no show
-	* 
+	*
 	* @return	html
 	*/
 	function getMonthHTML($m, $y, $showYear = 1){
@@ -436,9 +438,9 @@ class calendar extends tslib_pibase {
 
 	/**
 	* Generate the HTML for a given year
-	* 
+	*
 	* @param	int		$year: year
-	* 
+	*
 	* @return	html for a given year
 	*/
 	function getYearHTML($year){
@@ -486,7 +488,7 @@ class calendar extends tslib_pibase {
 	 *
 	 * @param	int		$month: Month
 	 * @param	int		$year: Year
-	 * 
+	 *
 	 * @return 	int		First element is the month, second the year
 	 */
 	function adjustDate($month, $year){

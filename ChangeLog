@@ -1,4 +1,5 @@
 2009  Marcus Krause <marcus#exp2009@t3sec.info>
+	* Review: #4601 - calendar widget susceptible to XSS
 	* Review: #4600 - blogList widget susceptible to XSS
 	* Review: #4599 - BE Module 3 susceptible to XSS
 	* Review: #4598 - BE Module 2 susceptible to XSS
