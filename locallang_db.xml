@@ -21,13 +21,14 @@
 			<label index="tx_t3blog_post.cat">Categories</label>
 			<label index="tx_t3blog_post.trackback">Trackback URLs (each URL on one line)</label>
 			<label index="tx_t3blog_post.trackback_hash">Trackback Hash</label>
+			<label index="tx_t3blog_post.number_views">Number of views</label>
 			<label index="tx_t3blog_cat">Categories</label>
 			<label index="tx_t3blog_cat.parent_id">Parent category</label>
 			<label index="tx_t3blog_cat.page_shortcut">Single PID</label>
 			<label index="tx_t3blog_cat.catname">Category name</label>
 			<label index="tx_t3blog_cat.generalTab">Category</label>
-			<label index="tx_t3blog_cat.access">Access</label>			
-			<label index="tx_t3blog_cat.nav_title">Navigation title</label>			
+			<label index="tx_t3blog_cat.access">Access</label>
+			<label index="tx_t3blog_cat.nav_title">Navigation title</label>
 			<label index="tx_t3blog_cat.subtitle">Subtitle</label>
 			<label index="tx_t3blog_cat.keywords">Keywords (,)</label>
 			<label index="tx_t3blog_cat.description">Description</label>
@@ -57,12 +58,10 @@
 			<label index="tx_t3blog_blogroll.xfn.I.7">date</label>
 			<label index="tx_t3blog_blogroll.xfn.I.8">friend</label>
 			<label index="tx_t3blog_blogroll.xfn.I.9">kin</label>
-			
 			<label index="tx_t3blog_blogroll.xfn.I.10">me</label>
 			<label index="tx_t3blog_blogroll.xfn.I.11">met</label>
 			<label index="tx_t3blog_blogroll.xfn.I.12">muse</label>
 			<label index="tx_t3blog_blogroll.xfn.I.13">neighbor</label>
-			
 			<label index="tx_t3blog_blogroll.xfn.I.14">parent</label>
 			<label index="tx_t3blog_blogroll.xfn.I.15">sibling</label>
 			<label index="tx_t3blog_blogroll.xfn.I.16">spouse</label>
@@ -87,7 +86,6 @@
 			<label index="tx_t3blog_blogroll.generalTab">Blogroll/link</label>
 			<label index="tx_t3blog_blogroll.additionalTab">Additional info</label>
 			<label index="tx_t3blog_blogroll.access">Access</label>
-
 		</languageKey>
 		<languageKey index="de" type="array">
 			<label index="tx_t3blog_post">Nachricht</label>
@@ -129,4 +127,8 @@
 			<label index="tt_content.list_type_pi2">Blog Widget Auswahl</label>
 		</languageKey>
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

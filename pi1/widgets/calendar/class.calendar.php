@@ -35,8 +35,8 @@ class calendar extends tslib_pibase {
 
 		if($this->globalPiVars['blogList']['datefrom'])	{
 			$year = substr($this->globalPiVars['blogList']['datefrom'], 0, 4);
-			$month = ereg_replace('-', '', substr($this->globalPiVars['blogList']['datefrom'], 5, 2));
-			$this->day = ereg_replace('-', '', substr($this->globalPiVars['blogList']['datefrom'], 8, 2));
+			$month = str_replace('-', '', substr($this->globalPiVars['blogList']['datefrom'], 5, 2));
+			$this->day = str_replace('-', '', substr($this->globalPiVars['blogList']['datefrom'], 8, 2));
 		} elseif ($this->globalPiVars['blogList']['month'] && $this->globalPiVars['blogList']['year']) {
 			$year = $this->globalPiVars['blogList']['year'];
 			$month = $this->globalPiVars['blogList']['month'];
@@ -60,10 +60,9 @@ class calendar extends tslib_pibase {
 			$year = $d['year'];
 		}
 
-		if (!empty($this->day))  intval($this->day);
-		$data['calendar'] = $this->getMonthView(intval($month), intval($year));
+		$data['calendar'] = $this->getMonthView($month, $year);
 
-		return t3blog_div::getSingle($data, 'calendaroutput');
+		return t3blog_div::getSingle($data, 'calendaroutput', $this->conf);
 	}
 
 	/**
@@ -176,9 +175,8 @@ class calendar extends tslib_pibase {
 	* @return	returns the url
 	*/
 	function getCalendarLink($month, $year) {
-		$data =  array( 'month' => sprintf('%02u', $month),
-						'year'  => sprintf('%04u', $year));
-		$returnVar = t3blog_div::getSingle($data,'navLink');
+		$data =  array('month' => $month, 'year' => $year);
+		$returnVar = t3blog_div::getSingle($data, 'navLink', $this->conf);
 		return $returnVar;
 	}
 
@@ -195,13 +193,13 @@ class calendar extends tslib_pibase {
 	 * @return	String	Url to the dayview
 	 */
 	function getDateLink($day, $month, $year){
-		$datefrom = sprintf('%04u-%02u-%02u', $year, $month, $day);
+		$datefrom = $year.'-'.$month.'-'.$day;
 		return t3blog_div::getSingle(
 			array(
 				'day' => $day,
 				'date'=> $datefrom,
 				'blogUid'=>t3blog_div::getBlogPid()
-			),'dateLink');
+			), 'dateLink', $this->conf);
 	}
 
 
@@ -345,18 +343,18 @@ class calendar extends tslib_pibase {
 
 		$s .= "<table class=\"calendar\" summary=\"Calendar\">\n";
 		$s .= "<tr>\n";
-		$s .= "<th class=\"previous navigation\">" . (($prevMonth == "") ? "&nbsp;" : '<a href="'.$prevMonth.'"> &lt; &lt;</a> </th>');
+		$s .= "<th class=\"previous navigation\">" . (($prevMonth == "") ? "&nbsp;" : '<a href="'.htmlspecialchars($prevMonth).'">'.$this->conf['prevString'].'</a> </th>');
 		$s .= "<th colspan=\"5\">$header</th>\n";
-		$s .= "<th class=\"next navigation\">" . (($nextMonth == "") ? "&nbsp;" : '<a href="'.$nextMonth.'"> &gt; &gt;</a> </th>');
+		$s .= "<th class=\"next navigation\">" . (($nextMonth == "") ? "&nbsp;" : '<a href="'.htmlspecialchars($nextMonth).'">'.$this->conf['nextString'].'</a> </th>');
 		$s .= "</tr>\n";
-		$s .= "<tr>\n";
-		$s .= "<td class=\" first \">" . $this->dayNames[($this->startDay)%7]. "</td>\n";
-		$s .= "<td>" . $this->dayNames[($this->startDay+1)%7] . "</td>\n";
-		$s .= "<td>" . $this->dayNames[($this->startDay+2)%7] . "</td>\n";
-		$s .= "<td>" . $this->dayNames[($this->startDay+3)%7] . "</td>\n";
-		$s .= "<td>" . $this->dayNames[($this->startDay+4)%7] . "</td>\n";
-		$s .= "<td>" . $this->dayNames[($this->startDay+5)%7] . "</td>\n";
-		$s .= "<td class=\"last\">" . $this->dayNames[($this->startDay+6)%7] . "</td>\n";
+		$s .= "<tr class=\"month\">\n";
+		$s .= "<td class=\" first \">" . htmlspecialchars($this->dayNames[($this->startDay)%7]). "</td>\n";
+		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+1)%7]) . "</td>\n";
+		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+2)%7]) . "</td>\n";
+		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+3)%7]) . "</td>\n";
+		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+4)%7]) . "</td>\n";
+		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+5)%7]) . "</td>\n";
+		$s .= "<td class=\"last\">" . htmlspecialchars($this->dayNames[($this->startDay+6)%7]) . "</td>\n";
 		$s .= "</tr>\n";
 
 		// We need to work out what date to start at so that the first appears in the correct column

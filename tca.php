@@ -5,7 +5,7 @@ if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
 $TCA['tx_t3blog_post'] = array (
 	'ctrl' => $TCA['tx_t3blog_post']['ctrl'],
 	'interface' => array (
-		'showRecordFieldList' => 'hidden,starttime,endtime,fe_group,title,author,be_user,date,content,allow_comments,cat,tagClouds,trackback'
+		'showRecordFieldList' => 'hidden,starttime,endtime,fe_group,title,author,be_user,date,content,allow_comments,cat,tagClouds,trackback,number_views'
 	),
 	'feInterface' => $TCA['tx_t3blog_post']['feInterface'],
 	'columns' => array (
@@ -63,9 +63,7 @@ $TCA['tx_t3blog_post'] = array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.title',
 			'config' => Array (
-				'type' => 'text',
-	            'cols' => '45',
-	            'rows' => '2',
+				'type' => 'input',
 				'eval' => 'required',
 			)
 		),
@@ -123,7 +121,7 @@ $TCA['tx_t3blog_post'] = array (
 				'behaviour' => array(
 				),
 			)
-			
+
 		),
 		'allow_comments' => Array (
 			'exclude' => 1,
@@ -174,10 +172,20 @@ $TCA['tx_t3blog_post'] = array (
 	            'eval' => 'trim',
 	        )
 	    ),
+	    'number_views' => Array (
+	        'exclude' => 1,
+	        'label' => 'LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.number_views',
+	        'config' => Array (
+	            'type' => 'input',
+	            'size' => '8',
+	            'max' => '15',
+	            'eval' => 'int',
+	        )
+	    ),
 	),
 	'types' => array (
 		'0' => array(
-			'showitem' => '--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.yourposttab;;;1-1-1,date,author;;;;2-2-2,be_user, title;;;;3-3-3,content,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.categorize,tagClouds,cat,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.interactive,allow_comments,trackback,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access,--palette--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access;1;2-2-2,')
+			'showitem' => '--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.yourposttab;;;1-1-1,date,author;;;;2-2-2,be_user, title;;;;3-3-3,content,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.categorize,tagClouds,cat,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.interactive,allow_comments,trackback,number_views,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access,--palette--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access;1;2-2-2,')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => 'starttime, endtime, fe_group, hidden','canNotCollapse'=>1)
@@ -279,12 +287,12 @@ $TCA['tx_t3blog_cat'] = array (
 	),
 	'types' => array (
 		'0' => array('showitem' => '--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_cat.generalTab;;;;1-1-1,catname,description,parent_id, --div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_cat.access,--palette--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_cat.access;1')
-	),	
+	),
     'palettes' => array (
         '1' => array('showitem' => 'starttime, endtime, fe_group, hidden','canNotCollapse'=>1)
     )
-	
-	
+
+
 );
 
 
@@ -600,14 +608,6 @@ $TCA['tx_t3blog_pingback'] = array (
     ),
     'feInterface' => $TCA['tx_t3blog_pingback']['feInterface'],
     'columns' => array (
-        't3ver_label' => array (
-            'label'  => 'LLL:EXT:lang/locallang_general.xml:LGL.versionLabel',
-            'config' => array (
-                'type' => 'input',
-                'size' => '30',
-                'max'  => '30',
-            )
-        ),
         'hidden' => array (
             'exclude' => 1,
             'label'   => 'LLL:EXT:lang/locallang_general.xml:LGL.hidden',

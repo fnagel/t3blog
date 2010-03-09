@@ -1,62 +1,220 @@
-2009  Marcus Krause <marcus#exp2009@t3sec.info>
-	* Review: #4609 - unneccessary files in XMLRPC library
-	* Review: #4608 - error_reporting settings overwritten in pi1
-	* Review: #4607 - trackback functionality (receiving/displaying) susceptible to SQLi and XSS
-	* Bugfix: Comments RSS feed - make link & guid URIs well-formed
-	* Bugfix: Comments RSS feed - removed double slash from link & guid URIs
-	* Review: #4604 - rss widget (feed) susceptible to XSS
-	* Bugfix: Comments RSS feed - MySQL Error in author retrieval
-	* Review: #4601 - calendar widget susceptible to XSS
-	* Review: #4600 - blogList widget susceptible to XSS
-	* Review: #4599 - BE Module 3 susceptible to XSS
-	* Review: #4598 - BE Module 2 susceptible to XSS
-	* Review: adding suggested dependency on ext:sfpantispam
-	* Review: #4597 - blogList widget susceptible to XSS
-	* Review: #4593 - blogList widget susceptible to XSS
-	* Review: #4592 - blogList widget susceptible to XSS
-	* Review: #4591 - blogList widget susceptible to XSS
-	* Review: #4590 - blogList widget susceptible to XSS
-	* Review: #4589 - blogList widget susceptible to XSS
-	* Review: #4588 - tagClound widget susceptible to XSS
-	* Review: #4587 - archive widget susceptible to XSS
-	* Review: #4584 - latestPostNav widget susceptible to XSS
-	* Review: #4583 - blogrollList widget susceptible to XSS
-	* Review: #4582 - BE Module 5 susceptible to XSS
-	* Review: #4579 - BE Module 2 susceptible to XSS
-	* Review: #4576 - BE Module 5 susceptible to SQLi
-	* Review: #4574 - BE Module 5 susceptible to SQLi
-	* Review: #4573 - BE Module 3 susceptible to SQLi
-	* Feature: remove deprecated calls to t3lib_div::GPVar()
-	* Review: #4566 - BE Module 3 susceptible to XSS
-	* Review: #4565 - BE Module 5 susceptible to XSS
-	* Review: #4564 - BE Module 5 susceptible to XSS
-	* Review: #4563 - BE Module 3 susceptible to XSS
-	* Review: #4562 - BE Module 2 susceptible to SQLi
-	* Review: #4561 - BE Module 2 susceptible to XSS
-	* Review: #4560 - BE Module 2 susceptible to XSS
-	* Review: #4559 - Class blogfunctions susceptible to XSS
-	* Review: #4558 - Class blogfunctions susceptible to XSS
-	* Review: #4557 - Class blogfunctions susceptible to XSS
-	* Review: #4556 - Class blogfunctions susceptible to XSS
-	* Review: #4555 - BE Module 2 susceptible to SQLi and XSS
-	* Review: #4554 - BE Module 2 susceptible to XSS
-	* Review: #4553 - BE Module 2 susceptible to SQLi and XSS
-	* Review: #4549 - BE Module 2 susceptible to SQLi and XSS
-	* Review: #4548 - BE Module 2 susceptible to SQLi and XSS
-	* Review: #4546 - BE Module 2 susceptible to XSS
-	* Review: #4545 - BE Module 3 susceptible to SQLi and XSS
-	* Review: #4544 - BE Module 3 susceptible to XSS
-	* Review: #4541 - BE Module 3 susceptible to SQLi and XSS
-	* Review: #4540 - BE Module 3 susceptible to SQLi and XSS
-	* Review: #4537 - blogList widget susceptible to XSS
-	* Review: #4536 - categories widget susceptible to XSS
-	* Review: #4531 - BE Module 5 susceptible to SQLi and XSS
-	* Review: #4530 - BE Module 5 susceptible to SQLi and XSS
-	* Review: #4529 - BE Module 5 susceptible to XSS
-	* Review: #4528 - BE Module 5 susceptible to SQLi and XSS
-	* Review: #4527 - blogList widget susceptible to SQLi
-	* Review: #4526 - BE Module 4 susceptible to SQLi and XSS
-	* Review: adding required dependency on ext:dam
+2010-03-08  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug #13742: Adding t3mootools.txt
+	* Fixed bug #13223: No single quotes in category
+	* Fixed bug: search URL contained cHash and query parameters
+	* Fixed bug #13523: T3Blog looses search word in pagebrowser in PI2
+	* Fixed bug #13768: XCLASS doesn't work in widgets because of includes in functions
+
+2010-03-04  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed deprecation warnings in XML-RPC library
+	* Fixed bug #11101: Receiving pingbacks does not work
+
+2010-03-03  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug #13536: RSS feed does not respect charset of TYPO3 installation
+	* Fixed bug #13518: [BE module comments] Wrong description for spam classification
+
+2010-02-22  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bugs: post title and uid were not retrieved correctly in RSS widget
+	* Fixed bug: unapproved comments are visible in rss feed
+	* Add anchor to jump to the comment from the RSS feed
+	* Fixed bug: spam comments are visible in rss feed
+
+2010-02-18  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug #11638: Texts of e-mails could not be "translated" via TS
+	* Fixed bug #13569: Post Management in backend - Filter your posts by category has no effect
+	* Fixed bug: extra category separator at the end of category line in list and single post view
+	* Fixed bug: "&quot;" is shown instead of `"` in delete prompts
+	* Fixed bug #13378: "latest comments" still shown after deleting article
+	* Fixed bug #11639: Sourcecode is not xhtml-valid
+	!!! WARNING: major markup change because of bugfix 11639! Check your styles before upgrading!
+	* Fixed bug #11157: [t3blog] 2 level category tree wrongly nested (as a part of bugfix #11639)
+
+2010-02-17  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug #13432: RSS widget: the feed's general description tag stays empty
+	* Fixed bug #11064: When requesting a blog entry via permalink, the link to comment an existing comment is corrupted
+	* Fixed bug: unsubscribe from post did not work at all
+	* Fixed bug #11160: two tagclouds on one page cause PHP Error
+
+2010-02-16  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug #13389: use the "bigDoc" template instead of "mediumDoc" in Posts module
+	* Fixed bug #3434: [blogList] Display of trackback urls is faulty
+	* Fixed bug #13429: Missing labels in comment form
+
+2010-02-15  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug: link to single post was not generated properly (missing cHash)
+	* Fixed bug: $this->feedType is null in rss::fieldWrap()
+
+2010-02-15  Dominic Brander  <dbrander@snowflake.ch>
+	* Fixed bug: CSS not included in the mods
+	* Removed unused code/methods in mod1/class.functions.php
+	* Fixed dimension of the order graphis in the mods
+	* Fixed markup in TypoScript < -> &lt;
+
+2010-02-02  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed bug: call to undefined function t3lib_div::__GP()
+	* Released version 0.8.1
+
+2010-02-01  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Released version 0.8.0
+
+2010-01-20  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed: PHP warning in case if pagebrowse TS is not included
+	* Fixed: another XSS in trackback display
+	* Removed htmlspecialchars for plain text e-mail
+	* Fixed: XSS in the comment form
+	* Replaced calls to deprecated GPvar
+	* Replaced a call to deprecated fixed_lgd_pre
+
+2010-01-05  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed: BE compatibility with TYPO3 4.3
+	* Replace calls to deprecated split() with explode() or preg_split()
+	* Optimize fetching number of posts in categories
+	* Fixed: MySQL memory leaks
+	* Removed unnecessary call to sql_num_rows()
+
+2010-01-04  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed: XSS in category filter string
+	* blogList: use TYPO3 API, do not call non-static functions statically
+	* Fixed: XSS in gravatars
+	* Fixed: small possibility of remote file inclusion in captcha
+	* Removed unnecessary files from XMLRPC library
+	* Update XMLRPC library to version 2.2.2
+	* Use more TYPO3 API functions; do not send comments to a cached page
+	* Replace deprecated ereg functions with preg equivalents; use str_replace when possible
+	* Use typolink for making permalinks
+	* Refactor trackback function to use direct database calls and remove unused variables
+	* Added refindex updates to trackbacks; simplified response sending
+	* Changed comment editing not to use TCEmain from FE
+	* Removed insertViaTCE function because it is a wrong way to do stuff from FE
+
+2009-12-22  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Copied changes from srv05
+	* Fixed: another XSS in blog list widget (related to categories)
+	* Fixed: tags in the blog list shows comma after the last tag
+
+2009-12-21  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed database calls in blog roll widget
+	* Fixed database calls in categories widget
+	* Fixed database calls in rss widget
+	* Fixed: bad date in the RSS widget (array passed instead of value)
+	* Fixed: tag cloud did not show up if there are lots of posts with no tags
+	* Simplified some calls in tag cloud widget
+	* Fixed: XSS in archive widget
+	* Fixed: XSS in "This is hot" widget
+	* Fixed: XSS in the blog list widget
+	* Fixed: XSS in the blog roll list
+	* Fixed: XSS in the categories widget
+	* Fixed: XSS in "Latest comments" widget
+	* Fixed: XSS in "Latest posts" widget
+	* Fixed: XSS in "tag cloud" widget
+
+2009-12-17  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Fixed another $this usage in t3blog_div
+
+2009-12-16  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Use TYPO3 API to validate e-mail
+	* Remove debug output from send_pingback.php
+	* Clean up t3blog_db and make sure it works without warnings with PHP 5.3
+	* Clean up and optimize database code in tblog_div
+	* Made functions in t3blog_div static public
+	* Fix error in t3blog_div: $this in the static call
+	* Fixed calls to TYPO3_DB in pi1/lib/pingback.php
+	* Fixed calls to TYPO3_DB in pi1/widgets/blogList/class.singleFunctions.php
+	* Fixed calls to TYPO3_DB in pi1/widgets/blogList/class.blogList.php
+	* Fixed calls to TYPO3_DB in pi1/widgets/blogList/class.listFunctions.php
+
+2009-12-15  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* moduleContent() is moved to modbase
+	* main() and printContent() is moved to modbase
+	* Added a common function for drawing "new record" link
+
+2009-12-14  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Moved some more common code to the modbase
+	* Moved "current settings" to the common module
+	* Renamed "current settings" to "record filter display"
+	* Unified the look of moduleContent function
+	* Cleaned up language files; moved identical labels into the common file
+	* Remove inclusion of mod1/class.functions.php
+
+2009-12-10  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Use common function for getting sort clause
+	* Move validation parameters for sorting to class variables
+	* Provide a single place to collect and store sorting arguments for all modules
+
+2009-12-09  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Added a separate class to handle trackback sending
+	* Stop using "blogfunctions" in all BE classes
+	* Fix: when using templavoila, content elements are shown twice
+
+2009-12-08  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Updated mod4 to use tx_t3blog_modbase
+	* Moved common code to tx_t3blog_modbase
+	* Mostly refactored mod5; sorting now uses TCEmain
+	* Minor output changes in tx_t3blog_modbase
+	* Minor adjustments in mod2, mod3 and mod4
+
+2009-12-07  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Small style adjustments
+	* Moved several common functions to tx_t3blog_modbase
+	* mod2: use more functions from tx_t3blog_modbase, localize several string, use _GP instead of GPvar
+	* mod3: intermediate refactoring
+
+2009-12-03  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Refactored mod2/index.php, fixed some small security issues
+	* Removed all clear.gif files
+	* Added a base class for all modules and converted mod2 and mod3 to use it
+
+2009-12-02  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Refactored mod1/class.blogfunctions.php and classes that use it to remove unused stuff and make the code more readable
+	* Set blog title to be a simple input instead of multiline text. This is in sync with the rest of TYPO3.
+
+2009-08-26 Michael Birchler <mbirchler@snowflake.ch>
+	* widget blogList: added index to comment datarow
+	* widget blogList: added possibility to position the single navigation
+
+2009-08-25 Michael Birchler <mbirchler@snowflake.ch>
+	* Added support for RealURL auto configuration
+	* Fixed permalink rendering
+	* widget calendar: added css class for month row
+
+2009-08-21 Michael Birchler <mbirchler@snowflake.ch>
+	* Removed: hardcoded catlist divider "/" in class.blogList.php with configurable typoscript constant $plugin.tx_t3blog_pi1.blogList.catLinkDivider
+
+2009-08-09 Dominic Brander <dbrander@snowflake.ch>
+	* Bugfix in RSS-Feed-Authentication
+
+2009-06-09 Dominic Brander <dbrander@snowflake.ch>
+	* security fixes for filters
+	* RSS improvements (thanks to Marcus Schwemer <schwemer@netzwerkberatung.de>) and bugfixes
+	* tags are displayed in the list and single mode (thanks to Marcus Schwemer <schwemer@netzwerkberatung.de> and the MTUG)
+
+2009-06-03 Adrian Fischer <afischer@snowflake.ch>
+	* widget rss: Added htmlspecialchars to replace "&" with "&amp;" in rss content. Without this, the content of the rss feed is not rendered on some rss reader because it is not valid xml
 
 2009-04-29 Thomas Imboden <timboden@snowflake.ch>
 	* widget blogList: Fixed bug with time in comments
@@ -101,17 +259,17 @@
 	* bumped to version 0.5.4
 	* widget blogList: added captcha security in comment form of task 357.116
 	* backend: fixed paging bug (hidden elements were not counted) in mod2 and mod5 of task 357.122
-		* widget socialBookmarks: fixed bug in javascript-code of task 357.118
+    * widget socialBookmarks: fixed bug in javascript-code of task 357.118
 	* backend: fixed 'pass-by-reference' error in function addChildrenToNonSelectable of task 357.125
 	* widget tagCloud: fixed some encoding problems reported by marek krawczyk of task 357.123
 	* add new functionality to comment comments of task 357.117
 
 2008-12-23 Thomas Imboden <timboden@snowflake.ch>
-		* widget tagCloud: added maxTagsToShow function according task 357.106
+    * widget tagCloud: added maxTagsToShow function according task 357.106
 	* added all missing method and class comments
 
 2008-12-22 Thomas Imboden <timboden@snowflake.ch>
-		* added some missing method and class comments
+    * added some missing method and class comments
 
 2008-11-20 Thomas Imboden <timboden@snowflake.ch>
 	* fixed bugs with trackbacks, rss and paging
@@ -174,5 +332,5 @@
 		* singleFunctions: implemented comments emailing (s.a)
 		* implemented FE flexform
 
-2007-11-14 snowflake  <info@snowflake.ch>
+2007-11-14 snowflake  <typo3@snowflake.ch>
 	* Initial release

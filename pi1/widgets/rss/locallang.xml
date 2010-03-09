@@ -15,7 +15,7 @@
 			<label index="rss_click_comment">Comments</label>
 		</languageKey>
 		<languageKey index="de" type="array">
-			<label index="title">RSS</label>	
+			<label index="title">RSS</label>
 			<label index="rss_click_here">Kopieren Sie diesen Link in Ihren RSS Reader</label>
 			<label index="rss_openaccess_at_this_url">Unser RSS Newsfeed steht für Sie bereit</label>
 			<label index="rss_protected_at_this_url">Ihr persönlicher Newsfeed Link steht für Sie bereit</label>
@@ -23,4 +23,8 @@
 			<label index="rss_click_comment">Comments</label>
 		</languageKey>
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

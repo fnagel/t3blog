@@ -10,7 +10,7 @@
  *
  * ==============================================================================
  *
- * @version 	$Id: trackback_cls.php,v 1.2 2004/12/11 18:54:32 Ran Exp $
+ * @version 	$Id$
  * @copyright 	Copyright (c) 2004 Ran Aroussi (http://www.blogish.org)
  * @author 		Ran Aroussi <ran@blogish.org>
  * @license 	http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
@@ -31,8 +31,8 @@
  * @param string $title: Retreives and holds $_POST['title'] (if not empty)
  * @param string $expert: Retreives and holds $_POST['expert'] (if not empty)
  */
-class Trackback {       
-    
+class Trackback {
+
     var $blog_name = 't3blog'; // Default blog name used throughout the class (ie. BLOGish)
     var $author = ''; // Default author name used throughout the class (ie. Ran Aroussi)
     var $encoding = 'UTF-8'; // Default encoding used throughout the class (ie. UTF-8)
@@ -41,8 +41,8 @@ class Trackback {
     var $url = ''; // Retreives and holds $_POST['url'] (if not empty)
     var $title = ''; // Retreives and holds $_POST['title'] (if not empty)
     var $expert = ''; // Retreives and holds $_POST['expert'] (if not empty)
-   
-   
+
+
     /**
      * Class constructor
      *
@@ -52,7 +52,7 @@ class Trackback {
      */
     function Trackback($blog_name, $author, $encoding = "UTF-8")
     {
-              
+
         $this->blog_name    = $blog_name;
         $this->author       = $author;
         $this->encoding     = $encoding;
@@ -99,7 +99,7 @@ class Trackback {
     {
         $response = "";
         $reason = "";
-        
+
         // Set default values
         if (empty($title)) {
             $title = "Trackbacking your entry...";
@@ -107,7 +107,7 @@ class Trackback {
         if (empty($excerpt)) {
             $excerpt = "I found your entry interesting so I've added a Trackback to it on my weblog :)";
         }
-        
+
         // Parse the target
         $target = parse_url($tb);
 
@@ -120,19 +120,19 @@ class Trackback {
         if ((isset($target["port"]) && !is_numeric($target["port"])) || (!isset($target["port"]))) {
             $target["port"] = 80;
         }
-        
+
         // Open the socket
         $tb_sock = fsockopen($target["host"], $target["port"]);
-        
+
         // Something didn't work out, return
         if (!is_resource($tb_sock)) {
             return '$trackback->ping: can\'t connect to: ' . $tb . '.';
             exit;
         }
-        
+
         // Put together the things we want to send
         $tb_send = "url=" . rawurlencode($url) . "&title=" . rawurlencode($title) . "&blog_name=" . rawurlencode($this->blog_name) . "&excerpt=" . rawurlencode($excerpt);
-        
+
         // Send the trackback
         fputs($tb_sock, "POST " . $target["path"] . $target["query"] . " HTTP/1.1\r\n");
         fputs($tb_sock, "Host: " . $target["host"] . "\r\n");
@@ -140,18 +140,18 @@ class Trackback {
         fputs($tb_sock, "Content-length: " . strlen($tb_send) . "\r\n");
         fputs($tb_sock, "Connection: close\r\n\r\n");
         fputs($tb_sock, $tb_send);
-        
+
         // Gather result
         while (!feof($tb_sock)) {
             $response .= fgets($tb_sock, 128);
         }
-        
+
         // Close socket
         fclose($tb_sock);
-        
+
         // Did the trackback ping work
         strpos($response, '<error>0</error>') ? $return = true : $return = false;
-        
+
         // send result
         return $return;
     }
@@ -197,23 +197,23 @@ class Trackback {
         if (!$success && empty($err_response)) {
             $err_response = "An error occured while tring to log your trackback...";
         }
-        
+
         // Start response to trackbacker...
         $return = '<?xml version="1.0" encoding="' . $this->encoding . '"?>' . "\n";
         $return .= "<response> \n";
-        
+
         // Send back response...
         if ($success) {
-            
+
             // Trackback received successfully...
             $return .= "	<error>0</error> \n";
         } else {
-            
+
             // Something went wrong...
             $return .= "	<error>1</error> \n";
             $return .= "	<message>" . $this->xml_safe($err_response) . "</message>\n";
         }
-        
+
         // End response to trackbacker...
         $return .= "</response>";
 
@@ -257,11 +257,11 @@ class Trackback {
         if (!$success && empty($response)) {
             $response = "An error occured while tring to retreive trackback information...";
         }
-        
+
         // Start response to caller
         $return = '<?xml version="1.0" encoding="' . $this->encoding . '"?>' . "\n";
         $return .= "<response> \n";
-        
+
         // Send back response...
         if ($success) {
             // Trackback retreived successfully...
@@ -280,12 +280,12 @@ class Trackback {
             $return .= "	</channel> \n";
             $return .= "	</rss> \n";
         } else {
-            
+
             // Something went wrong - provide reason from $response (string)...
             $return .= "	<error>1</error> \n";
             $return .= "	<message>" . $this->xml_safe($response) . "</message>\n";
         }
-        
+
         // End response to trackbacker
         $return .= "</response>";
 
@@ -374,11 +374,11 @@ class Trackback {
         // RegExp to look for (0=>link, 4=>host in 'replace')
         $reg_exp = "/(http)+(s)?:(\\/\\/)((\\w|\\.)+)(\\/)?(\\S+)?/i";
         // Make sure each link ends with [sapce]
-        $text = eregi_replace("www.", "http://www.", $text);
-        $text = eregi_replace("http://http://", "http://", $text);
-        $text = eregi_replace("\"", " \"", $text);
-        $text = eregi_replace("'", " '", $text);
-        $text = eregi_replace(">", " >", $text);
+        $text = str_ireplace('www.', 'http://www.', $text);
+        $text = str_ireplace('http://http://', 'http://', $text);
+        $text = str_ireplace('"', ' "', $text);
+        $text = str_ireplace('\'', ' \'', $text);
+        $text = str_ireplace('>', ' >', $text);
         // Create an array with unique links
         $uri_array = array();
         if (preg_match_all($reg_exp, strip_tags($text, "<a>"), $array, PREG_PATTERN_ORDER)) {

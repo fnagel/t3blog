@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,7 +27,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
  *
- * @author		snowflake <info@snowflake.ch>
+ * @author		snowflake <typo3@snowflake.ch>
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */
@@ -39,10 +39,10 @@ class archive extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
-	
+
 	/**
 	 * The main method of the PlugIn
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
@@ -55,8 +55,8 @@ class archive extends tslib_pibase {
 		$this->init();
 
 		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
+		// example pivar for communication interface
+		// $this->piVars['widgetname']['action'] = "value";
 		/*******************************************************/
 
 		$content = '';
@@ -67,21 +67,21 @@ class archive extends tslib_pibase {
 				$firstdate = $list[0];
 				$firstYear = date('Y', $firstdate['date']);
 			}
-			
+
 			$listlast = t3blog_db::getPostByWhere('deleted = 0 AND hidden = 0 ', 'date ASC', '0,1');
 			if($listlast){
 				$lastdate = $listlast[0];
-				$lastYear = date('Y',$lastdate['date']);	
+				$lastYear = date('Y',$lastdate['date']);
 			}else{
 				$lastYear = $firstYear;
 			}
-			
+
 			$years = array();
 			for($actYear = $firstYear; $actYear >= $lastYear; $actYear--){
 				$monthsInYear = '';
 				$entriesInMonth = 0;
 				for ($month = 12; $month > 0; $month--) {
-					
+
 					$table = 'tx_t3blog_post';
 					$from = strtotime($actYear. '-'. $month. '-01');
 					$to = strtotime($actYear. '-'. $month. '-31');
@@ -97,14 +97,14 @@ class archive extends tslib_pibase {
 								'uid'		=> $row['uid'],
 								'date'		=> $row['date'],
 								'title'		=> $row['title'],
-								'blogUid'	=> t3blog_div::getBlogPid()
+								'blogUid'	=> t3blog_div::getBlogPid(),
 							);
 							//post <li>
 							$dataLi = array(
 								'class'	=> 'blogentry',
-								'text'	=> t3blog_div::getSingle($dataTitle,'titleLink')
+								'text'	=> t3blog_div::getSingle($dataTitle,'titleLink', $this->conf)
 							);
-							$blogInMonth .= t3blog_div::getSingle($dataLi, 'itemWrap');
+							$blogInMonth .= t3blog_div::getSingle($dataLi, 'itemWrap', $this->conf);
 							$entriesInMonth++;
 						}
 						//wrap ul for the entries in this month
@@ -144,7 +144,7 @@ class archive extends tslib_pibase {
 							'js'		=> $js
 
 						);
-						$ulEntries = t3blog_div::getSingle($dataUlEntries, 'listWrap');
+						$ulEntries = t3blog_div::getSingle($dataUlEntries, 'listWrap', $this->conf);
 
 						$dataCatLinkMonth = array(	//wrap month link
 							'text'		=> $this->pi_getLL('month_'.$month),
@@ -152,13 +152,13 @@ class archive extends tslib_pibase {
 							'dateto'	=> $to,
 							'entries'	=> count($list),
 							'id'		=> ($actYear).($month),
-							'blogUid'	=> t3blog_div::getBlogPid()
+							'blogUid'	=> t3blog_div::getBlogPid(),
 						);
 						$dataMonthLi = array(
 							'class'	=> 'month',
-							'text'	=> t3blog_div::getSingle($dataCatLinkMonth, 'catLink'). $ulEntries
+							'text'	=> t3blog_div::getSingle($dataCatLinkMonth, 'catLink', $this->conf) . $ulEntries
 						);
-						$monthsInYear = $monthsInYear.t3blog_div::getSingle($dataMonthLi, 'itemWrap');
+						$monthsInYear = $monthsInYear.t3blog_div::getSingle($dataMonthLi, 'itemWrap', $this->conf);
 					}
 				}
 				//wrap months in this year <ul>
@@ -195,7 +195,7 @@ class archive extends tslib_pibase {
 					'id'	=> $actYear,
 					'js'	=> $js
 				);
-				$years[$actYear]['data'] = t3blog_div::getSingle($dataUlMonths, 'listWrap');
+				$years[$actYear]['data'] = t3blog_div::getSingle($dataUlMonths, 'listWrap', $this->conf);
 				$years[$actYear]['entries'] = $entriesInMonth;
 			}
 
@@ -210,22 +210,22 @@ class archive extends tslib_pibase {
 					);
 					$dataYearLi = array(
 						'class'	=> 'year',
-						'text'	=> t3blog_div::getSingle($dataCatLinkYear, 'catLink'). $row['data']
+						'text'	=> t3blog_div::getSingle($dataCatLinkYear, 'catLink', $this->conf) . $row['data']
 					);
-					$yearsInArchive .= t3blog_div::getSingle($dataYearLi, 'itemWrap');
+					$yearsInArchive .= t3blog_div::getSingle($dataYearLi, 'itemWrap', $this->conf);
 				}
 
 				$dataYearUl = array(	//wrap global ul
 					'class'	=> 'archive',
 					'text'	=> $yearsInArchive
 				);
-				$content = t3blog_div::getSingle($dataYearUl, 'listWrap');
+				$content = t3blog_div::getSingle($dataYearUl, 'listWrap', $this->conf);
 				$content = t3blog_div::getSingle(
 					array(
 						'categoryTree'	=> $content,
-						'title'	=> $this->pi_getLL('title')),
-						'globalWrap'
-					);
+						'title'	=> $this->pi_getLL('title')
+					), 'globalWrap', $this->conf
+				);
 			}
 		}
 

@@ -27,7 +27,7 @@ xmlnews {
 	typeNum = 100
 	config {
 		disableAllHeaderCode = 1
-		additioalHeaders = Content-type:text/xml
+		additionalHeaders = Content-type:text/xml
 		linkVars = L
 		no_cache = 1
  		xhtml_cleaning = 0
@@ -43,7 +43,7 @@ xmlnews {
 		# Attention! This will only work, when you are 
 		# using the static template "T3BLOG Layout".
 		# The static template has included the full design of 
-		# a blog (position of widgets and much more)t
+		# a blog (position of widgets and much more)
 		
 		template =< plugin.tx_t3blog_pi1.layoutBlog.40.80
 	}

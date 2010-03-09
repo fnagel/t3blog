@@ -1,104 +1,59 @@
 <?php
-require_once('conf.php');
-require_once($BACK_PATH.'init.php');
-require_once($BACK_PATH.'template.php');
-require_once(PATH_t3lib.'class.t3lib_scbase.php');
-require_once(PATH_site.'typo3/sysext/cms/tslib/class.tslib_fe.php');
-require_once(PATH_t3lib.'class.t3lib_userauth.php' );
-require_once(PATH_site.'typo3/sysext/cms/tslib/class.tslib_feuserauth.php');
-require_once(PATH_t3lib.'class.t3lib_cs.php');
-require_once(PATH_site.'typo3/sysext/cms/tslib/class.tslib_content.php');
-require_once(PATH_t3lib.'class.t3lib_tstemplate.php');
-require_once(PATH_t3lib.'class.t3lib_page.php');
+/***************************************************************
+*  Copyright notice
+*
+*  (c) 2009 Snowflake Productions Gmbh <info@snowflake.ch>
+*  All rights reserved
+*
+*  This script is part of the Typo3 project. The Typo3 project is
+*  free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*
+*  This script is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  This copyright notice MUST APPEAR in all copies of the script!
+***************************************************************/
+/**
+ * $Id$
+ */
 
+if (!defined('TYPO3_MODE')) {
+	die('blogfunctions: this class should not be called from the browser directly! Did you forget to include typo3/init.php?');
+}
 
 /**
- * blogfunctions
- *
- * @package   	TYPO3
- * @author 		snowflake <info@snowflake.ch>
- * @copyright 	snowflake <info@snowflake.ch>
- * @access public
- */
-class blogfunctions extends t3lib_SCbase {
-	function main()	{
-		global $BE_USER,$LANG,$BACK_PATH,$TCA_DESCR,$TCA,$CLIENT,$TYPO3_CONF_VARS;
-
-		// Access check!
-		// The page will show only if there is a valid page and if this page may be viewed by the user
-		$this->pageinfo = t3lib_BEfunc::readPageAccess($this->id,$this->perms_clause);
-		$access = is_array($this->pageinfo) ? 1 : 0;
-
-		if (($this->id && $access) || ($BE_USER->user['admin'] && !$this->id))	{
-
-			// Get the page ID from the extension config
-			$this->id = $_GET['id'];
-
-			// Draw the header.
-			$this->doc = t3lib_div::makeInstance('mediumDoc');
-			$this->doc->backPath = $BACK_PATH;
-			$this->doc->form='<form action="" method="POST">';
-
-			// JavaScript
-			$this->doc->JScode = '
-				<script language="javascript" type="text/javascript">
-					script_ended = 0;
-					function jumpToUrl(URL)	{
-						document.location = URL;
-					}
-				</script>
-			';
-
-			$this->doc->postCode='
-				<script language="javascript" type="text/javascript">
-					script_ended = 1;
-					if (top.fsMod) top.fsMod.recentIds["web"] = 0;
-				</script>
-			';
-
-			$headerSection = $this->doc->getHeader('pages',$this->pageinfo,$this->pageinfo['_thePath']).'<br />'.$LANG->sL('LLL:EXT:lang/locallang_core.xml:labels.path').': '.t3lib_div::fixed_lgd_pre($this->pageinfo['_thePath'],50);
-
-			$this->content.=$this->doc->startPage($LANG->getLL('title'));
-			$this->content.=$this->doc->header($LANG->getLL('title'));
-			$this->content.=$this->doc->spacer(5);
-			$this->content.=$this->doc->section('',$this->doc->funcMenu($headerSection,t3lib_BEfunc::getFuncMenu($this->id,'SET[function]',$this->MOD_SETTINGS['function'],$this->MOD_MENU['function'])));
-			$this->content.=$this->doc->divider(5);
-
-			// ShortCut
-			if ($BE_USER->mayMakeShortcut())	{
-				$this->content.=$this->doc->spacer(20).$this->doc->section('',$this->doc->makeShortcutIcon('id',implode(',',array_keys($this->MOD_MENU)),$this->MCONF['name']));
-			}
-
-			$this->content.=$this->doc->spacer(10);
-			} else {
-
-			// If no access or if ID == zero
-			$this->doc = t3lib_div::makeInstance('mediumDoc');
-			$this->doc->backPath = $BACK_PATH;
-
-			$this->content.=$this->doc->startPage($LANG->getLL('title'));
-			$this->content.=$this->doc->header($LANG->getLL('title'));
-			$this->content.=$this->doc->spacer(5);
-			$this->content.=$this->doc->spacer(10);
-		}
-	}
-
+  * This class is implements various blog functions. While most of them could
+  * be static, we keep them non-static to allow XCLASSing if necessary.
+  *
+  * @author Snowflake Productions Gmbh <info@snowflake.ch>
+  * @package TYPO3
+  * @subpackage tx_t3blog
+  */
+class blogfunctions {
 
 	/**
 	 * Get the category names for a post
 	 *
-	 * @param 	string	$table: Tablename
-	 * @param 	array	$row: Datarow
-	 * @return			List of category names
+	 * @param string $table
+	 * @param int $recordId
+	 * @return Space-separated category names
 	 */
-	function getCategoryNames($table, $row){
-		$rsCatNames=$GLOBALS['TYPO3_DB']->exec_SELECTquery('tx_t3blog_cat.catname as cat_names','tx_t3blog_cat,tx_t3blog_post_cat_mm','deleted=0 AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign AND tx_t3blog_post_cat_mm.uid_local ='.$row['uid'].'','');
-		while($dsCatNames=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsCatNames))
-		{
-
-				$content .=$dsCatNames['cat_names'].' ';
-
+	public function getCategoryNames($table, $recordId) {
+		$rsCatNames = $GLOBALS['TYPO3_DB']->exec_SELECTquery('tx_t3blog_cat.catname as cat_names',
+			'tx_t3blog_cat,tx_t3blog_post_cat_mm',
+			'deleted=0 AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign AND tx_t3blog_post_cat_mm.uid_local =' . intval($recordId));
+		while (false != ($dsCatNames = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsCatNames))) {
+			$content .= $dsCatNames['cat_names'] . ' ';
 		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($rsCatNames);
 
 		return $content;
 	}
@@ -112,17 +67,15 @@ class blogfunctions extends t3lib_SCbase {
 	 * @param	string	$exclList: list
 	 * @return	string	url
 	 */
-	function listURL($altId='',$table=-1,$exclList='')	{
-		return 'index.php'.
-			'?id='.(strcmp($altId,'')?$altId:$this->id).
-			'&table='.rawurlencode($table==-1?$this->table:$table).
+	public function listURL($altId = '', $table = '') {
+		$urlParameters = array(
+			'id' => $altId ? $altId : t3lib_div::_GP('id')
+		);
+		if ($table) {
+			$urlParameters['table'] = $table;
+		}
 
-			($this->returnUrl?'&returnUrl='.rawurlencode($this->returnUrl):'').
-			($this->searchString?'&search_field='.rawurlencode($this->searchString):'').
-
-			((!$exclList || !t3lib_div::inList($exclList,'sortField')) && $this->sortField?'&sortField='.rawurlencode($this->sortField):'').
-			((!$exclList || !t3lib_div::inList($exclList,'sortRev')) && $this->sortRev?'&sortRev='.rawurlencode($this->sortRev):'')
-			;
+		return 'index.php?' . substr(t3lib_div::implodeArrayForUrl('', $urlParameters), 1);
 	}
 
 
@@ -132,242 +85,224 @@ class blogfunctions extends t3lib_SCbase {
 	 * @param	string	$table: name of the table
 	 * @return	string	search string
 	 */
-	function makeSearchString($table){
-		global $TCA;
+	public function makeSearchString($table){
+		// Initialize field array. This array is never empty!
+		$searchFields = $this->getSearchFields($table);
 
-		// Loading full table description - we need to traverse fields:
-		t3lib_div::loadTCA($table);
-
-		// Initialize field array:
-		$sfields=array();
-		$sfields[]=$table.'.uid';	// Adding "uid" by default.
-
-		// Traverse the configured columns and add all columns that can be searched:
-		foreach($TCA[$table]['columns'] as $fieldName => $info)	{
-			if ($info['config']['type']=='text' || ($info['config']['type']=='input' && !ereg('date|time|int',$info['config']['eval'])))	{
-					$sfields[]=$table.'.'.$fieldName;
-			}
+		// Free-text search
+		$searchField = t3lib_div::_GP('search_field');
+		if ($searchField != '') {
+			$like = ' LIKE ' . $GLOBALS['TYPO3_DB']->fullQuoteStr('%' . $searchField . '%', $table);
 		}
+		else {
+			$like = ' LIKE ' . $GLOBALS['TYPO3_DB']->fullQuoteStr('%', $table);
+		}
+		$queryPart = ' AND (' . implode($like . ' OR ', $searchFields) . $like . ')';
 
-		// If search-fields were defined (and there always are) we create the query:
-			if (count($sfields)) {
-				$like = ' LIKE \'%'.$GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('search_field'), '$table').'%\'';		// Free-text searching...
-				$queryPart = ' AND ('.implode($like.' OR ',$sfields).$like.')';
-			}
-
-			return $queryPart;
+		return $queryPart;
 	}
 
 	/**
 	 * Creates a Searchbox
 	 *
-	 * @param	boolean	$formFields
+	 * @param	boolean	$addFormFields
 	 * @return	string	code for search box
 	 */
-	function getSearchBox($formFields=1)	{
+	public function getSearchBox($wrapIntoForm = true)	{
 
-		// Setting form-elements, if applicable:
-		$formElements=array('','');
-		if ($formFields)	{
-			$formElements=array('<form action="'.htmlspecialchars($this->listURL().'&curPage=1').'.&sort=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('sort'))) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid=' . intval(t3lib_div::_GP('pid')) . '" method="post">','</form>');
+		// Setting form-elements, if applicable
+		$formElements = array('', '');
+		if ($wrapIntoForm) {
+			$formElements = array(
+				'<form action="index.php" method="post">
+					<input type="hidden" name="id" value="' . intval(t3lib_div::_GP('id')) . '" />
+					<input type="hidden" name="curPage" value="1" />
+					<input type="hidden" name="sort" value="' . htmlspecialchars(t3lib_div::_GP('sort')) . '" />
+					<input type="hidden" name="sortDir" value="' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '" />
+					<input type="hidden" name="cat" value="' . htmlspecialchars(t3lib_div::_GP('cat')) . '" />
+					<input type="hidden" name="pid" value="' . htmlspecialchars(t3lib_div::_GP('pid')) . '" />
+					',
+				'</form>'
+			);
 		}
 
 		// Table with the search box:
-		$content.= '
-			'.$formElements[0].'
-
+		$searchFieldTitle = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.enterSearchString', true);
+		$searchFieldValue = htmlspecialchars(t3lib_div::_GP('search_field'));
+		$submitButtonText = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.search', true);
+		$content = '
 				<!--
 					Search box:
 				-->
 				<table border="0" cellpadding="0" cellspacing="0" class="bgColor4" id="typo3-dblist-search">
 					<tr>
-						<td>'.$GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.enterSearchString',1).'<input type="text" name="search_field" value="'.htmlspecialchars(t3lib_div::_GP('search_field')).'"'.$GLOBALS['TBE_TEMPLATE']->formWidth(10).' /></td>
-						<td>'.$lMenu.'</td>
-						<td><input type="submit" name="search" value="'.$GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.search',1).'" /></td>
+						<td>' . $searchFieldTitle .'<input type="text" name="search_field" value="' . $searchFieldValue . '"' .
+							$GLOBALS['TBE_TEMPLATE']->formWidth(10) . ' /></td>
+						<td> </td>
+						<td><input type="submit" name="search" value="' . $submitButtonText . '" /></td>
 					</tr>
 
-				</table>
-			'.$formElements[1];
+				</table>';
 
-		return $content;
+		return $formElements[0] . $content . $formElements[1];
 	}
 
-
-	function truncate($string,$pos)  {
-				if ( $pos < strlen($string) )
-				{
-						$text = substr($string, 0, $pos);
-						if ( false !== ($strrpos = strrpos($text,' ')) )
-						{
-								$text = substr($text, 0, $strrpos);
-						}
-						$string = $text."...";
-				}
-				return $string;
-		}
-
-
 	/**
-	 * Sends the trackbacks and saves blogPost
+	 * Truncates the string at the given length and appends ellipses if necessary
 	 *
-	 * @param	int		$uid: uid of the post
-	 * @param	int		$pid: pid of the post
-	 * @return	string	code for search box
+	 * @param string $string
+	 * @param int $length
+	 * @return string
+	 * @deprecated Use t3lib_div::fixed_lgd_cs() instead!
 	 */
-	function sendTrackbacks($uid,$pid) {
-		include_once(t3lib_extMgm::extPath('t3blog').'pi1/lib/trackback_cls.php');
-
-		// select trackback information of a post, even if not available
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'uid, trackback, trackback_hash, author, title',						// SELECT ...
-			'tx_t3blog_post',														// FROM ...
-			'uid = '.$uid.' AND pid = '.$pid.' AND  deleted = 0 AND hidden = 0 ',	// WHERE ...
-			'uid',																	// GROUP BY ...
-			'uid',																	// ORDER BY ...
-			'0,1'																	// LIMIT ...
-		);
-
-
-		$t3blog_name 	= '';
-		$author 		= '';
-
-		// base-url of the site
-		$permalink 		= t3lib_div::getIndpEnv('TYPO3_SITE_URL');
-		$title 			= $row['title'];
-		$textPart 		= strip_tags($row['text']);
-
-		// if a post is available
-		if($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)){
-
-			// select header and bodytext of the post
-			$resContent = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-				'header, bodytext',																									// SELECT ...
-				'tt_content',																										// FROM ...
-				'deleted = 0 AND hidden = 0 AND irre_parenttable = \'tx_t3blog_post\' AND irre_parentid = '.$row['uid'].' ',		// WHERE ...
-				'uid',																												// GROUP BY ...
-				'sorting',																											// ORDER BY ...
-				'0,1'																												// LIMIT ...
-			);
-
-			// if the post has content, set text
-			if($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resContent)){
-
-				$row['text'] = $rowContent['header'].$rowContent['bodytext'];
-
-			} else {
-
-				$row['text'] = '';
-			}
-
-
-			// generates froumurl for tx_t3blog_trackback
-			$additionalParams = array(
-				'tx_t3blog_pi1[showUid]'	=>	$row['uid'],
-			);
-
-			$permalink = $this->buildTYPO3href($pid,$additionalParams);
-
-			// gets real name of author of this post
-			$resUser = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-				'realName',						// SELECT ...
-				'be_users',						// FROM ...
-				'uid = '.$row['author'],		// WHERE ...
-				'uid',							// GROUP BY ...
-				'uid',							// ORDER BY ...
-				'0,1'							// LIMIT ...
-			);
-
-			$rowUser = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resUser);
-
-			if ($rowUser['realName']) {
-
-				$author = $rowUser['realName'];
-
-			} else {
-
-				$author = 'Admin';
-			}
-
-
-			// gets name of the main blog
-			$resPage 		= $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-				'title',			// SELECT ...
-				'pages',			// FROM ...
-				'uid = '.$pid,		// WHERE ...
-				'uid',				// GROUP BY ...
-				'uid',				// ORDER BY ...
-				'0,1'				// LIMIT ...
-			);
-
-			$rowPage 		= $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resPage);
-			$t3blog_name 	= $rowPage['title'];
-			$count 			= 0;
-
-			// space = ascii: dec 32
-			// only if trackback is set and the hash is not the same
-			if(strlen($row['trackback']) > 0 && $row['trackback_hash'] != md5($row['trackback'])){
-
-				// initialize trackback
-				$trackback 	= new Trackback($t3blog_name, $author,'UTF-8');
-
-				// split urls by tilde (chr126)
-				$urls[] 	= split(chr(126),$row['trackback']);
-
-				if (count($urls)>0 && $urls[0][0]!=''){
-					$title 		= $row['title'];
-					$textPart 	= substr($row['text'],0,250);
-					foreach ($urls[0] AS $url){
-						if ($url && strlen($url)>1 && strpos($url,'http')>-1) {
-							if ($trackback->ping($url, $permalink, $title, $textPart)) {
-								$count++;
-							}
-						}
-					}
-
-					$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-							'tx_t3blog_post', // table
-							'uid = '.$row['uid'],
-							array('trackback_hash'=>md5($row['trackback']))
-					);
-				}
-			}
-
-			return $count;
-
-		} else {
-
-			return 0;
+	public function truncate($string, $length)  {
+		if (strlen($string) > $length) {
+			$string = t3lib_div::fixed_lgd_cs($string, $length);
 		}
+		return $string;
 	}
 
+	
 
 	/**
-		* Renders a TYPO3 href url
-		*
-		* @param    	integer $targetId: page id
-		* @param    	string  $addParams: additional parameters (getVars)
-		* @return		string  the link url, not being htmlspecialchar'ed yet
+	 * Obtains styles declarations from the CSS file
+	 *
+	 * @return  string
 	 */
-	function buildTYPO3href($targetId, $addParams='') {
-		$link = 'http://'.t3lib_div::getIndpEnv('HTTP_HOST').'/?id='.$targetId.'&bid='.$addParams['tx_t3blog_pi1[showUid]'];
+	public function getCSS() {
+		return file_get_contents('../lib/styles.css');
+	}
+
+	/**
+	 * Renders a TYPO3 href url
+	 *
+	 * @param    	integer $targetId page id
+	 * @param    	string  $blogId Blog id
+	 * @return		string  the link url, not being htmlspecialchar'ed yet
+	 */
+	protected function getBlogURL($pageId, $blogId) {
+		if (t3lib_extMgm::isLoaded('pagepath')) {
+			t3lib_div::requireOnce(t3lib_extMgm::extPath('pagepath', 'class.tx_pagepath_api.php'));
+			$link = tx_pagepath_api::getPagePath($pageId, array(
+				'bid' => $blogId
+			));
+		}
+		else {
+			$link = t3lib_div::getIndpEnv('TYPO3_SITE_URL') . '/?id=' . $pageId . '&bid=' . $blogId;
+		}
 		return $link;
 	}
 
-
 	/**
-		* Include the CSS
-		*
-		* @return  string  link to the css-file
+	 * Obtains the text of the blog entry
+	 *
+	 * @param int $blogEntryUid
+	 * @return string
 	 */
-	function getCSS (){
-		return(implode('',file('../lib/styles.css')));
+	protected function getBlogEntryText($blogEntryUid) {
+		$where = 'irre_parenttable=\'tx_t3blog_post\' AND ' .
+			'irre_parentid=' . intval($blogEntryUid) . ' AND ' .
+			'(CType=\'text%\' OR CType=\'textpic\') AND ' .
+			'bodytext<>\'\'' .
+			t3lib_BEfunc::BEenableFields('tt_content') .
+			t3lib_BEfunc::deleteClause('tt_content');
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'header,bodytext', 'tt_content', $where, '', 'sorting', '1');
+
+		// if the post has content, set text
+		$result = '';
+		if (is_array($row)) {
+			$result = trim($row['header'] . ' ' . $row['bodytext']);
+		}
+
+		return $result;
 	}
 
+	
 
+	/**
+	 * Obtains blog entry author name by his id
+	 *
+	 * @param int $authorId
+	 * @return string
+	 */
+	protected function getBlogEntryAuthorName($authorId) {
+		$user = t3lib_BEfunc::getRecord('be_users', $authorId, 'realName');
+		if (is_array($user) && $user['realName']) {
+			$author = $user['realName'];
+		}
+		else {
+			$author = 'Admin';
+		}
+		return $author;
+	}
+
+	/**
+	 * Obtains blog name (page title) from page id
+	 *
+	 * @param int $pid
+	 * @return string
+	 */
+	protected function getBlogName($pid) {
+		$page = t3lib_BEfunc::getRecord('pages', $pid, 'title');
+		return is_array($page) ? $page['title'] : '';
+
+	}
+
+	/**
+	 * Updates trackback hash value
+	 *
+	 * @param int $postUid
+	 * @param string $trackbacks
+	 * @return void
+	 */
+	protected function updateTrackbackHash($postUid, $trackbacks) {
+		$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
+			'tx_t3blog_post',
+			'uid=' . intval($postUid),
+			array(
+				'trackback_hash' => md5($trackbacks)
+			)
+		);
+	}
+
+	/**
+	 * Obtains searchable fields for the given table. The result is an array
+	 * of fields prepended with table name. There is always at least uid field
+	 * in the result.
+	 *
+	 * @param string $table
+	 * @return array
+	 */
+	protected function getSearchFields($table) {
+		t3lib_div::loadTCA($table);
+
+		$searchFields[] = $table . '.uid'; // Adding "uid" by default
+
+		// Traverse the configured columns and add all columns that can be searched:
+		foreach ($GLOBALS['TCA'][$table]['columns'] as $fieldName => $tceFieldConf) {
+			if ($this->isTextField($tceFieldConf)) {
+				$searchFields[] = $table . '.' . $fieldName;
+			}
+		}
+
+		return $searchFields;
+	}
+
+	/**
+	 * Determines if the field is a text field using its TCA configuration
+	 *
+	 * @param array $tcaFieldConf
+	 * @return boolean
+	 */
+	protected function isTextField(array $tcaFieldConf) {
+		return $tcaFieldConf['config']['type'] == 'text' ||
+			($tcaFieldConf['config']['type'] == 'input' && !preg_match('/date|time|int/', $tcaFieldConf['config']['eval']));
+	}
 }
+
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/mod1/class.functions.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/mod1/class.functions.php']);
 }
-
 
 ?>

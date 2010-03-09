@@ -19,6 +19,9 @@
 			<label index="comments">Kommentare: </label>
 			<label index="latestPostsTitle">Letzte Beiträge</label>
 		</languageKey>
-
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

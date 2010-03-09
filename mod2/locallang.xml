@@ -9,25 +9,13 @@
 			<label index="moduleTitle">T3BLOG - TYPO3 based blogging</label>
 			<label index="title">T3BLOG posts</label>
 			<label index="sectionTitle">Post management</label>
-			<label index="selABlog">Please select a blog</label>
-			<label index="note">Note:</label>
-			<label index="dateAndTime">Date &amp; Time</label>
-			<label index="title">Title</label>
-			<label index="text">Text</label>
 			<label index="category">Category</label>
 			<label index="nrOfComments">Comments</label>
-			<label index="functions">Functions</label>
 			<label index="filterByCat">Filter your posts by category</label>
-			<label index="showRecords">Showing records</label>
-			<label index="pages">Pages</label>
-			<label index="search">Search</label>
-			<label index="sortBy">Sort by</label>
-			<label index="filterCategory">Filter-category</label>
+			<label index="filterCategory">Category</label>
 			<label index="createNewBlogPost">Create a new blog post</label>
 			<label index="seeComments">Click here to see the comments</label>
-		</languageKey>
-		<languageKey index="de" type="array">
-			<label index="title">T3BLOG posts</label>
+			<label index="addComment">Add a comment</label>
 		</languageKey>
 	</data>
 </T3locallang>

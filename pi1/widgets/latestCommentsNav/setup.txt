@@ -15,7 +15,7 @@ plugin.tx_t3blog_pi1 {
 				field = listItems
 			}
 		}
-		
+
 		listItem = COA
 		listItem {
 			10 = TEXT
@@ -28,9 +28,9 @@ plugin.tx_t3blog_pi1 {
 				wrap = <dd>|</dd>
 				field = date
 				strftime = %d.%m.%Y %R
-			}		
+			}
 		}
-	
+
 		link = COA
 		link {
 			#load register
@@ -49,24 +49,26 @@ plugin.tx_t3blog_pi1 {
 					strftime = %d
 				}
 			}
-			
+
 			10 = TEXT
 			10 {
 				wrap= |
 				field = text
 				crop = 60 | ... | 1
+				htmlSpecialChars = 1
 				typolink {
 					parameter.field = blogUid
 					useCacheHash = 1
-					title.stdWrap.dataWrap = &lt;{field:author}&gt; 
+					title.stdWrap.dataWrap = &lt;{field:lll:author}{field:author}&gt;
+					title.stdWrap.htmlSpecialChars = 1
 					additionalParams.dataWrap = &tx_t3blog_pi1[blogList][showUid]={field:showUid}&tx_t3blog_pi1[blogList][year]={register:year}&tx_t3blog_pi1[blogList][month]={register:month}&tx_t3blog_pi1[blogList][day]={register:day}
 					section.dataWrap = comment_{field:alink}
 				}
 			}
-			
+
 			99 = RESTORE_REGISTER
-			
+
 		}
-	
+
 	}
 }

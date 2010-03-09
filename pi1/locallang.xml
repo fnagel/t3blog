@@ -7,11 +7,13 @@
 	<data type="array">
 		<languageKey index="default" type="array">
 			<label index="back">Back</label>
-			
 		</languageKey>
 		<languageKey index="de" type="array">
 			<label index="back">Zurück</label>
-			
-		</languageKey>	
+		</languageKey>
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

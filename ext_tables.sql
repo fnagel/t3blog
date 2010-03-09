@@ -61,7 +61,7 @@ CREATE TABLE tx_t3blog_post (
 	tagClouds text NOT NULL,
 	trackback text NOT NULL,
 	trackback_hash varchar(130) DEFAULT '' NOT NULL,
-
+	number_views int(11) DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
@@ -164,7 +164,7 @@ CREATE TABLE tx_t3blog_com (
 	text text NOT NULL,
 	approved tinyint(3) DEFAULT '0' NOT NULL,
 	spam tinyint(3) DEFAULT '0' NOT NULL,
-	fk_post blob NOT NULL,
+	fk_post int(11) DEFAULT '0' NOT NULL,
 	parent_id int(11) DEFAULT '0' NOT NULL,
 
 	PRIMARY KEY (uid),

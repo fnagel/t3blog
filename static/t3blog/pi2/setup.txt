@@ -16,6 +16,7 @@
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/socialBookmarks/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/tagCloud/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/searchBox/setup.txt">
+<INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/views/setup.txt">
 
 
 plugin.tx_t3blog_pi2 {
@@ -31,4 +32,5 @@ plugin.tx_t3blog_pi2 {
 	socialBookmarks < plugin.tx_t3blog_pi1.socialBookmarks
 	tagCloud		 < plugin.tx_t3blog_pi1.tagCloud
 	searchBox		 < plugin.tx_t3blog_pi1.searchBox
+        views			< plugin.tx_t3blog_pi1.views
 }

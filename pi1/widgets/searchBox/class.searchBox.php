@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,7 +28,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
  *
- * @author	snowflake <info@snowflake.ch>
+ * @author	snowflake <typo3@snowflake.ch>
  * @package	TYPO3
  * @subpackage	tx_t3blog
  */
@@ -40,11 +40,11 @@ class searchBox extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
-	
+
 	/**
 	 * The main method of the PlugIn
 	 * @author Manu Oehler <moehler@snowflake.ch>
-	 * 
+	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
 	 * @return	The content that is displayed on the website
@@ -54,20 +54,20 @@ class searchBox extends tslib_pibase {
 		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
 		$this->init();
-		
+
 		/*******************************************************/
 		//example pivar for communication interface
 		//$this->piVars['widgetname']['action'] = "value";
 		/*******************************************************/
-		$button = t3blog_div::getSingle(array('buttonTitle'=>$this->pi_getLL('buttonTitle')),'searchButton');
-		
+		$button = t3blog_div::getSingle(array('buttonTitle'=>$this->pi_getLL('buttonTitle')), 'searchButton', $this->conf);
+
 		$data = array(
 			'searchBoxLabel'		=>	$this->pi_getLL('searchBoxLabel'),
 			'searchBoxDefault'		=>	$this->pi_getLL('searchBoxDefault'),
 			'time'					=>	time(),
 			'searchButton'			=>	$button
 		);
-		$content = t3blog_div::getSingle($data,'form');
+		$content = t3blog_div::getSingle($data, 'form', $this->conf);
 		return $content;
 	}
 
@@ -77,7 +77,7 @@ class searchBox extends tslib_pibase {
 	function init(){
 		$this->pi_loadLL();
 	}
-	
+
 }
 
 

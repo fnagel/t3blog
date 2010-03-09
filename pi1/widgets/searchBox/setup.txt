@@ -2,25 +2,25 @@
  	searchBox {
 	 	# searchBox
 		searchButton = COA
-		searchButton {	
-						
+		searchButton {
+
 			stdWrap.noTrimWrap = |<button class="button" name="submit" type="submit" |</button>|
-						
+
 			#value
 			10 = TEXT
 			10 {
 				field = buttonTitle
 				noTrimWrap = |value="|" onmouseover="this.className='button buttonHover'; this.style.cursor='pointer';" onmouseout="this.className='button'">|
 			}
-							
+
 			#span
 			20 = TEXT
 			20 {
 				wrap = <span>|</span>
 				field = buttonTitle
-			}		
+			}
 		}
-		
+
 		# searchbox for T3BLOG
 		form = COA
 		form {
@@ -28,48 +28,50 @@
 			10 = COA
 			10 {
 				wrap = |</form>
-	
+
 				10 = TEXT
 				10 {
-					typolink {
+					cObject = TEXT
+					cObject.typolink {
+						no_cache = 1
 						parameter.data = TSFE:id
-						useCacheHash = 1
-						additionalParams.dataWrap = &tx_t3blog_pi1[tstmp]={field:time}
+						useCacheHash = 0
 						returnLast = url
 					}
-					wrap =	<form id="searchSword" action="|" method="post">			
-				}	
+					htmlSpecialChars = 1
+					wrap =	<form id="searchSword" action="|" method="post">
+				}
 				
 				20 = COA
 				20 {
-				
+
 					#label
 					10 = TEXT
 					10 {
 						# data = LLL:{$FILE.locallang}:pageElement.searchBox.label
 						field = searchBoxLabel
-						wrap = <label for="tx-indexedsearch-sword">|</label>				
+						wrap = <label for="tx-t3blog-sword">|</label>
 					}
-					
+
 					#input
 					20 = COA
 					20 {
 						stdWrap {
 							noTrimWrap = |<input id="tx-t3blog-sword" class="text" type="text" name="tx_t3blog_pi1[sword]" | />|
 						}
-						
+
 						10 = TEXT
 						10 {
 							# data = LLL:{$FILE.locallang}:pageElement.searchBox.default
 							field = searchBoxDefault
 							noTrimWrap = |value="|" |
 						}
-						
+
 						#onfocus
 						20 = COA
 						20 {
 							stdWrap.noTrimWrap = |onfocus="|" |
-							
+
 							10 = TEXT
 							10 {
 								# data = LLL:{$FILE.locallang}:pageElement.searchBox.default
@@ -77,7 +79,7 @@
 								wrap = if (this.value =='|') this.value=''
 							}
 						}
-						
+
 						#onblur
 						30 = COA
 						30 {
@@ -89,14 +91,17 @@
 								wrap = if (this.value=='') this.value='|'
 							}
 						}
-		
+
 					}
-									
+
 					#button
 					30 = TEXT
 					30 {
 						field = searchButton
 					}
+					
+					40 = TEXT
+					40.dataWrap = <input type="hidden" name="tx_t3blog_pi1[tstmp]" value="{field:time}" />
 				}
 			}
 		}
@@ -104,57 +109,57 @@
 		# alternative indexed search box inactive
 		searchBox2 = COA
 		searchBox2 {
-	
+
 			wrap = <div id="searchBox">|</div>
-			
+
 			10 = COA
 			10 {
 				wrap = |</form>
-	
+
 				10 = TEXT
 				10 {
 					typolink {
 						parameter = {$PID.search}
 						returnLast = url
 					}
-					wrap =	<form id="searchSword" action="|" method="post">			
-				}	
-				
+					wrap =	<form id="searchSword" action="|" method="post">
+				}
+
 				20 = COA
 				20 {
-				
+
 					#label
 					10 = TEXT
 					10 {
 						data = LLL:{$FILE.locallang}:pageElement.searchBox.label
-						wrap = <label for="tx-indexedsearch-sword">|</label>				
+						wrap = <label for="tx-indexedsearch-sword">|</label>
 					}
-					
+
 					#input
 					20 = COA
 					20 {
 						stdWrap {
 							noTrimWrap = |<input id="tx-indexedsearch-sword" class="text" type="text" name="tx_indexedsearch[sword]" | />|
 						}
-						
+
 						10 = TEXT
 						10 {
 							data = LLL:{$FILE.locallang}:pageElement.searchBox.default
 							noTrimWrap = |value="|" |
 						}
-						
+
 						#onfocus
 						20 = COA
 						20 {
 							stdWrap.noTrimWrap = |onfocus="|" |
-							
+
 							10 = TEXT
 							10 {
 								data = LLL:{$FILE.locallang}:pageElement.searchBox.default
 								wrap = if (this.value =='|') this.value=''
 							}
 						}
-						
+
 						#onblur
 						30 = COA
 						30 {
@@ -165,14 +170,14 @@
 								wrap = if (this.value=='') this.value='|'
 							}
 						}
-		
+
 					}
-									
+
 					#button
 					30 < temp.blogElement.searchButton
 				}
 			}
-		}	
+		}
 		*/
 	}
  }

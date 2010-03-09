@@ -1,0 +1,1 @@
+components=Core,Class,Class.Extras,Array,String,Function,Number,Element,Element.Event,Fx.Base,Fx.Slide,Cookie

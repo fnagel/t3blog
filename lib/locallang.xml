@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>module</type>
+		<description>Language labels for module &quot;txt3blog&quot;</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="sort.ascending">Ascending</label>
+			<label index="sort.descending">Descending</label>
+			<label index="selABlog">Please select a blog</label>
+			<label index="note">Note:</label>
+			<label index="dateAndTime">Date &amp; Time</label>
+			<label index="title">Title</label>
+			<label index="text">Text</label>
+			<label index="sortBy">Sort by</label>
+			<label index="search">Search</label>
+			<label index="pages">Pages</label>
+			<label index="functions">Functions</label>
+			<label index="showRecords">Showing records</label>
+		</languageKey>
+		<languageKey index="jp" type="array">
+			<label index="sort.ascending">昇順</label>
+			<label index="sort.descending">降順</label>
+			<label index="selABlog">ブログを選択してください</label>
+			<label index="note">メモ：</label>
+			<label index="dateAndTime">日時</label>
+			<label index="title">タイトル</label>
+			<label index="text">テキスト</label>
+			<label index="sortBy">ソート</label>
+			<label index="search">検索</label>
+			<label index="pages">ページ</label>
+			<label index="functions">機能</label>
+			<label index="showRecords">レコードを見る</label>
+		</languageKey>
+	</data>
+</T3locallang>

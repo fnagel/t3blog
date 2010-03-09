@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,7 +28,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
  * Plugin 'T3BLOG' for the 't3blog' extension. Listing the Blog entries.
  * Includes a Single and a listview, this class switches them depending on the showUid pivar.
  *
- * @author		snowflake <info@snowflake.ch>
+ * @author		snowflake <typo3@snowflake.ch>
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */
@@ -43,7 +43,7 @@ class blogList extends tslib_pibase {
 
 	/**
 	 * The main method of the PlugIn
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
@@ -86,6 +86,7 @@ class blogList extends tslib_pibase {
 	 * Initial Method
 	 */
 	function init(){
+		$this->fixLL();
 		$this->pi_loadLL();
 		$this->localcObj = t3lib_div::makeInstance('tslib_cObj');
 	}
@@ -94,7 +95,7 @@ class blogList extends tslib_pibase {
 	/**
 	 * Styles the title link with the typoscript titleLink
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 *
 	 * @param 	string 	$title: title of the post
 	 * @param 	int		$uid: uid of the post
@@ -112,7 +113,7 @@ class blogList extends tslib_pibase {
 			'longTitle' => $longTitle
 		);
 
-		return t3blog_div::getSingle($data, $wrap);
+		return t3blog_div::getSingle($data, $wrap, $this->conf);
 	}
 
 
@@ -120,7 +121,7 @@ class blogList extends tslib_pibase {
 	 * returns the text formated in the typoscript textRow
 	 * available uid in typoscript
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param 	text $text: text to get
 	 *
 	 * @return 	string (html)
@@ -131,14 +132,14 @@ class blogList extends tslib_pibase {
 			'text'	=> $text,
 		);
 
-		return t3blog_div::getSingle($data, 'textFormat');
+		return t3blog_div::getSingle($data, 'textFormat', $this->conf);
 	}
 
 
 	/**
 	 * returns the date formated with the config timeformat or G:i:s a'
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param 	date 	$date: date to be formated
 	 *
 	 * @return 	string
@@ -148,7 +149,7 @@ class blogList extends tslib_pibase {
 		$data 	= array(
 			'time'	=> $date
 		);
-		return t3blog_div::getSingle($data, 'time');
+		return t3blog_div::getSingle($data, 'time', $this->conf);
 	}
 
 
@@ -156,7 +157,7 @@ class blogList extends tslib_pibase {
 	 * returns the date formated with the config dateformat or d.m.Y
 	 * also wrapped in the typoscript date
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param 	date 	$date: date to be formated
 	 *
 	 * @return 	string
@@ -168,7 +169,7 @@ class blogList extends tslib_pibase {
 			'date'	=> $date
 		);
 
-		return t3blog_div::getSingle($data, 'date');
+		return t3blog_div::getSingle($data, 'date', $this->conf);
 	}
 
 
@@ -176,7 +177,7 @@ class blogList extends tslib_pibase {
 	 * returns the comments link with the numbers of comments in front of it.
 	 * Link generated in typoscript commentsLink
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param  	int		$uid: uid of the comment
 	 * @param  	date	$date: date of the comment
 	 *
@@ -190,14 +191,14 @@ class blogList extends tslib_pibase {
 				'date'			=> $date
 		);
 
-		return t3blog_div::getSingle($data, 'commentsLink');
+		return t3blog_div::getSingle($data, 'commentsLink', $this->conf);
 	}
 
 
 	/**
 	 * returns the categories as link. therefore the catLink template is used.
 	 *
-	 * @author 	Manu Oehler <moehler@snowflake.ch>
+	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param  	int		$uid: uid of the category
 	 *
 	 * @return 	string
@@ -213,23 +214,24 @@ class blogList extends tslib_pibase {
 			'tx_t3blog_cat.catname ASC'																	// ORDER BY ...
 		);
 
+		$catDivider = $this->conf['catLinkDivider'];
 		$catlist = '';
-		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-
+		$index = 1;
+		$items = array();
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
 			$data = array(
+				'index' => $index ++,
 				'categories'	=> $row['uid'],
 				'text'			=> $row['catname']
 			);
 
-			$catlist .= t3blog_div::getSingle($data, 'catLink'). ' / ';
+			$items[] = t3blog_div::getSingle($data, 'catLink', $this->conf);
 		}
-
-		if($catlist && strpos($catlist, ' / ')) {
-			$catlist = substr($catlist, 0, strlen($catlist)-2);
-		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+		$catlist = implode($catDivider, $items);
 
 		$data['catLink'] = $catlist;
-		return t3blog_div::getSingle($data, 'catList');
+		return t3blog_div::getSingle($data, 'catList', $this->conf);
 	}
 
 
@@ -244,7 +246,7 @@ class blogList extends tslib_pibase {
 			'name' => $author
 		);
 
-		return t3blog_div::getSingle($data,'author');
+		return t3blog_div::getSingle($data, 'author', $this->conf);
 	}
 
 
@@ -267,10 +269,10 @@ class blogList extends tslib_pibase {
 		if(!$avatar){
 
 			// Default needed if user don't have a gravatar and don't have a local pic, but email is stated
-			$default 	= 'http://'. $_SERVER['HTTP_HOST']. '/'. t3lib_extMgm::siteRelPath($this->extKey). 'icons/nopic_50_f.jpg';
+			$default 	= t3lib_div::locationHeaderUrl(t3lib_extMgm::siteRelPath($this->extKey). 'icons/nopic_50_f.jpg');
 			$size 		= $this->conf['gravatarsize']?$this->conf['gravatarsize']:50;
 			$grav_url 	= 'http://www.gravatar.com/avatar/'. md5($email).	'?d='. urlencode($default).'&amp;s='.intval($size).'&amp;r='.$this->conf['gravatarRating'];
-			$avatar 	= '<img src="'. $grav_url. '" alt="Gravatar: ' . htmlspecialchars($username) . '" title="Gravatar: ' . htmlspecialchars($username) . '" />';
+			$avatar 	= '<img src="'. $grav_url. '" alt="Gravatar: '. htmlspecialchars($username) . '" title="Gravatar: '. htmlspecialchars($username) . '" />';
 		}
 
 		// if local avatar is set then display that, else display the global gravatar @ site.gravatar.com
@@ -279,64 +281,107 @@ class blogList extends tslib_pibase {
 
 
 	/**
-		* Instantiates an IMAGE object (see TSREF for more info on that) and returns the according string
-		* ready for use in your HTML.
-		*
-		* @param    string  $imagePath: The image's path. Typically uploads/tx_pluginname/filename
-		* @param	string	$title: titel of the image
-		* @param    array   $conf: Configuration for the image. See TSREF IMAGE for more info.
-		* @param	boolean	$icon: whether icon is set or not
-		* @return   string	An image string.
-		*/
-	 function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
+    * Instantiates an IMAGE object (see TSREF for more info on that) and returns the according string
+    * ready for use in your HTML.
+    *
+    * @param    string  $imagePath: The image's path. Typically uploads/tx_pluginname/filename
+    * @param	string	$title: titel of the image
+    * @param    array   $conf: Configuration for the image. See TSREF IMAGE for more info.
+    * @param	boolean	$icon: whether icon is set or not
+    * @return   string	An image string.
+    */
+   function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 		$image = $conf;
 
 		if ($icon) {
-			 $image['file'] = $this->extensionPath. $imagePath;
+		   $image['file'] = $this->extensionPath. $imagePath;
 		} else {
-			 $image['file'] = $this->uploadPath. $imagePath;
+		   $image['file'] = $this->uploadPath. $imagePath;
 		}
 
 		$image['titleText'] = $title;
 		$image['altText'] = $title;
 		$imagestring = $this->cObj->IMAGE($image);
 
-			 return $imagestring;
-	 }
+       return $imagestring;
+   }
 
 
-	 /**
-		* returns a link to the blog entry. or only the url.
-		*
-		* @param 	int		$uid: blogEntryUid
-		* @param 	date	$date: date of the blog entry
+   /**
+    * returns a link to the blog entry. or only the url.
+    *
+    * @param 	int		$uid: blogEntryUid
+    * @param 	date	$date: date of the blog entry
 	* @param 	boolean	$onlyUrl: whether to display only the url or with a link
-		* @return 	string	permalink
-		*/
-	 function getPermalink($uid,$date,$onlyUrl = false){
-
-		// generate permalink
-		$cObj = t3lib_div::makeInstance('tslib_cObj');
-		$tmpDate = date('d.m.Y',$date);
-		$tmpDateArray = split('\.',$tmpDate);
-
-		$conf = array(
-			'parameter' => $GLOBALS['TSFE']->id,
-
-			//'additionalParams' => '&tx_t3blog_pi1[blogList][year]='.$tmpDateArray[2].'&tx_t3blog_pi1[blogList][day]='.$tmpDateArray[0].'&tx_t3blog_pi1[blogList][month]='.$tmpDateArray[1].'&tx_t3blog_pi1[blogList][showUid]='.$uid,
-						'additionalParams' => '&tx_t3blog_pi1[blogList][showUidPerma]='.$uid,
-			'useCacheHash' => 1,
-			'title'	=>	$this->pi_getLL('permalinkDesc')
-			 );
-
-		if ($onlyUrl === true) {
-			$permaLink = $cObj->typoLink_URL($conf);
-		} else {
-			$permaLink = $cObj->typoLink($this->pi_getLL('permalinkTitle'),$conf);
+    * @return 	string	permalink
+    */
+	function getPermalink($uid, $date, $onlyUrl = false) {
+		$dateInfo = getdate($date);
+		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'blogList' => array(
+				'day' => $dateInfo['mday'],
+				'month' => $dateInfo['mon'],
+				'year' => $dateInfo['year'],
+				'showUidPerma' => $uid
+			)
+		));
+		$typolinkConf = array(
+			'additionalParams' => $trackBackParameters,
+			'parameter' => t3blog_div::getBlogPid(),
+			'title' => $this->pi_getLL('permalinkDesc'),
+			'useCacheHash' => true
+		);
+		if ($onlyUrl) {
+			$typolinkConf['returnLast'] = 'url';
 		}
 
-			 return $permaLink;
-	 }
+		$cObj = t3lib_div::makeInstance('tslib_cObj');
+		$permaLink = $cObj->typoLink($this->pi_getLL('permalinkTitle'), $typolinkConf);
+
+   		return $permaLink;
+   }
+
+   /**
+    * returns the number of views by each post
+    *
+    */
+	function getNumberOfViews($numberOfViews) {
+
+		return($numberOfViews);
+
+	}
+
+	protected function fixLL() {
+		if (isset($this->conf['_LOCAL_LANG.'])) {
+			// Walk each language
+			foreach ($this->conf['_LOCAL_LANG.'] as $lang => $LL) {
+				// If any label is set...
+				if (count($LL)) {
+					$ll = array();
+					$this->fixLL_internal($LL, $ll);
+					$this->conf['_LOCAL_LANG.'][$lang] = $ll;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Helper function for fixLL. Called recursively.
+	 *
+	 * @param	array		$LL	Current array
+	 * @param	array		$ll	Result array
+	 * @param	string		$prefix	Prefix
+	 * @return	void
+	 */
+	function fixLL_internal($LL, &$ll, $prefix = '') {
+		while (list($key, $val) = each($LL)) {
+			if (is_array($val))	{
+				$this->fixLL_internal($val, $ll, $prefix . $key);
+			} else {
+				$ll[$prefix.$key] = $val;
+			}
+		}
+	}
 
 }
 

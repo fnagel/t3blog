@@ -125,7 +125,7 @@ plugin.tx_t3blog_pi1.layoutBlog {
 			value = <!-- -->
 		}
 	}
-	#left Content
+	#left/main Content
 	#CONTENT
 	30 = COA
 	30 {
@@ -142,10 +142,10 @@ plugin.tx_t3blog_pi1.layoutBlog {
 			stdWrap {
 				prepend = TEXT
 				prepend {
-					value = navigation
+					//value = navigation
 					wrap = <hr class="hidden" /><h2 id="mainContentLabel" class="hidden">|</h2>
 				}
-				wrap = <div id ="mainContent" class="content">|</div>
+				wrap = <div id ="mainContent" class="content">|</div>				
 			}
 			20 < styles.content.get
 			20.select.andWhere = irre_parenttable = '' AND irre_parentid = 0
@@ -197,6 +197,10 @@ plugin.tx_t3blog_pi1.layoutBlog {
 		90 = TEXT
 		90 {
 			field = socialBookmarks
+		}
+		100 = TEXT
+		100 {
+			field = views
 		}
 	}
 }

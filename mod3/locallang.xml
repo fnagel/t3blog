@@ -8,18 +8,8 @@
 		<languageKey index="default" type="array">
 			<label index="moduleTitle">T3BLOG - TYPO3 based blogging</label>
 			<label index="title">T3BLOG</label>
-			<label index="selABlog">Please select a blog</label>
-			<label index="note">Note:</label>			
-			<label index="dateAndTime">Date &amp; Time</label>
-			<label index="title">Title</label>
-			<label index="text">Text</label>
 			<label index="author">Author</label>
 			<label index="post">Post</label>
-			<label index="functions">Functions</label>
-			<label index="showRecords">Showing records</label>
-			<label index="pages">Pages</label>
-			<label index="search">Search</label>
-			<label index="sortBy">Sort by</label>
 			<label index="createNewComment">Create a new comment</label>
 			<label index="sectionTitle">Comment management</label>
 			<label index="subscribe.confirmation">Registration for post: </label>
@@ -28,9 +18,10 @@
 			<label index="subscribe.salutation">Dear</label>
 			<label index="subscribe.notification">A new comment has been added to the post in the subject:</label>
 			<label index="subscribe.unsubscribe">If you wish to no more being notified about new comments, please click (or copy) the following link:</label>
-		</languageKey>
-		<languageKey index="de" type="array">
-			<label index="title">T3BLOG</label>
+			<label index="approve">Approve</label>
+			<label index="unapprove">Unapprove</label>
+			<label index="markAsSpam">Mark as spam</label>
+			<label index="markAsNotSpam">Mark as not spam</label>
 		</languageKey>
 	</data>
 </T3locallang>

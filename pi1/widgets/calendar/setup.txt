@@ -29,5 +29,7 @@ plugin.tx_t3blog_pi1 {
 				returnLast = url
 			}
 		}
+		nextString = &raquo;
+		prevString = &laquo;
 	}
 }

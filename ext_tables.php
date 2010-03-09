@@ -13,11 +13,11 @@
 			'tstamp'    			=> 'tstamp',
 			'crdate'    			=> 'crdate',
 			'cruser_id' 			=> 'cruser_id',
-			'versioningWS' 			=> TRUE, 
+			'versioningWS' 			=> TRUE,
 			'origUid' 				=> 't3_origuid',
-			'languageField'            => 'sys_language_uid',    
-			'transOrigPointerField'    => 'l18n_parent',    
-			'transOrigDiffSourceField' => 'l18n_diffsource',    
+			'languageField'            => 'sys_language_uid',
+			'transOrigPointerField'    => 'l18n_parent',
+			'transOrigDiffSourceField' => 'l18n_diffsource',
 			'default_sortby' 		=> 'ORDER BY crdate DESC',
 			'delete' 				=> 'deleted',
 			'enablecolumns' 		=> array (
@@ -31,7 +31,7 @@
 			'dividers2tabs'			=>	TRUE,
 		),
 		'feInterface' => array (
-			'fe_admin_fieldList' => 'sys_language_uid, l18n_parent, l18n_diffsource, hidden, starttime, endtime, fe_group, title, author, date, content,allow_comments, cat, trackback',
+			'fe_admin_fieldList' => 'sys_language_uid, l18n_parent, l18n_diffsource, hidden, starttime, endtime, fe_group, title, author, date, content,allow_comments, cat, trackback,number_views',
 		)
 	);
 
@@ -45,11 +45,11 @@
 			'tstamp'    				=> 'tstamp',
 			'crdate'    				=> 'crdate',
 			'cruser_id' 				=> 'cruser_id',
-			'versioningWS' => TRUE, 
+			'versioningWS' => TRUE,
 			'origUid' => 't3_origuid',
-			'languageField'            => 'sys_language_uid',    
-			'transOrigPointerField'    => 'l18n_parent',    
-			'transOrigDiffSourceField' => 'l18n_diffsource',   
+			'languageField'            => 'sys_language_uid',
+			'transOrigPointerField'    => 'l18n_parent',
+			'transOrigDiffSourceField' => 'l18n_diffsource',
 			'treeParentField' 			=> 'parent_id',
 			'sortby' 					=> 'sorting',
 			'delete' 					=> 'deleted',
@@ -95,6 +95,16 @@
 		)
 	);
 
+	$TCA['tx_t3blog_com_nl'] = array (
+		'ctrl' 	=> array(
+			'title'     		=> '',
+			'label'     		=> '',
+			'delete' 			=> 'deleted',
+			'hideTable'			=> true,
+			'columns'			=> array()
+		)
+	);
+
 	t3lib_extMgm::allowTableOnStandardPages('tx_t3blog_blogroll');
 	t3lib_extMgm::addToInsertRecords('tx_t3blog_blogroll');
 
@@ -105,11 +115,11 @@
 	        'tstamp'    				=> 'tstamp',
 	        'crdate'    				=> 'crdate',
 	        'cruser_id' 				=> 'cruser_id',
-			'versioningWS' => TRUE, 
+			'versioningWS' => TRUE,
 			'origUid' => 't3_origuid',
-			'languageField'            => 'sys_language_uid',    
-			'transOrigPointerField'    => 'l18n_parent',    
-			'transOrigDiffSourceField' => 'l18n_diffsource',   
+			'languageField'            => 'sys_language_uid',
+			'transOrigPointerField'    => 'l18n_parent',
+			'transOrigDiffSourceField' => 'l18n_diffsource',
 	        'sortby' 					=> 'sorting',
 	        'delete' 					=> 'deleted',
 	        'enablecolumns' 			=> array (
@@ -193,14 +203,14 @@
 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM4', 'bottom', $extPath. 'mod4/');
 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM5', 'bottom', $extPath. 'mod5/');
 	}
-	
+
 	// the static templates
 	t3lib_extMgm::addStaticFile($_EXTKEY, 'static/t3blog/pi1', 'T3BLOG - main configuration');
 	t3lib_extMgm::addStaticFile($_EXTKEY, 'static/t3blog/styling/', 'T3BLOG CSS - snowflake theme 1');
 	t3lib_extMgm::addStaticFile($_EXTKEY, 'static/t3blog/template/', 'T3BLOG template - snowflake theme 1 ');
 	t3lib_extMgm::addStaticFile($_EXTKEY, 'static/t3blog/', 'T3BLOG blog2page - output to the page');
 	t3lib_extMgm::addStaticFile($_EXTKEY, 'static/t3blog/pi2/', 'T3BLOG functionalities on your website');
-	
+
 	if (TYPO3_MODE == 'BE')	{
 		require_once(t3lib_extMgm::extPath($_EXTKEY). 'lib/class.tx_t3blog_treeview.php');
 		require_once(t3lib_extMgm::extPath($_EXTKEY). 'lib/class.tx_t3blog_tcefunc_selecttreeview.php');
@@ -219,7 +229,7 @@
 	$TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY. '_pi2'] = 'layout,select_key';
 
 	t3lib_extMgm::addPlugin(array('LLL:EXT:t3blog/locallang_db.xml:tt_content.list_type_pi2', $_EXTKEY. '_pi2'), 'list_type');
-	
+
 	//Flexform
 	$TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY. '_pi2'] = 'layout,select_key,pages,recursive';
 	$TCA['tt_content']['types']['list']['subtypes_addlist'][$_EXTKEY. '_pi2'] = 'pi_flexform';

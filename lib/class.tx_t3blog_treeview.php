@@ -3,7 +3,7 @@
 *  Copyright notice
 *
 *  (c)  2006 Nicolas Karrer <nkarrer@snowflake.ch>
-* 
+*
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -32,7 +32,7 @@ class tx_t3blog_treeview {
 
 	/**
 	 * Generation of TCEform elements of the type "select"
-	 * This will render a selector box element, or possibly a special 
+	 * This will render a selector box element, or possibly a special
 	 * construction with two selector boxes. That depends on configuration.
 	 *
 	 * @param	array		$PA: the parameter array for the current field
@@ -43,23 +43,23 @@ class tx_t3blog_treeview {
 		$table = $PA['table'];
 		$field = $PA['field'];
 		$row   = $PA['row'];
-		
-		
+
+
 		$this->pObj = &$PA['pObj'];
 
 			// Field configuration from TCA:
 		$config = $PA['fieldConf']['config'];
 			// it seems TCE has a bug and do not work correctly with '1'
 		$config['maxitems'] = ($config['maxitems']==2) ? 1 : $config['maxitems'];
-		
+
 			// Getting the selector box items from the system
 		$selItems = $this->pObj->addSelectOptionsToItemArray($this->pObj->initItemArray($PA['fieldConf']),$PA['fieldConf'],$this->pObj->setTSconfig($table,$row),$field);
 		$selItems = $this->pObj->addItems($selItems,$PA['fieldTSConfig']['addItems.']);
 		#if ($config['itemsProcFunc']) $selItems = $this->pObj->procItems($selItems,$PA['fieldTSConfig']['itemsProcFunc.'],$config,$table,$row,$field);
-		
+
 			// Possibly remove some items:
 		$removeItems=t3lib_div::trimExplode(',',$PA['fieldTSConfig']['removeItems'],1);
-		
+
 		foreach($selItems as $tk => $p)	{
 			if (in_array($p[1],$removeItems))	{
 				unset($selItems[$tk]);
@@ -87,7 +87,7 @@ class tx_t3blog_treeview {
 		if ($maxitems<=1 && !$config['treeView'])	{
 
 		} else {
-			
+
 				$item.= '<input type="hidden" name="'.$PA['itemFormElName'].'_mul" value="'.($config['multiple']?1:0).'" />';
 
 					// Set max and min items:
@@ -98,18 +98,18 @@ class tx_t3blog_treeview {
 					// Register the required number of elements:
 				$this->pObj->requiredElements[$PA['itemFormElName']] = array($minitems,$maxitems,'imgName'=>$table.'_'.$row['uid'].'_'.$field);
 
-				
+
 				if($config['treeView'] && $config['foreign_table']) {
 					global $TCA, $LANG;
-					
+
 					if($config['treeViewClass'] && is_object($treeViewObj = &t3lib_div::getUserObj($config['treeViewClass'],'user_',false))) {
-					
+
 					} else {
 						$treeViewObj = t3lib_div::makeInstance('tx_t3blog_tceFunc_selectTreeView');
 					}
 					$where   = ' AND sys_language_uid = 0 AND l18n_parent = 0 AND pid = '.$PA['row']['pid'];
 					$orderBy = 'catname';
-					
+
 					$treeViewObj->table        = $config['foreign_table'];
 					$treeViewObj->init($where, $orderBy);
 					$treeViewObj->backPath     = $this->pObj->backPath;
@@ -120,13 +120,9 @@ class tx_t3blog_treeview {
 					$treeViewObj->ext_IconMode = '1'; // no context menu on icons
 					$treeViewObj->title        = $LANG->sL($TCA[$config['foreign_table']]['ctrl']['title']);
 					//$treeViewObj->thisScript = t3lib_BEfunc::editOnClick('', $GLOBALS['BACK_PATH']);
-					
+
 					$treeViewObj->TCEforms_itemFormElName = $PA['itemFormElName'];
-					
-					$treeViewObj->TCEforms_nonSelectableItemsArray[] = $row['uid'];
-					$this->addChildrenToNonSelectable($row['uid'], $treeViewObj);
-					
-					
+
 						// get default items
 					$defItems = array();
 					if (is_array($config['items']) && $table == 'tt_content' && $row['CType']=='list' && $row['list_type']=='tx_t3blog_pi1' && $field == 'pi_flexform')	{
@@ -134,29 +130,29 @@ class tx_t3blog_treeview {
 						while (list($itemName,$itemValue) = each($config['items']))	{
 							if ($itemValue[0]) {
 								$ITitle = $this->pObj->sL($itemValue[0]);
-								$defItems[] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data['.$table.']['.$row['uid'].']['.$field.'][data][sDEF][lDEF][groupSelection][vDEF]\','.$itemValue[1].',\''.$ITitle.'\'); return false;" style="text-decoration:none;">'.$ITitle.'</a>';
+								$defItems[] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data['.$table.']['.$row['uid'].']['.$field.'][data][sDEF][lDEF][groupSelection][vDEF]\','.t3lib_div::slashJS($itemValue[1]).',\''.t3lib_div::slashJS($ITitle).'\'); return false;" style="text-decoration:none;">'.$ITitle.'</a>';
 							}
 						}
 					}
 
 						// render tree html
 					$treeContent = $treeViewObj->getBrowsableTree();
-					
+
 					$treeItemC   = count($treeViewObj->ids);
-					
+
 					if ($defItems[0]) { // add default items to the tree table. In this case the value [not categorized]
 						$treeItemC += count($defItems);
 						$treeContent .= '<table border="0" cellpadding="0" cellspacing="0"><tr>
 							<td>'.$this->pObj->sL($config['itemsHeader']).'&nbsp;</td><td>'.implode($defItems,'<br />').'</td>
 							</tr></table>';
 					}
-					
+
 						// find recursive groups or "storagePid" related errors and if there are some, add a message to the $errorMsg array.
 					$errorMsg = $this->findRecursiveGroups($PA,$row,$table,$storagePid,$treeViewObj->ids) ;
 
 					$width = 280; // default width for the field with the group tree
 					if ($GLOBALS['CLIENT']['BROWSER'] == 'msie') {
-						// to suppress the unneeded horizontal scrollbar IE 
+						// to suppress the unneeded horizontal scrollbar IE
 						// needs a width of at least 320px
 						$width = 320;
 					}
@@ -170,27 +166,27 @@ class tx_t3blog_treeview {
 					$thumbnails  = '<div name="'.$PA['itemFormElName'].'_selTree" style="'.htmlspecialchars($divStyle).'">';
 					$thumbnails .= $treeContent;
 					$thumbnails .= '</div>';
-					
+
 
 				} else {
 
-					$sOnChange = 'setFormValueFromBrowseWin(\''.$PA['itemFormElName'].'\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); '.implode('',$PA['fieldChangeFunc']);
+					$sOnChange = 'setFormValueFromBrowseWin(\''.t3lib_div::slashJS($PA['itemFormElName']).'\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); '.implode('',$PA['fieldChangeFunc']);
 											// Put together the select form with selected elements:
 					$selector_itemListStyle = isset($config['itemListStyle']) ? ' style="'.htmlspecialchars($config['itemListStyle']).'"' : ' style="'.$this->pObj->defaultMultipleSelectorStyle.'"';
 					$size = $config['autoSizeMax'] ? t3lib_div::intInRange(count($itemArray)+1,t3lib_div::intInRange($size,1),$config['autoSizeMax']) : $size;
 					$thumbnails = '<select style="width:150px;" name="'.$PA['itemFormElName'].'_sel"'.$this->pObj->insertDefStyle('select').($size?' size="'.$size.'"':'').' onchange="'.htmlspecialchars($sOnChange).'"'.$PA['onFocus'].$selector_itemListStyle.'>';
 					#$thumbnails = '<select                       name="'.$PA['itemFormElName'].'_sel"'.$this->pObj->insertDefStyle('select').($size?' size="'.$size.'"':'').' onchange="'.htmlspecialchars($sOnChange).'"'.$PA['onFocus'].$selector_itemListStyle.'>';
-					
+
 					foreach($selItems as $p)	{
 						$thumbnails.= '<option value="'.htmlspecialchars($p[1]).'">'.htmlspecialchars($p[0]).'</option>';
 					}
 					$thumbnails.= '</select>';
 
 				}
-				
+
 					// Perform modification of the selected items array:
 				$itemArray = t3lib_div::trimExplode(',',$PA['itemFormElValue'],1);
-				
+
 				foreach($itemArray as $tk => $tv) {
 					$tvP = explode('|',$tv,2);
 					if (in_array($tvP[0],$removeItems) && !$PA['fieldTSConfig']['disableNoMatchingValueElement'])	{
@@ -202,7 +198,7 @@ class tx_t3blog_treeview {
 					}
 					$itemArray[$tk]=implode('|',$tvP);
 				}
-				
+
 				$params=array(
 					'size' => $size,
 					'autoSizeMax' => t3lib_div::intInRange($config['autoSizeMax'],0),
@@ -218,7 +214,7 @@ class tx_t3blog_treeview {
 					'noBrowser' => 1,
 					'thumbnails' => $thumbnails
 				);
-				
+
 				foreach ($itemArray as $key => $value)	{
 					if($value)	{
 						$vals = explode('|', $value);
@@ -229,16 +225,16 @@ class tx_t3blog_treeview {
 							$itemArray[$key] = $vals[0].'|XX';
 							unset($itemArray);
 						}
-						
+
 					}
 				}
-			
+
 				$item.= $this->pObj->dbFileIcons($PA['itemFormElName'],'','',$itemArray,'',$params,$PA['onFocus']);
 				// Wizards:
 				$altItem = '<input type="hidden" name="'.$PA['itemFormElName'].'" value="'.htmlspecialchars($PA['itemFormElValue']).'" />';
-				
+
 				$item = $this->pObj->renderWizards(array($item,$altItem),$config['wizards'],$table,$row,$field,$PA,$PA['itemFormElName'],$specConf);
-				
+
 			//}
 		}
 
@@ -257,7 +253,7 @@ class tx_t3blog_treeview {
 	 * @return	array		error messages
 	 */
 	function findRecursiveGroups ($PA,$row,$table,$storagePid,$treeIds) {
-		
+
 		$errorMsg = array();
 		if ($table == 'tt_content' && $row['CType']=='list' && $row['list_type']=='t3blog_pi1') { // = tt_content element which inserts plugin tx_ttaddress_pi1
 			$cfgArr = t3lib_div::xml2array($row['pi_flexform']);
@@ -317,8 +313,8 @@ class tx_t3blog_treeview {
 		}
 		return $rcList;
 	}
-	
-	
+
+
 	/**
 	 * This function gets the label of a specific uid
 	 *
@@ -327,13 +323,12 @@ class tx_t3blog_treeview {
 	 */
 	function getLabel($uid)	{
 		$where = "uid = '".t3lib_div::intval_positive($uid)."'";
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('catname', 'tx_t3blog_cat', $where);
-		$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);	
-		
-		return ($row['catname']) ? $row['catname']:'default';
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('catname', 'tx_t3blog_cat', $where);
+
+		return ($row['catname']) ? $row['catname'] : 'default';
 	}
-	
-	
+
+
 	/**
 	 * This function adds children as non selectable
 	 *
@@ -342,17 +337,15 @@ class tx_t3blog_treeview {
 	 * @return	none
 	 */
 	function addChildrenToNonSelectable($parent, &$treeViewObj)	{
-	
+
 		if(is_int($parent)){
-			$GLOBALS['TYPO3_DB']->store_lastBuiltQuery = true;
 			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'tx_t3blog_cat', 'parent_id = \''.$parent.'\'');
-			while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))	{
+			while (false != ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)))	{
 				$treeViewObj->TCEforms_nonSelectableItemsArray[] = $row['uid'];
 				$this->addChildrenToNonSelectable($row['uid'], $treeViewObj);
 			}
+			$GLOBALS['TYPO3_DB']->sql_free_result($res);
 		}
-		
-		return;
 	}
 }
 

@@ -7,10 +7,12 @@
 	<data type="array">
 		<languageKey index="default" type="array">
 			<label index="moduleTitle">T3BLOG - TYPO3 based blogging</label>
-			<label index="title">T3BLOG</label>
-			<label index="selABlog">Please select a blog</label>
 			<label index="sectionTitle">Category management</label>
 			<label index="newCategory">Create a new category</label>
 		</languageKey>
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

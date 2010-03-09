@@ -6,7 +6,7 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				wrap = <h3>|</h3>
-				field=  title
+				field = title
 			}
 			20 = TEXT
 			20 {
@@ -28,10 +28,11 @@ plugin.tx_t3blog_pi1 {
 			20 {
 				wrap = |
 				field = title
-				htmlSpecialChars=1
+				htmlSpecialChars = 1
 				typolink {
 					parameter.field = url
 					title.field = description
+					title.htmlSpecialChars = 1
 					ATagParams.stdWrap.dataWrap = rel="{field:xfn}"
 				}
 			}
@@ -126,5 +127,3 @@ plugin.tx_t3blog_pi1 {
 
 	}
 }
-
-

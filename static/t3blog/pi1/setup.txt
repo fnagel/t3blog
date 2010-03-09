@@ -12,10 +12,9 @@
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/socialBookmarks/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/tagCloud/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/searchBox/setup.txt">
-
+<INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/views/setup.txt">
 
 plugin.tx_t3blog_pi1 {
-
 
 	myblog = USER
 	myblog {
@@ -32,6 +31,7 @@ plugin.tx_t3blog_pi1 {
 		widget.socialBookmarks < plugin.tx_t3blog_pi1.socialBookmarks
 		widget.tagCloud < plugin.tx_t3blog_pi1.tagCloud
 		widget.searchBox < plugin.tx_t3blog_pi1.searchBox
+		widget.views< plugin.tx_t3blog_pi1.views
 
 		# Load design
 		# Attention! This will only work, when you are 
@@ -41,6 +41,3 @@ plugin.tx_t3blog_pi1 {
 		template =< plugin.tx_t3blog_pi1.layoutBlog
 	}
 }
-
-plugin.tx_t3blog_pi2.myblog.widget.latestCommentsNav.list.30 = TEXT
-plugin.tx_t3blog_pi2.myblog.widget.latestCommentsNav.list.30.value = hier text

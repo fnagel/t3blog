@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2008 snowflake productions gmbH <info@snowflake.ch>
+*  (c) 2008 snowflake productions gmbH <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,7 +27,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'Blog Widget Selector' for the 't3blog' extension.
  *
- * @author		snowflake productions gmbH <info@snowflake.ch>
+ * @author		snowflake productions GmbH <typo3@snowflake.ch>
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */

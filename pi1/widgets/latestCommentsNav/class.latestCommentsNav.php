@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,7 +27,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
  *
- * @author	snowflake <info@snowflake.ch>
+ * @author	snowflake <typo3@snowflake.ch>
  * @package	TYPO3
  * @subpackage	tx_t3blog
  */
@@ -39,14 +39,14 @@ class latestCommentsNav extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
-	
+
 	/**
 	 * The main method of the PlugIn
 	 * @author 	Meile Simon <smeile@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
-	 * 
+	 *
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
@@ -69,19 +69,23 @@ class latestCommentsNav extends tslib_pibase {
 					'title'		=> t3blog_div::getSingle(array(
 						'text'		=> ($row['title']?$row['title']:$row['text']),
 						'showUid'	=> $row['fk_post'],
-						'author'	=> $this->pi_getLL('author').$row['author'],
+						'author'	=> $row['author'],
+						'lll:author'	=> $this->pi_getLL('author'),
 						'alink'		=> $row['uid'],
 						'date'		=> $row['date'],
-						'blogUid'	=> t3blog_div::getBlogPid()),
-						'link'
+						'blogUid'	=> t3blog_div::getBlogPid()
+						), 'link', $this->conf
 					),
-					'alink'=>$row['uid'],
+					'author' => $row['author'],
+					'text' => $row['text'],
+					'alink'=> $row['uid'],
 					'date'=> $row['date']
 				);
-				$listElements.= t3blog_div::getSingle($data,'listItem');
+
+				$listElements.= t3blog_div::getSingle($data, 'listItem', $this->conf);
 			}
 
-			$content = t3blog_div::getSingle(array('title'=>$this->pi_getLL('latestCommentsTitle'),'listItems'=>$listElements),'list');
+			$content = t3blog_div::getSingle(array('title'=>$this->pi_getLL('latestCommentsTitle'),'listItems'=>$listElements), 'list', $this->conf);
 		}
 
 		return $content;

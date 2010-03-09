@@ -20,7 +20,7 @@ plugin.tx_t3blog_pi1 {
 					field = dateto
 					strftime = %Y
 				}
-				monthto{
+				monthto {
 					field = dateto
 					strftime = %m
 				}
@@ -33,11 +33,13 @@ plugin.tx_t3blog_pi1 {
 			10 {
 				wrap =  <a class="toggle" id="toggle|" href="#">[-]</a>
 				field = id
+				htmlSpecialChars = 1
 			}
 			20 = TEXT
 			20 {
 				dataWrap = | <span class="postnum">({field:entries})</span>
 				field = text
+				htmlSpecialChars = 1
 				typolink {
 					parameter.field = blogUid
 					useCacheHash = 1
@@ -97,7 +99,6 @@ plugin.tx_t3blog_pi1 {
 				wrap = <script type="text/javascript">|</script>
 				required = 1
 				field = js
-
 			}
 		}
 
@@ -108,6 +109,7 @@ plugin.tx_t3blog_pi1 {
 			10 {
 				wrap = <h3>|</h3>
 				field = title
+				htmlSpecialChars = 1
 			}
 			20 = TEXT
 			20 {

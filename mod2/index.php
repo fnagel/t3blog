@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007-2009 Snowflake Productions Gmbh <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -22,446 +22,453 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-// DEFAULT initialization of a module [BEGIN]
 unset($MCONF);
 require_once('conf.php');
+require_once($BACK_PATH . 'init.php');
+require_once($BACK_PATH . 'template.php');
 
-require_once ('../mod1/class.functions.php');
-require_once($BACK_PATH.'init.php');
-require_once($BACK_PATH.'template.php');
+require_once (t3lib_extMgm::extPath('t3blog', 'lib/class.tx_t3blog_sendtrackback.php'));
 
-$LANG->includeLLFile('EXT:t3blog/mod2/locallang.xml');
-require_once(PATH_t3lib.'class.t3lib_scbase.php');
-
-// DEFAULT initialization of a module [END]
+require_once(t3lib_extMgm::extPath('t3blog', 'lib/class.tx_t3blog_modbase.php'));
+$GLOBALS['LANG']->includeLLFile('EXT:t3blog/mod2/locallang.xml');
 
 /**
  * Module 'T3BLOG' for the 't3blog' extension.
  * returns the Blog entry administration
  *
- * @author		snowflake <info@snowflake.ch>
+ * @author		Snowflake Productions Gmbh <typo3@snowflake.ch>
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */
-
-
-class  tx_t3blog_module2 extends t3lib_SCbase {
-	var $pageinfo;
-	var $blogfunctions;
-
+class tx_t3blog_module2 extends tx_t3blog_modbase {
 
 	/**
-	 * Initializes the Module
-	 * @return	void
-	 */
-	function init()	{
-		global $BE_USER, $LANG, $BACK_PATH, $TCA_DESCR, $TCA, $CLIENT, $TYPO3_CONF_VARS;
-		parent::init();
-	}
-
-
-	/**
-	 * Adds items to the ->MOD_MENU array. Used for the function menu selector.
-	 */
-	function menuConfig()	{
-		global $LANG;
-		parent::menuConfig();
-	}
-
-	/**
-	 * Main function of the module. Write the content to $this->content
-	 * If you chose "web" as main module, you will need to consider the $this->id parameter which will contain the uid-number of the page clicked in the page tree
-	 */
-	function main()	{
-
-		global $BE_USER, $LANG, $BACK_PATH, $TCA_DESCR, $TCA, $CLIENT, $TYPO3_CONF_VARS;
-
-
-		if(t3lib_div::_GP('pid')){
-			$this->id = is_numeric(t3lib_div::_GP('pid')) ? intval(t3lib_div::_GP('pid')) : null;
-		}else{
-			$this->id = is_numeric(t3lib_div::_GET('id')) ? intval(t3lib_div::_GET('id')) : null;
-		}
-
-		// Access check!
-		// The page will show only if there is a valid page and if this page may be viewed by the user
-		$this->perms_clause = $GLOBALS['BE_USER']->getPagePermsClause(1);
-		$this->pageinfo = t3lib_BEfunc::readPageAccess($this->id,$this->perms_clause);
-		$access = is_array($this->pageinfo) ? 1 : 0;
-
-		if (($this->id && $access) || ($BE_USER->user['admin'] && !$this->id))	{
-			// Initialize Blog function class
-			$this->blogfunctions = t3lib_div::makeInstance('blogfunctions');
-			// Draw the header
-			$this->doc = t3lib_div::makeInstance('mediumDoc');
-			$this->doc->backPath = $BACK_PATH;
-			$this->doc->form='<form action="" method="POST">';
-
-			// JavaScript
-			$this->doc->JScode = '
-				<script language="javascript" type="text/javascript">
-					script_ended = 0;
-					function jumpToUrl(URL)	{
-						document.location = URL;
-					}
-				</script>
-			';
-
-			$this->doc->postCode='
-				<script language="javascript" type="text/javascript">
-					script_ended = 1;
-					if (top.fsMod) top.fsMod.recentIds["web"] = 0;
-				</script>
-			';
-			$this->doc->inDocStylesArray[]= $this->blogfunctions->getCSS();
-
-			$headerSection = $this->doc->getHeader('pages',$this->pageinfo,$this->pageinfo['_thePath']).'<br />'.$LANG->sL('LLL:EXT:lang/locallang_core.xml:labels.path').': '.t3lib_div::fixed_lgd_pre($this->pageinfo['_thePath'],50);
-
-			$this->content .=
-				$this->doc->startPage($LANG->getLL('moduleTitle')).
-				$this->doc->header($LANG->getLL('moduleTitle')).
-				$this->doc->spacer(5).
-				$this->doc->section('',$this->doc->funcMenu($headerSection,t3lib_BEfunc::getFuncMenu($this->id,'SET[function]',$this->MOD_SETTINGS['function'],$this->MOD_MENU['function']))).
-				$this->doc->divider(5);
-
-			$this->moduleContent();	// Render content
-
-			if ($BE_USER->mayMakeShortcut())	{	// ShortCut
-				$this->content .=
-					$this->doc->spacer(20).
-					$this->doc->section('', $this->doc->makeShortcutIcon('id', implode(',', array_keys($this->MOD_MENU)), $this->MCONF['name']));
-			}
-
-			$this->content .= $this->doc->spacer(10);
-		} else {	// no access or if ID == zero
-			$this->doc = t3lib_div::makeInstance('mediumDoc');
-			$this->doc->backPath = $BACK_PATH;
-
-			$this->content .=
-				$this->doc->startPage($LANG->getLL('moduleTitle')).
-				$this->doc->header($LANG->getLL('moduleTitle')).
-				$this->doc->spacer(5).
-				$this->doc->spacer(10);
-		}
-	}
-
-
-	/**
-	 * Prints out the module HTML
+	 * Total number of available blog posts that match all search criterias
 	 *
-	 * @return	void
+	 * @var int
 	 */
-	function printContent()	{
-		$this->content .= $this->doc->endPage();
-		echo $this->content;
+	protected $numberOfPosts;
+
+	/**
+	 * Initializes the module.
+	 *
+	 * @return void
+	 */
+	public function init() {
+		$this->defaultSort = 'date DESC';
+		$this->validSortFields = 'date,title,category';
+
+		parent::init();
+
+		if ($this->hasAccess()) {
+			$this->filter = $this->getCategoryFilter();
+			$this->numberOfPosts = $this->getMaximumNumberOfPosts();
+		}
+	}
+
+	/**
+	 * Obtains the content for this module
+	 *
+	 * @return string
+	 * @see tx_t3blog_modbase::getModuleContent()
+	 */
+	protected function getModuleContent() {
+		return $this->getCategorySelector() . $this->getPosts();
 	}
 
 	/**
 	 * Returns a function bar for the record list
 	 *
-	 * @param 	string 	$table: Table name
-	 * @param 	string 	$row: Datarow
-	 * @return 	Function bar
+	 * @param string $table Table name
+	 * @param array $row Data row
+	 * @return string Function bar
 	 */
-	function getFunctions($table,$row){
+	protected function getFunctions($table, array $row){
 			// "Edit" link:
-		$params = '&edit['.$table.']['.$row['uid'].']=edit';
-		$cells .= '<a href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::editOnClick($params,$this->doc->backPath)).'">'.
-				'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,t3lib_extMgm::extRelPath('t3blog').'icons/page_edit.png','width="16" height="16"').' title="Edit" alt="Edit" />'.
+		$params = '&edit[' . $table . '][' . $row['uid'] . ']=edit';
+		$title = $GLOBALS['LANG']->getLL('cm.edit', true);
+		$cells .= '<a href="#" title="' . $title .
+			'" onclick="' . htmlspecialchars(t3lib_BEfunc::editOnClick($params,$this->doc->backPath)) . '">' .
+			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') .
+			'icons/page_edit.png', 'width="16" height="16"') . ' alt="' . $title . '" />' .
 			'</a>';
 
 			// "Hide/Unhide" links:
 		if ($row['hidden'])	{
-			$params = '&data['.$table.']['.$row['uid'].']['.'hidden'.']=0';
-			$cells .= '<a href="#" onclick="'.htmlspecialchars('return jumpToUrl(\''.$GLOBALS['SOBE']->doc->issueCommand($params).'\');').'">'.
-					'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/button_unhide.gif','width="11" height="10"').' title="Un-hide" alt="Un-hide" />'.
-				'</a>';
-			} else {
-				$params = '&data['.$table.']['.$row['uid'].']['.'hidden'.']=1';
-				$cells .= '<a href="#" onclick="'.htmlspecialchars('return jumpToUrl(\''.$GLOBALS['SOBE']->doc->issueCommand($params).'\');').'">'.
-						'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/button_hide.gif','width="11" height="10"').' title="Hide" alt="Hide" />'.
-					'</a>';
+			$params = '&data[' . $table . '][' . $row['uid'] . '][' . 'hidden' . ']=0';
+			$title = $GLOBALS['LANG']->getLL('cm.unhide', true);
+			$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars('return jumpToUrl(\'' .
+				$GLOBALS['SOBE']->doc->issueCommand($params) . '\');') . '">' .
+				'<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
+				'gfx/button_unhide.gif', 'width="11" height="10"') .
+				' alt="' . $title . '" /></a>';
+		}
+		else {
+			$params = '&data[' . $table . '][' . $row['uid'] . '][' . 'hidden' . ']=1';
+			$title = $GLOBALS['LANG']->getLL('cm.hide', true);
+			$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars('return jumpToUrl(\'' .
+				$GLOBALS['SOBE']->doc->issueCommand($params) . '\');') . '">' .
+				'<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
+				'gfx/button_hide.gif', 'width="11" height="10"') .
+				' alt="' . $title . '" /></a>';
 		}
 
 			// "Delete" link:
-		$params = '&cmd['.$table.']['.$row['uid'].'][delete]=1';
-		$cells .= '<a href="#" onclick="'.htmlspecialchars('if (confirm('.$GLOBALS['LANG']->JScharCode('Are you sure you want to delete this record?'.t3lib_BEfunc::referenceCount($table,$row['uid'],' (There are %s reference(s) to this record!)')).')) {jumpToUrl(\''.$GLOBALS['SOBE']->doc->issueCommand($params).'\');} return false;').'">'.
-					'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="Delete" alt="Delete" />'.
-					'</a>';
+		$params = '&cmd[' . $table . '][' . $row['uid'] . '][delete]=1';
+		$title = $GLOBALS['LANG']->getLL('cm.delete', true);
+		$prompt = sprintf($GLOBALS['LANG']->getLL('mess.delete'), htmlspecialchars($row['title']));
+		$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars('if (confirm(' .
+			$GLOBALS['LANG']->JScharCode($prompt) .
+			')) {jumpToUrl(\'' . $GLOBALS['SOBE']->doc->issueCommand($params) .
+			'\');} return false;') . '">' .
+			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
+			'gfx/garbage.gif', 'width="11" height="12"') . ' alt="' . $title . '" />' .
+			'</a>';
 
 			// Add comment link:
-		$cells .= '<a href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::editOnClick('&edit[tx_t3blog_com]['.$this->id.']=new&defVals[tx_t3blog_com][fk_post]='.$row['uid'],$this->doc->backPath)).'">'.
-				'<img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/comment_add.png','width="16" height="16"').' title="Add comment" alt="Add comment" />'.
-				'</a>';
+		$title = $GLOBALS['LANG']->getLL('addComment', true);
+		$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars(
+			t3lib_BEfunc::editOnClick('&edit[tx_t3blog_com][' . $this->id .
+			']=new&defVals[tx_t3blog_com][fk_post]=' . $row['uid'], $this->doc->backPath)) . '">' .
+			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') .
+			'icons/comment_add.png', 'width="16" height="16"') .
+			' alt="' . $title . '" /></a>';
 
 			// Preview link:
-		$cells .= '<a href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::viewOnClick($this->id,$this->doc->backPath,'','#blogentry'.$row['uid'])).'">'.
-				'<img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/magnifier.png','width="16" height="16"').' title="Preview" alt="Preview" />'.
-			'</a>';
+		$title = $GLOBALS['LANG']->getLL('cm.view', true);
+		$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars(
+			t3lib_BEfunc::viewOnClick($this->id, $this->doc->backPath, '', '#blogentry' . $row['uid'])) . '">' .
+			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
+			t3lib_extMgm::extRelPath('t3blog') . 'icons/magnifier.png',
+			'width="16" height="16"') . ' alt="' . $title . '" /></a>';
 
 		return $cells;
 	}
 
+	/**
+	 * Creates URL format string for header. This function takes into account
+	 * various request parameters to build the URL.
+	 *
+	 * @return string
+	 */
+	protected function getUrlFormatForHeader() {
+		$urlParameters = array(
+			'id' => $this->id
+		);
+		if ($this->currentPage > 1) {
+			$urlParameters['curPage'] = $this->currentPage;
+		}
+		if (($searchField = t3lib_div::_GP('search_field'))) {
+			$urlParameters['search_field'] = $searchField;
+		}
+		if (($cat = t3lib_div::_GP('cat'))) {
+			$urlParameters['cat'] = $cat;
+		}
+		$parameters = t3lib_div::implodeArrayForUrl('', $urlParameters);
+		$parameters = str_replace('%', '%%', $parameters);
+		return 'index.php?sort=%1$s&sortDir=%2$s' . $parameters;
+	}
 
 	/**
-	 * Generates the module content
+	 * Creates table header for the module
+	 *
+	 * @return string
 	 */
-	function moduleContent()	{
-		global $LANG;
-		if ($this->id) {
-			if(t3lib_div::_GP('sort')){	// Sort if there is a parameter
-				// Set the sort with the parameter received
-				$sort .= t3lib_div::_GP('sort'). ' '. t3lib_div::_GP('sortDir');
-			}else{
-				// Set standart sort to date DESC if there is no parameter
-				$sort .= 'date DESC';
+	protected function createTableHeader() {
+		$urlFormat = $this->getUrlFormatForHeader();
+		$header = '<tr>' .
+				$this->getHeaderWithSorting('dateAndTime', 'date', $urlFormat) .
+				$this->getHeaderWithSorting('title', 'title', $urlFormat) . '
+				<th>
+					'.$GLOBALS['LANG']->getLL('category').'
+				</th>' .
+				$this->getHeaderWithSorting('nrOfComments', 'comments', $urlFormat) . '
+				<th>
+					' . $GLOBALS['LANG']->getLL('functions') . '
+				</th>
+			</tr>';
+		return $header;
+	}
+
+	/**
+	 * Creates one sortable header
+	 *
+	 * @param string $fieldLabel
+	 * @param string $field
+	 * @param string $urlFormat
+	 * @return string
+	 */
+	protected function getHeaderWithSorting($fieldLabel, $field, $urlFormat) {
+		$header = '<th>
+				' . $GLOBALS['LANG']->getLL($fieldLabel) . '
+				<a href="' . htmlspecialchars(sprintf($urlFormat, $field, 'ASC')) .'">
+					<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="7" height="4"').' title="ASC" alt="" />
+				</a>
+				<a href="' . htmlspecialchars(sprintf($urlFormat, $field, 'DESC')) .'">
+					<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="7" height="4"').' title="DESC" alt="" />
+				</a>
+			</th>';
+		return $header;
+	}
+
+	/**
+	 *	Obtains a part of SQL where statement depending on the request arguments
+	 *
+	 *	@return string
+	 */
+	protected function getCategoryFilter() {
+		$filter = ' AND tx_t3blog_post.uid IN (SELECT tx_t3blog_post.uid
+					FROM tx_t3blog_post, tx_t3blog_cat, tx_t3blog_post_cat_mm
+					WHERE tx_t3blog_post.uid = tx_t3blog_post_cat_mm.uid_local
+					AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign';
+		$categoryName = t3lib_div::_GP('cat');
+		if ($categoryName) {
+			$filter .= ' AND tx_t3blog_cat.catname='.
+					$GLOBALS['TYPO3_DB']->fullQuoteStr($categoryName, 'tx_t3blog_cat');
+		}
+		else {
+			$categoryId = intval(t3lib_div::_GP('linkCat'));
+			if ($categoryId) {
+				$filter .= ' AND tx_t3blog_post_cat_mm.uid_foreign=' . $categoryId;
+			}
+		}
+		$filter .= ')';
+
+		$filter .= $this->getSearchSQLWhere('tx_t3blog_post');	// Get the query string for the table
+
+		return $filter;
+	}
+
+	/**
+	 * Generates category selector for the module
+	 *
+	 * @return string
+	 */
+	protected function getCategorySelector() {
+		$urlFormat = $this->getUrlFormatForCategorySelector();
+		$options = array(
+			'<option value="' .
+				htmlspecialchars(sprintf($urlFormat, '')) .
+				'">' . $GLOBALS['LANG']->getLL('filterByCat', true) . '</option>'
+		);
+
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('catname',
+			'tx_t3blog_cat',
+			'pid=' . $this->id .
+			t3lib_BEfunc::deleteClause('tx_t3blog_cat'), '', 'catname');
+
+		$currentCategory = t3lib_div::_GP('cat');
+		while (false != ($data = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			if ($data['catname'] == $currentCategory) {
+				$selected = ' selected="selected"';
+			}
+			else {
+				$selected = '';
 			}
 
-			// SORTING
-			// Table-header & Sorting links
-			$i = (t3lib_div::_GP('curPage')?intval(t3lib_div::_GP('curPage')):0);
-			$fullTable=
-				'<table cellspacing="0" cellpadding="0" class="recordlist">
-				<tr>
-					<th>
-						'.$LANG->getLL('dateAndTime').'
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=date&sortDir=ASC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="ASC" alt="" />
-						</a>
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=date&sortDir=DESC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) .'&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="11" height="12"').' title="DESC" alt="" />
-						</a>
-					</th>
-					<th>
-						'.$LANG->getLL('title').'
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=title&sortDir=ASC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="ASC" alt="" />
-						</a>
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=title&sortDir=DESC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) .'&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="11" height="12"').' title="DESC" alt="" />
-						</a>
-					</th>
-					<th>
-						'.$LANG->getLL('category').'
-					</th>
-					<th>
-						'.$LANG->getLL('nrOfComments').'
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=comments&sortDir=ASC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/redup.gif','width="11" height="12"').' title="ASC" alt="" />
-						</a>
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging'.$i.'&sort=comments&sortDir=DESC&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>
-							<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/reddown.gif','width="11" height="12"').' title="DESC" alt="" />
-						</a>
-					</th>
-					<th>
-						'.$LANG->getLL('functions').'
-					</th>
+			// Populate the form with category names
+			$options[] = '<option value="' .
+				htmlspecialchars(sprintf($urlFormat, rawurlencode($data['catname']))) .
+				'"' . $selected. '>' .
+				htmlspecialchars($data['catname']) .
+				'</option>';
+		}
+        $GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		$selectorCode = '<select onchange="window.location.href=this.options[this.selectedIndex].value" style="margin-bottom: 7px">' .
+			implode('', $options) .
+			'</select>';
+
+		return $selectorCode;
+	}
+
+	/**
+	 * Creates URL format string for category selector. This function takes into
+	 * account various request parameters to build the URL.
+	 *
+	 * @return string
+	 */
+	protected function getUrlFormatForCategorySelector() {
+		$urlParameters = array(
+			'id' => $this->id
+		);
+		if ($this->currentPage > 1) {
+			$urlParameters['curPage'] = $this->currentPage;
+		}
+		if (($searchField = t3lib_div::_GP('search_field'))) {
+			$urlParameters['search_field'] = $searchField;
+		}
+		if ($this->sortParameter != '') {
+			$urlParameters[$this->sortParameterName] = $this->sortParameter;
+		}
+		if ($this->sortDirectionParameter) {
+			$urlParameters[$this->sortDirectionParameterName] = $this->sortDirectionParameter;
+		}
+		$parameters = substr(t3lib_div::implodeArrayForUrl('', $urlParameters), 1);
+		$parameters = str_replace('%', '%%', $parameters);
+		return 'index.php?' . $parameters . '&cat=%1$s';
+	}
+
+	/**
+	 * Obtains a maximum number of posts for this filter
+	 *
+	 * @return int
+	 */
+	protected function getMaximumNumberOfPosts() {
+		$tables = 'tx_t3blog_post';
+		$where = 'tx_t3blog_post.pid=' . $this->id .
+			t3lib_BEfunc::deleteClause('tx_t3blog_post');
+		if ($this->filter) {
+			// FIXME Internal knowledge is bad!!!
+			$tables .= ', tx_t3blog_post_cat_mm, tx_t3blog_cat';
+			$where .= $this->filter .
+				t3lib_BEfunc::deleteClause('tx_t3blog_post');
+		}
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'count(distinct tx_t3blog_post.uid) as counter',
+			$tables, $where);
+		return is_array($row) ? intval($row['counter']) : 0;
+	}
+
+	/**
+	 * Generates a list if posts
+	 *
+	 * @return string
+	 */
+	protected function getPostList() {
+		$start = ($this->currentPage-1)*$this->numberOfItemsPerPage;
+		$limit = $start . ',' . $this->numberOfItemsPerPage;
+
+		// FIXME Need proper enableFields and deleteClause for all tables!
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+			'distinct tx_t3blog_post.uid as uid, tx_t3blog_post.title as title, tx_t3blog_post.date as date, tx_t3blog_post.hidden as hidden, count(tx_t3blog_com.fk_post) as comments',
+			'tx_t3blog_post LEFT JOIN tx_t3blog_com ON (tx_t3blog_post.uid = tx_t3blog_com.fk_post AND tx_t3blog_com.deleted=0)',
+			'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid=' . $this->id . $this->filter,
+			'uid',
+			$this->getListSortClause(),
+			$limit
+		);
+
+		$rows = array();
+		while (false != ($data=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$oddEven = ((count($rows) % 2) == 0 ? 'even' : 'odd');
+
+			// only if not hidden
+			if($data['hidden'] == 0){
+				$this->sendTrackbacks($this->id,$data['uid']);
+			}
+
+			// FIXME Hard-coded date format
+			$rows[] = '<tr class="' . $oddEven . '">
+					<td>' . date('d.m.y H:i:s', $data['date']) . '</td>
+					<td>' . htmlspecialchars($data['title']) . '</td>
+					<td>' . htmlspecialchars($this->getCategoryNames($data['uid'])) . '</td>
+					<td><a href="../mod3/index.php?linkCom=' . $data['uid'] . '&amp;id=' . $this->id . '" title="' . $GLOBALS['LANG']->getLL('seeComments', true) . '">' . htmlspecialchars($data['comments']) . ' <img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') . 'icons/comments.png','width="16" height="16"').' alt="' . $GLOBALS['LANG']->getLL('seeComments', true) . '" /></a></td>
+					<td>'. $this->getFunctions('tx_t3blog_post', $data) . ' <!-- trackbacks sent: '. $trackbacksSent . '--></td>
 				</tr>';
+		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
-				// PARAMETER EXAMINATION
+		return implode(chr(10), $rows);
+	}
 
-				if(t3lib_div::_GP('cat')){	// Use the cat parameter as filter
-					$filter = 'AND tx_t3blog_post.uid IN (SELECT tx_t3blog_post.uid
-							FROM tx_t3blog_post, tx_t3blog_cat, tx_t3blog_post_cat_mm
-							WHERE tx_t3blog_post.uid = tx_t3blog_post_cat_mm.uid_local
-							AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign
-							AND tx_t3blog_cat.catname  =\'' . $GLOBALS['TYPO3_DB']->quoteStr(t3lib_div::_GP('cat'), 'tx_t3blog_post') .'\')' ;
-				}else{	// Use a selected category from the "Categories" module as filter
-					if(t3lib_div::_GP('linkCat') && is_numeric(t3lib_div::_GP('linkCat'))){
-						$filter .= 'AND tx_t3blog_post.uid IN (SELECT tx_t3blog_post.uid
-							FROM tx_t3blog_post, tx_t3blog_cat, tx_t3blog_post_cat_mm
-							WHERE tx_t3blog_post.uid = tx_t3blog_post_cat_mm.uid_local
-							AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign
-							AND tx_t3blog_post_cat_mm.uid_foreign =' . intval(t3lib_div::_GP('linkCat')) . ')';
-					}else{	// Otherwise disable the filter
-						$filter = '';
-					}
-				}
+	/**
+	 * Gets category names for a post
+	 *
+	 * @param int $blogUid
+	 * @return Space-separated category names
+	 */
+	public function getCategoryNames($postUid) {
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('tx_t3blog_cat.catname',
+			'tx_t3blog_cat,tx_t3blog_post_cat_mm',
+			'tx_t3blog_cat.uid=tx_t3blog_post_cat_mm.uid_foreign AND ' .
+			'tx_t3blog_post_cat_mm.uid_local=' . $postUid .
+			t3lib_BEfunc::deleteClause('tx_t3blog_cat'));
+		$list = array();
+		while (false != ($data = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$list[] = $data['catname'];
+		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
-				if(!t3lib_div::_GP('curPage')){	// Set the current page with parameter or default
-					$curPage = 1;	// Default
-				}else{
-					$curPage = intval(t3lib_div::_GP('curPage'));	// Page from parameter
-				}
+		return implode(', ', $list);
+	}
 
-				if(!t3lib_div::_GP('search') && !t3lib_div::_GP('search_field')){	// Add the search parameter to the query
-					$queryPart = '';	// Default
-				}else{
-					$queryPart = $this->blogfunctions->makeSearchString('tx_t3blog_post');	// Get the query string for the table
-				}
+	/**
+	 * Obtains information for new "Create new XYZ" link
+	 *
+	 * @return array
+	 * @see tx_t3blog_modbase::getNewRecordLinkData()
+	 */
+	protected function getNewRecordLinkData() {
+		return array(
+			'icon' => t3lib_extMgm::extRelPath('t3blog'). 'icons/page_add.png',
+			'iconSize' => '16x16',
+			'table' => 'tx_t3blog_post',
+			'title' => $GLOBALS['LANG']->getLL('createNewBlogPost')
+		);
+	}
 
-				if(t3lib_div::_GP('search') == 'Search'){	// Redirect to the first page after a search
-					$curPage = 1;
-				}
+	/**
+	 * Generates a complete posts list with header
+	 *
+	 * @return string
+	 */
+	protected function getPosts() {
+		$result = '<table cellspacing="0" cellpadding="0" class="recordlist">';
+		$result .= $this->createTableHeader();
+		$result .= $this->getPostList();
+		$result .= '</table>';
 
-				// FILTERING
-				// Reads all category names from the database
+		return $result;
+	}
 
-				// Create a select option form
-				$categoryFilters = '<select onchange="window.location.href=this.options[this.selectedIndex].value">';
-				$categoryFilters .= '<option value="'.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::_GP('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&pid='.$this->id.'">'.$LANG->getLL('filterByCat').'</option>';
-				// We also want to see the hidden and times records, but not the deleted ones
-				$rsAllFilters=$GLOBALS['TYPO3_DB']->exec_SELECTquery('catname','tx_t3blog_cat','deleted=0 AND pid='.$this->id,'','catname');
+	/**
+	 * Obtains a total number of items for this view
+	 *
+	 * @return int
+	 * @see tx_t3blog_modbase::getNumberOfItems()
+	 */
+	protected function getNumberOfItems() {
+		return $this->numberOfPosts;
+	}
 
-				while($dsAllFilters=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsAllFilters)){
-					if($dsAllFilters['catname'] == t3lib_div::_GP('cat')){
-						$selected = 'selected';
-					}else {
-						$selected = '';
-					}
+	/**
+	 * Obtains elements for the record filter display
+	 *
+	 * @return string
+	 * @see tx_t3blog_modbase::getElementsForCurrentSettings()
+	 */
+	protected function getElementsForRecordFilterDisplay() {
+		$elements = parent::getElementsForRecordFilterDisplay();
 
-					// Populate the form with category names
-					$categoryFilters .=
-						'<option value="'. htmlspecialchars($this->blogfunctions->listURL()).
-						'&curPage='.$i.
-						'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) .
-						'&search=Paging'.
-						'&sort=' . htmlspecialchars(t3lib_div::_GP('sort')) .
-						'&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) .
-						'&cat=' . htmlspecialchars(rawurlencode($dsAllFilters['catname'])) .
-						'&pid='.$this->id.
-						'" '.$selected. '>' . htmlspecialchars($dsAllFilters['catname']) . '</option>';
-				}
-				$categoryFilters .= '</select>';
-
-				// PAGING
-				// Counts the number of database records with the given query
-				// Set the limit for one page
-				$limitSize = 20;
-
-				// Get the amount of posts
-				$rslimitMax = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-						'count(distinct tx_t3blog_post.uid) as counter',	// select
-						'tx_t3blog_post'.($filter?', tx_t3blog_post_cat_mm, tx_t3blog_cat':''),	//from
-						'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid='.$this->id.' '.$queryPart.' '.$filter, //where
-						'',	//group by
-						'' //order by
-					);
-				while($dslimitMax =$GLOBALS['TYPO3_DB']->sql_fetch_assoc($rslimitMax)){
-					$limitMax = $dslimitMax['counter'];
-				}
-
-				// Calculate the first post on the current page
-				$limitStart 	= ($curPage-1)*$limitSize;
-				$limitStartShow	= $limitMax == 0 ? $limitStart : $limitStart+1;
-
-				// Calculate the last post on the current page
-				$limitEnd 		= $curPage*$limitSize;
-
-				// Calculates the number of records on the 'last' page
-				if($limitEnd > $limitMax){
-
-					$limitEffSize 	= $limitMax%$limitSize;
-					$limitEnd 		= $limitMax;
-
-				}else{
-
-					$limitEffSize 	= $limitSize;
-
-				}
-
-				if(!isset($limitStart)) {
-					$limitStart=1;
-				}
-
-				$recordFrame = '<div class="pagecount">'.$LANG->getLL('showRecords').' '.$limitStartShow.'-'.$limitEnd.' ('.$limitMax.') </div>';
-				$limit = $limitStart.','.$limitEffSize;
-				$numPages = ceil($limitMax/$limitSize);	// Calculate the number of pages
-
-
-				$paging = '<div class="paging">'. $LANG->getLL('pages'). ':';
-				for ($i = 1; $i <= $numPages; $i++) {
-					$paging .= ' ';
-					if ($i == $curPage){
-						$paging .= '<strong>'.$i.'</strong>';
-					}else{
-						$paging .= '<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$i.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::_GP('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>'.$i.'</a>';
-					}
-				}
-				$paging .= '</div>';
-
-				if(t3lib_div::_GP('sortDir')){	// Show the current filter/sort/search settings and delete links
-					if(t3lib_div::_GP('sortDir') == 'ASC'){
-						$sortDirFull = 'ascending';
-					}else{
-						$sortDirFull = 'descending';
-					}
-				}
-
-				$curSettings = '<table><tr>';
-				if(t3lib_div::_GP('search_field')) {
-					$curSettings .= '<td class="highlight">
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search=Paging&sort=' . htmlspecialchars(t3lib_div::_GP('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>'.
-							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'),1).'" alt="" />'.
-						'</a> <strong>'.$LANG->getLL('search').'</strong>: ' . htmlspecialchars(t3lib_div::_GP('search_field')) . '</td>';
-				}
-
-				if(t3lib_div::_GP('sort'))	{
-					$curSettings .= '<td class="highlight">
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging&cat=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('cat'))) . '&pid='.$this->id.'>'.
-							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />'.
-						'</a> <strong>'.$LANG->getLL('sortBy').'</strong>: ' . htmlspecialchars(t3lib_div::_GP('sort')) . ' '.$sortDirFull .'</td>';
-				}
-
-				if(t3lib_div::_GP('cat')) {
-					$curSettings .= '<td class="highlight">
-						<a href='.htmlspecialchars($this->blogfunctions->listURL()).'&curPage='.$curPage.'&search_field=' . htmlspecialchars(rawurlencode(t3lib_div::_GP('search_field'))) . '&search=Paging&sort=' . htmlspecialchars(t3lib_div::_GP('sort')) . '&sortDir=' . htmlspecialchars(t3lib_div::_GP('sortDir')) . '&pid='.$this->id.'>'.
-							'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />'.
-						'</a> <strong>'.$LANG->getLL('filterCategory').'</strong>: ' . htmlspecialchars(t3lib_div::_GP('cat')) . '</td>';
-				}
-				$curSettings .= '</tr></table>';
-
-				// Show a table with of records that match the given query as well as the filter/sort/search settings
-				$rsNormalList = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-					'distinct tx_t3blog_post.uid as uid, tx_t3blog_post.title as title, tx_t3blog_post.date as date, tx_t3blog_post.hidden as hidden, count(tx_t3blog_com.fk_post) as comments',	// select
-					'tx_t3blog_post LEFT JOIN tx_t3blog_com ON(tx_t3blog_post.uid = tx_t3blog_com.fk_post AND tx_t3blog_com.deleted=0)', //from
-					'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid='.$this->id.' '.$queryPart.' '.$filter, //where
-					'uid',	//group by
-					$GLOBALS['TYPO3_DB']->quoteStr($sort, 'tx_t3blog_post'),	// order by
-					$limit	//limit
-				);
-
-				$i=0;
-				while($dsNormalList=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($rsNormalList)){
-					$i++;
-					$oddeven = 'odd';
-
-					// only if not hidden
-					if($dsNormalList['hidden'] == 0){
-						$trackbacksSent = $this->blogfunctions->sendTrackbacks($dsNormalList['uid'],$this->id);
-					}
-					if($i % 2)$oddeven = 'even';
-					$fullTable .= chr(10).
-					'<tr class="'.$oddeven.'">
-						<td width="110">'. date("d.m.y H:i:s",$dsNormalList['date']).'</td>
-						<td width="350">' . htmlspecialchars($dsNormalList['title']) . '</td>
-						<td width="100">' . htmlspecialchars($this->blogfunctions->getCategoryNames('tx_t3blog_post', $dsNormalList)) . '</td>
-						<td width="" align="center"><a href="../mod3/index.php?linkCom='.$dsNormalList['uid'].'&pid='.$this->id.'" title="'.$GLOBALS['LANG']->getLL('seeComments').'">'.$dsNormalList['comments'].' <img'.t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog').'icons/comments.png','width="16" height="16"').' title="'.$GLOBALS['LANG']->getLL('seeComments').'" alt="'.$GLOBALS['LANG']->getLL('seeComments').'" /></a></td>
-						<td width="100">'. $this->getFunctions('tx_t3blog_post', $dsNormalList).' <!-- trackbacks sent: '.$trackbacksSent.'--></td>
-					</tr>';
-				}
-
-				$fullTable .= '</table>';
-
-				// Create new Post link
-				$createNewRecord = '<a class="newRecord" href="#" onclick="'.htmlspecialchars(t3lib_BEfunc::editOnClick('&edit[tx_t3blog_post]['.$this->id.']=new',$this->doc->backPath)).'">'.
-								'<img'.t3lib_iconWorks::skinImg($this->doc->backPath,t3lib_extMgm::extRelPath('t3blog').'icons/page_add.png','width="16" height="16"').' title="'.$GLOBALS['LANG']->getLL('new'.($table == 'pages' ? 'Page' : 'Record'), 1).'" alt="" />&nbsp;'.$LANG->getLL('createNewBlogPost').'</a>';
-
-				// Building the content
-				$content .=
-					$createNewRecord.
-					$categoryFilters.
-					$fullTable.
-					$recordFrame.
-					$paging.
-					$curSettings.
-					$this->blogfunctions->getSearchBox();
-
-				$this->content .= $this->doc->section($LANG->getLL('sectionTitle'), $content, 0, 1);
-		}else{
-			$this->content.= $this->doc->section($LANG->getLL('note'), $LANG->getLL('selABlog'), 0, 1);
+		$categoryName = trim(t3lib_div::_GP('cat'));
+		if ($categoryName) {
+			$elementCount = count($elements);
+			if ($elementCount > 1) {
+				$categoryName = t3lib_div::fixed_lgd_cs($categoryName, 20);
+			}
+			elseif ($elementCount == 1) {
+				$categoryName = t3lib_div::fixed_lgd_cs($categoryName, 40);
+			}
+			$elements[] = array(
+				'link' => $this->getCurrentUrlWithoutParameters('cat'),
+				'title' => $GLOBALS['LANG']->getLL('filterCategory'),
+				'value' => $categoryName
+			);
 		}
 
+		return $elements;
+	}
+
+	/**
+	 * Sends new trackbacks for the given blog
+	 *
+	 * @return boolean true if one or more trackbacks were sent
+	 */
+	protected function sendTrackbacks($blogUid,$uid) {
+		$trackbackSender = t3lib_div::makeInstance('tx_t3blog_sendtrackback');
+		/* @var $trackbackSender tx_t3blog_sendtrackback */
+		return $trackbackSender->sendTrackbacks($blogUid,$uid);
 	}
 }
 
@@ -474,8 +481,11 @@ $SOBE = t3lib_div::makeInstance('tx_t3blog_module2');
 $SOBE->init();
 
 // Include files?
-foreach($SOBE->include_once as $INC_FILE)	include_once($INC_FILE);
+foreach($SOBE->include_once as $INC_FILE) {
+	include_once($INC_FILE);
+}
 
 $SOBE->main();
 $SOBE->printContent();
+
 ?>

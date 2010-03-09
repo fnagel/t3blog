@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>module</type>
+		<description>Language labels for plugin &quot;latestCommentsNav&quot;</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="viewsTitle">This is hot</label>
+                        <label index="title">Views</label>
+			<label index="widgetSelector.description">Most viewed post widget</label>
+			<label index="author">Author: </label>
+			<label index="post">Post: </label>
+		</languageKey>
+		<languageKey index="de" type="array">
+			<label index="viewsTitle">Meist gelesene Posts</label>
+                        <label index="title">Views</label>
+			<label index="widgetSelector.description">Most viewed post widget</label>
+			<label index="author">Autor:</label>
+			<label index="post">Post: </label>
+		</languageKey>
+	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
+</T3locallang>

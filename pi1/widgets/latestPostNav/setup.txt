@@ -7,7 +7,8 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				wrap = <h3>|</h3>
-				field=  title
+				field = title
+				htmlSpecialChars = 1
 			}
 			20 = TEXT
 			20 {
@@ -65,14 +66,15 @@ plugin.tx_t3blog_pi1 {
 
 			10 = TEXT
 			10 {
-				wrap= |
+				wrap = |
 				field = text
-				htmlSpecialChars = 1
 				crop = 60 | ... | 1
+				htmlSpecialChars = 1
 				typolink {
 					parameter.field = blogUid
 					useCacheHash = 1
 					title.stdWrap.dataWrap = &lt;{field:author}&gt; ({field:comments})
+					title.stdWrap.htmlSpecialChars = 1
 					additionalParams.dataWrap = &tx_t3blog_pi1[blogList][showUid]={field:uid}&tx_t3blog_pi1[blogList][year]={register:year}&tx_t3blog_pi1[blogList][month]={register:month}&tx_t3blog_pi1[blogList][day]={register:day}
 				}
 			}

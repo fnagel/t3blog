@@ -3,7 +3,7 @@ require_once('../../lib/xmlrpc-2.2/lib/xmlrpc.inc');
 
 
 /**
- * Sends pingback 
+ * Sends pingback
  *
  * @param 	string	$myarticle: the article
  * @param	string	$url: url of the article
@@ -11,8 +11,6 @@ require_once('../../lib/xmlrpc-2.2/lib/xmlrpc.inc');
  * @return 	int		Pingback code and printed message
 */
 function do_send_pingback($myarticle, $url, $pdebug = 0) {
-	print_r($parts);
-
 	if (!isset($parts['scheme'])) {
 		print "do_send_pingback: failed to get url scheme [".$url."]<br />\n";
 		return(1);
@@ -42,9 +40,9 @@ function do_send_pingback($myarticle, $url, $pdebug = 0) {
 	fclose($fp);
 	$lines = explode("\r\n", $response);
 	foreach ($lines as $line) {
-		if (ereg("X-Pingback: ", $line)) {
-			list($pburl) = sscanf($line, "X-Pingback: %s");
-			#print "pingback url is $pburl<br />\n";
+		if (preg_match('/^X-Pingback\s*:/i', $line)) {
+			list(, $pburl) = explode(':', $line);
+			$pburl = trim($pburl);
 		}
 	}
 

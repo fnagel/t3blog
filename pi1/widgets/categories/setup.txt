@@ -18,43 +18,22 @@ plugin.tx_t3blog_pi1 {
 
 		list = COA
 		list {
-
-			5 = TEXT
-			5 {
-				wrap = <ul class="level | "
-				field = level
-			}
-
-			7 = TEXT
-			7 {
-				wrap =  id=" | " >
-				field = id
-			}
-
 			10 = TEXT
-			10 {
-				wrap = |</ul>
-				field = content
+			10.dataWrap (
+				<ul class="level{field:level}" id="{field:id}">
+					{field:content}
+				</ul>
+			)
+			20 = TEXT
+			20 {
+				field = javascript
+				required = 1
+				wrap = <script type="text/javascript">/*<![CDATA[*/|/*]]>*/</script>
 			}
 		}
 
-		listItem = COA
-		listItem {
-
-			wrap = <li>|</li>
-
-			10 = TEXT
-			10 {
-
-				field = catname
-			}
-
-			15 = TEXT
-			15 {
-				wrap = <span class="postnum">(|)</span>
-				field = postnum
-			}
-		}
+		listItem = TEXT
+		listItem.dataWrap = <li>{field:catname} <span class="postnum">({field:postnum})</span>{field:subcategories}</li>
 
 		catLink = TEXT
 		catLink {

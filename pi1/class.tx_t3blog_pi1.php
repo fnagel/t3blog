@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,7 +28,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
  *
- * @author	snowflake <info@snowflake.ch>
+ * @author	snowflake <typo3@snowflake.ch>
  * @package	TYPO3
  * @subpackage	tx_t3blog
  */
@@ -61,7 +61,6 @@ class tx_t3blog_pi1 extends tslib_pibase {
 		$this->init();
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
-		header('X-Pingback: '. t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR'). 'typo3conf/ext/t3blog/pi1/lib/pingback.php');
 		$data = array();
 		$js = '';
 
@@ -86,8 +85,8 @@ class tx_t3blog_pi1 extends tslib_pibase {
 			$GLOBALS['TSFE']->additionalHeaderData[$this->extKey] = $js;
 		}
 
-		$GLOBALS['TSFE']->additionalHeaderData[$this->extKey] = '<link rel="pingback" href="'. t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR').'typo3conf/ext/t3blog/pi1/lib/pingback.php" />';
-		$content = t3blog_div::getSingle($data, 'template');
+		$GLOBALS['TSFE']->additionalHeaderData['t3b_pingback'] = '<link rel="pingback" href="' . htmlspecialchars($this->getPingbackUrl()) . '" />';
+		$content = t3blog_div::getSingle($data, 'template', $this->conf);
 
 		return $content;
 	}
@@ -115,7 +114,7 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	function callWidget($widgetname, $widgetconf){
 		$fullWidgetPath = $this->widgetFolder. $widgetname. '/class.'. $widgetname.'.php';
 		if(is_file($fullWidgetPath)) {
-			require_once($fullWidgetPath);
+			t3lib_div::requireOnce($fullWidgetPath);
 			$widget = t3lib_div::makeInstance($widgetname);
 			$content = $widget->main('', $widgetconf, $this->piVars, $this->localcObj);
 
@@ -171,6 +170,18 @@ class tx_t3blog_pi1 extends tslib_pibase {
 
 		//Parse and return the result.
 		return $this->localCobj->cObjGetSingle($this->conf[$ts], $this->conf[$ts.'.']);
+	}
+	
+	/**
+	 * Generates a pingback URL
+	 * 
+	 * @return string
+	 */
+	protected function getPingbackUrl() {
+		return t3lib_div::locationHeaderUrl($this->cObj->typoLink_URL(array(
+			'parameter' => $GLOBALS['TSFE']->id,
+			'additionalParams' => '&eID=t3b_pingback'
+		)));
 	}
 }
 

@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -22,41 +22,31 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-
-
 class t3blog_div {
-	
+
 	/**
 	 * Parses data through typoscript.
 	 *
-	 * @param	array		$data: Data which will be passed to the typoscript.
-	 * @param	string		$ts: The typoscript which will be called.
+	 * @param array $data Data which will be passed to the typoscript.
+	 * @param string $tsObjectKey The typoscript which will be called.
+	 * @param array $tsObjectConf TS object configuration
+	 * @return string
 	 */
-	function getSingle($data, $ts) {
-		
+	static public function getSingle(array $data, $tsObjectKey, array $tsObjectConf) {
 		$cObj = t3lib_div::makeInstance('tslib_cObj');
-		
-
-		//Set the data array in the local cObj. This data will be available in the ts. E.G. {field:[fieldName]} or field = [fieldName]
-		
 		$cObj->data = $data;
-
-		//Parse and return the result.
-		return $cObj->cObjGetSingle($this->conf[$ts], $this->conf[$ts.'.']);
+		return $cObj->cObjGetSingle($tsObjectConf[$tsObjectKey], $tsObjectConf[$tsObjectKey . '.']);
 	}
 
 	/**
-	 * Checks if it is a valid email
+	 * Checks if it is a valid email. Use t3lib_div::validEmail() instead!
 	 *
 	 * @param 	string 	$email: emailaddress
 	 * @return 	boolean	true if error
+	 * @deprecated
 	 */
-	function checkEmail($email){
-		$error = false;
-		if(!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$",$email)){
-			$error = true;
-		}
-		return $error;
+	static public function checkEmail($email){
+		return !t3lib_div::validEmail($email);
 	}
 
 	/**
@@ -66,57 +56,48 @@ class t3blog_div {
 	 * @param 	string 	$url: url-address
 	 * @return 	boolean	true if error
 	 */
-	function checkExternalUrl($url){
+	static public function checkExternalUrl($url){
 		$error = false;
-		if(!preg_match('((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?)',$url)){
-			$url = 'http://'.$url;
-			if(!preg_match('((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?)',$url)){
-				$error = true;
-			}
-		}
+		$regExp = '/((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?)/';
+		if (!preg_match($regExp, $url)){
+			$url = 'http://' . $url;
+			$error = !preg_match($regExp, $url);
+ 		}
 		return $error;
 	}
 
 	/**
 	 * Returns the username (realname) from be_user by a uid
 	 *
-	 * @param  integer	$uid: uid of the be_user
-	 * @return string	realname of the be_user
+	 * @param  int $uid uid of the be_user
+	 * @return string Real name of the be_user
 	 */
-	function getAuthorByUid($uid){
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'realName',										// SELECT ...
-			'be_users',										// FROM ...
-			'uid = '.t3lib_div::intval_positive($uid)		// WHERE ...
+	static public function getAuthorByUid($uid) {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('realName', 'be_users',
+			'uid= ' . intval($uid), '', '', '1'
 		);
-		$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-		return $row['realName'];
+		return (is_array($row) ? $row['realName'] : '');
 	}
-	
+
 	/**
-	 * returns the Category string by a single uid
+	 * Obtains the category name by its uid
 	 *
-	 * @param 	integer  	$uid: uid of a specific category
-	 * @return 	string 		name of the category
+	 * @param int $uid uid of a specific category
+	 * @return string name of the category
 	 */
-	function getCategoryNameByUid($uid){
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'catname',		// SELECT ...
-			'tx_t3blog_cat',		// FROM ...
-			'uid = '.intval($uid),		// WHERE ...
-			'uid',		// GROUP BY ...
-			'uid',		// ORDER BY ...
-			'0,1'		// LIMIT ...
+	static public function getCategoryNameByUid($uid) {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'catname', 'tx_t3blog_cat', 'uid=' . intval($uid),
+			'', '', '1'
 		);
-		$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-		return $row['catname'];		
+		return (is_array($row) ? $row['catname'] : '');
 	}
-	
+
 
 	/**
 	 * returns the page browser of given table.
 	 *
-	 * @author Nicolas Karrer <nkarrer@snowflake.ch>
+	 * @author snowflake <typo3@snowflake.ch>
 	 *
 	 * @param int 			$numOfEntries: total of all elements of a table
 	 * @param string 		$ident: identifier for pointer. e.g. recently editet as more than 1 page browser on the site.
@@ -124,168 +105,107 @@ class t3blog_div {
 	 *
 	 * @return string 		HTML-Content to the browser
 	 */
-	function getPageBrowser($numOfEntries, $ident, $prefixId, $llarray, $piVars,$conf, $limit = 10, $maxPages = 20)	{
-		
-		$this->limit 			= $limit;
-		$this->maxShownPages 	= $maxPages;
-		$this->prefixId 		= $prefixId;
-		$this->conf  			= $conf;
-
-		$piBase = t3lib_div::makeInstance('tslib_pibase');
-		$piBase->cObj = t3lib_div::makeInstance('tslib_cObj');
-
-		$pages = $numOfEntries/$this->limit;
-		
-		// amount of pages in the list
-		$definitivePages = round($pages);
-		
-		//e.g. pages are 4.4 it rounds to 4 but we need 5.
-		if($definitivePages < $pages)	{
-			$definitivePages = $definitivePages+1;
+	static public function getPageBrowser($numOfEntries, $ident, $prefixId, $llarray, $piVars,$conf, $limit = 10, $maxPages = 20)	{
+  		// Get default configuration
+  		$conf = $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_pagebrowse_pi1.'];
+		if (!is_array($conf) || !isset($conf['userFunc'])) {
+			// Hardcoded because:
+			// - language labels are unavailable from here
+			// - this message is for installers only, not for end users
+			$result = 'Warning: "pagebrowse" extension TypoScript is unavailable! Did you forget to include it before t3blog\'s TypoScript?';
 		}
-		
-
-		//now we need the real number of pages. => pointervalue
-		$items = '';
-		$pointer = $_GET[$ident.'_pointer'] ? $_GET[$ident.'_pointer'] : 0;
-		
-		//previous link
-		if($pointer > 0)	{
-			$previous = (($pointer - $this->maxShownPages) < 0) ? $pointer - 1 : 0 ;
-			$previous_number = (($pointer-$this->maxShownPages)<0)?$pointer:$this->maxShownPages;
-
-			$tempdata = array(
-					'link' => $piBase->pi_linkTP_keepPIvars($llarray['previous'], array($ident.'_pointer' => $previous), 1, 0, 0),
-					'pbitemclass' => 'previous',
-			);
-
-			$items.= t3blog_div::getSingle($tempdata, 'pageBrowserElement');
-		}
-		
-
-		//Main paging from
-		if(($pointer+1) < $definitivePages)	{
-					
-				$next = (($pointer + $this->maxShownPages) > $definitivePages) ? $pointer+1 : ($definitivePages-1);
-				$next_number = (($pointer+$this->maxShownPages)>$definitivePages)?($definitivePages-1-$pointer):$this->maxShownPages;
-				$tempdata = array(
-					'link' => $piBase->pi_linkTP_keepPIvars($llarray['next'], array($ident.'_pointer' => $next), 1, 0, 0),
-					'pbitemclass' => 'next',
-				);
-
-				$endOfItems = t3blog_div::getSingle($tempdata, 'pageBrowserElement');
-		}
-
-		$paging = '';
-		
-		//Gets the Range of the Browser.
-		$diff = $this->maxShownPages/2;
-		if($definitivePages > $this->maxShownPages)	{
-			if(!$start)	{
-				$start = ($pointer > ($this->maxShownPages/2))?$pointer-$diff:0;
+		else {
+			$pages = intval($numOfEntries/$limit) + (($numOfEntries % $limit) == 0 ? 0 : 1);
+			if ($pages == 0) {
+				$result = '';
 			}
-
-			$end = $start+$this->maxShownPages;
-
-			if(($start+$this->maxShownPages) >= $definitivePages)	{
-				$end = $definitivePages;
-				$start = $definitivePages-$this->maxShownPages;
+			else {
+				// Modify this configuration
+				$conf = array_merge($conf, array(
+					'pageParameterName' => 'tx_t3blog_post_pointer',
+					'numberOfPages' => $pages,
+				));
+	
+				self::setPageBrowserFilters($conf);
+	
+				// Get page browser
+				$cObj = t3lib_div::makeInstance('tslib_cObj');
+				/* @var $cObj tslib_cObj */
+				$cObj->start(array(), '');
+				$result = $cObj->cObjGetSingle('USER', $conf);
 			}
-		} else {
-			$start = 0;
-			$end = $definitivePages;
 		}
-
-		//whole main paging stuff form $start to $end (is defined above)
-		$i = $start;
-		for($i = $start; $i < $end; $i++) {
-			
-			if (!isset($_GET[$ident.'_pointer']) && $i == $start) {
-				$tmpdata = array(
-						'link' => $i+1,
-						'pbitemclass' => ($pointer==$i)?'page cur':'page',
-					);
-				
-			} else {
-			
-				if (isset($_GET[$ident.'_pointer']) && $_GET[$ident.'_pointer'] == $i) {
-					$tmpdata = array(
-						'link' => $i+1,
-						'pbitemclass' => ($pointer==$i)?'page cur':'page',
-					);
-					
-				} else {
-					$tmpdata = array(
-						'link' => $piBase->pi_linkTP_keepPIvars(($i+1), array($ident.'_pointer' => $i), 1, 0, 0),
-						'pbitemclass' => ($pointer==$i)?'page cur':'page',
-					);
-				}
-			}
-						
-			$items.= t3blog_div::getSingle($tmpdata, 'pageBrowserElement');
+		return $result;
+	}
+	
+	/**
+	 * Adds extra conditions to the page browser link
+	 *
+	 * @param array $conf
+	 * @return void
+	 */
+	static protected function setPageBrowserFilters(array &$conf) {
+		$postVars = t3lib_div::_GP('tx_t3blog_pi1');
+		if (is_array($postVars) && isset($postVars['sword'])) {
+			$conf['extraQueryString'] = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+				'sword' => $postVars['sword']
+			));
 		}
-
-		$items = $items.$endOfItems;
-
-		$data['pbitems'] = $items;
-		//return nothing if there is only 1 page.
-		if($i>1){
-			$return = t3blog_div::getSingle($data, 'pageBrowser');
-		}else {
-			$return = '';
-		}
-		return $return;
 	}
 
 	/**
-	 * Sets an alternative blog Pid. 
+	 * Sets an alternative blog Pid.
 	 *
 	 * @param 	integer		$pid: pid of the record storage page
 	 */
-	function setAlternativeBlogPid($pid){
+	static public function setAlternativeBlogPid($pid) {
 		$GLOBALS['alternativeBlogPid'] = $pid;
 	}
-	
+
 	/**
 	 * returns the blog storage folder pid
 	 *
 	 * @return integer 	pid of the storage folder
 	 */
-	function getBlogPid(){
+	static public function getBlogPid(){
+		static $cachedPid = 0;
+
 		// get pid
-		if(isset($GLOBALS['alternativeBlogPid']) && $GLOBALS['alternativeBlogPid'] > 0){
-			$pid = $GLOBALS['alternativeBlogPid'];
-		}else{
-			$pid = $GLOBALS['TSFE']->id;	
+		if (isset($GLOBALS['alternativeBlogPid']) && $GLOBALS['alternativeBlogPid'] > 0) {
+			return $GLOBALS['alternativeBlogPid'];
 		}
-		
-		// get the Rootline
-		$rootline = array_reverse($GLOBALS['TSFE']->tmpl->rootLine);
 
-		$tmp->cObj = t3lib_div::makeInstance('tslib_cObj');
-		// go throu rootline until a blogPid is found
-		foreach ($rootline as $page){
-			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-				'uid',		// SELECT ...
-				'pages',		// FROM ...
-				'uid = '.$page['uid'].' AND module = \'t3blog\' '.$tmp->cObj->enableFields('pages'),		// WHERE ...
-				'uid',		// GROUP BY ...
-				'uid',		// ORDER BY ...
-				'0,1'		// LIMIT ...
-			);
-			if($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)){
+		if ($cachedPid != 0) {
+			$pid = $cachedPid;
+		}
+		else {
+			// get the Rootline
+			$rootline = array_reverse($GLOBALS['TSFE']->tmpl->rootLine);
 
-				$pid = $row['uid'];
-				return $pid;
+			// go through rootline until a blogPid is found
+			$pidList = array();
+			foreach ($rootline as $page) {
+				$pidList[] = $page['uid'];
 			}
+			$pidString = implode(',', $pidList);
+			list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('uid', 'pages',
+				'uid IN (' . $pidString . ') AND module=\'t3blog\'' .
+				$GLOBALS['TSFE']->sys_page->enableFields('pages'),
+				'', 'FIELD(uid,' . $pidString . ')', 1);
+			if (is_array($row)) {
+				$pid = $row['uid'];
+			}
+			else {
+				$pid = $GLOBALS['TSFE']->id;
+			}
+			$cachedPid = $pid;
 		}
 		return $pid;
 	}
-	
-	
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/lib/class.t3blog_div.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/lib/class.t3blog_div.php']);
 }
+
 ?>

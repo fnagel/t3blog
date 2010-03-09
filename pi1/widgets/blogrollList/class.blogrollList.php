@@ -39,11 +39,11 @@ class blogrollList extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
-	
-	
+
+
 	/**
 	 * The main method of the PlugIn
-	 * 
+	 *
 	 * @author 	Manu Oehler <moehler@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
@@ -56,7 +56,7 @@ class blogrollList extends tslib_pibase {
 		$this->conf = $conf;
 		$this->init();
 		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
-		
+
 		/*******************************************************/
 		//example pivar for communication interface
 		//$this->piVars['widgetname']['action'] = "value";
@@ -65,19 +65,16 @@ class blogrollList extends tslib_pibase {
 		$content = '';
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'*',						// SELECT ...
-			'tx_t3blog_blogroll',		// FROM ...
-			'pid = '.t3blog_div::getBlogPid().$this->cObj->enableFields('tx_t3blog_blogroll'),		// WHERE ...
-			'uid',			// GROUP BY ...
-			'sorting',		// ORDER BY ...
-			''				// LIMIT ...
+			'*', 'tx_t3blog_blogroll',
+			'pid=' . t3blog_div::getBlogPid() . $this->cObj->enableFields('tx_t3blog_blogroll'),
+			'', 'sorting'
 		);
 
 		if ($res) {
 			$listElements = '';
-			for ($i = 0;$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);$i++) {
+			for ($i = 0; $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res); $i++) {
 				$image = '';
-				if($row['image']){
+				if ($row['image']) {
 					$this->localcObj->data['uid'] = $row['uid'];
 					$image = $this->localcObj->cObjGetSingle($this->conf['imgFieldList'], $this->conf['imgFieldList.']);
 				}
@@ -91,10 +88,11 @@ class blogrollList extends tslib_pibase {
 					'description'	=> $row['description'],
 					'xfn'			=> $xfn
 				);
-				$listElements.= t3blog_div::getSingle($data, 'listItem');
+				$listElements .= t3blog_div::getSingle($data, 'listItem', $this->conf);
 			}
+			$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
-			$content = t3blog_div::getSingle(array('title'=>$this->pi_getLL('latestPostsTitle'),'listItems'=>$listElements),'list');
+			$content = t3blog_div::getSingle(array('title'=>$this->pi_getLL('latestPostsTitle'),'listItems'=>$listElements), 'list', $this->conf);
 		}
 
 		return $content;
@@ -119,7 +117,7 @@ class blogrollList extends tslib_pibase {
 	function getXfnNames($xfnIds){
 		$return = '';
 		if($xfnIds){
-			$arrIds = split(',',$xfnIds);
+			$arrIds = explode(',',$xfnIds);
 			foreach ($arrIds as $id) {
 				$return .= $this->pi_getLL('xfn.I.'.$id);
 				$return .= ' ';

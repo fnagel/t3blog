@@ -1,20 +1,17 @@
 plugin.tx_t3blog_pi1 {
-
 	gravatarsize = 50
-
 	image {
 		big {
 			imageLinkWrap = 1
 			imageLinkWrap {
 				enable = 1
-				wrap = <A href="javascript:close();"> | </A>
+				wrap = <a href="javascript:close();"> | </a>
 				JSwindow = 1
 				JSwindow.newWindow = 1
 				JSwindow.expand = 17,20
 			}
 			file {
-				width= 100
-
+				width = 100
 			}
 		}
 		small {
@@ -32,6 +29,7 @@ plugin.tx_t3blog_pi1 {
 		adminsCommentsEmail = {$plugin.tx_t3blog_pi1.blogList.adminsCommentsEmail}
 		adminsCommentMailTemplate = EXT:t3blog/pi1/widgets/blogList/adminemail.txt
 		approved = 0
+		catLinkDivider = {$plugin.tx_t3blog_pi1.blogList.catLinkDivider}
 
 		substitutePagetitle = 1
 
@@ -71,6 +69,12 @@ plugin.tx_t3blog_pi1 {
 		#senderEmail
 		senderEmail = example@example.org
 
+		#views: Amount of seconds which have to pass by until an returning visitor is recounted. Very cool: if you want to have counted each view just put a negative number.
+		timePeriodToRecountView = 10000
+
+		#views: Shall we count users which have logged in the backend?
+		countBEUsersViews = 1
+
 		## Possible fields would be: commentauthor, commenttext, commentauthoremail, commenttitle, commentauthorwebsite, captcha
 		requiredFields = commentauthor, commenttext, commentauthoremail, commenttitle, captcha
 
@@ -87,8 +91,9 @@ plugin.tx_t3blog_pi1 {
 				if.isTrue.field  = filtered
 				10 = TEXT
 				10 {
-					dataWrap = | {field:filtered}<br/>
-					field = text
+					dataWrap = {field: text}&#32;|<br/>
+					field = filtered
+					htmlSpecialChars = 1
 				}
 				20 = TEXT
 				20 {
@@ -139,6 +144,7 @@ plugin.tx_t3blog_pi1 {
 					20 {
 						if.isTrue.field = contentUids
 						10 < styles.content.get
+                        10.select.pidInList.field=blogPid
 						10.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid} AND uid in ( {field:contentUids} )
 					}
 					30 = TEXT
@@ -162,7 +168,6 @@ plugin.tx_t3blog_pi1 {
 						additionalParams.dataWrap = &tx_t3blog_pi1[blogList][author]={field:authorId}
 						useCacheHash = 1
 					}
-
 				}
 
 				12 = TEXT
@@ -197,14 +202,74 @@ plugin.tx_t3blog_pi1 {
 				#show gravatar if email is set
 				20 = TEXT
 				20 {
-						required = 1
-						if.isTrue.field = email
-						field = gravatar
+					required = 1
+					if.isTrue.field = email
+					field = gravatar
 				}
+
+				40 = COA
+				40 {
+					if.isTrue.field = tagClouds
+					wrap = <br /><span class="tags">|</span>
+
+					10 = TEXT
+					10.data = LLL:EXT:t3blog/pi1/widgets/blogList/locallang.xml:tagsTitle
+					10.noTrimWrap = ||: |
+
+					20 = TEXT
+					20 {
+						field = tagClouds
+						split {
+							cObjNum = 1
+							token = ,
+							1 {
+								1 = LOAD_REGISTER
+								1 {
+									linkparam.cObject = TEXT
+									linkparam.cObject {
+										current = 1
+										trim = 1
+										htmlSpecialChars = 1
+										rawUrlEncode = 1
+									}
+								}
+								10 = TEXT
+								10 {
+									trim = 1
+									current = 1
+									htmlSpecialChars = 1
+									typolink {
+										parameter.data = TSFE:id
+										additionalParams.dataWrap = &tx_t3blog_pi1[blogList][tags]={register:linkparam}
+										useCacheHash = 1
+									}
+									noTrimWrap = | ||
+								}
+							}
+							wrap = | |*| ,|
+						}
+					}
+				}
+
+				50 = COA_INT
+				50 {
+					wrap = <br /><span class="views">|</span>
+
+					10 = TEXT
+					10.data = LLL:EXT:t3blog/pi1/widgets/blogList/locallang.xml:viewsTitle
+					10.noTrimWrap = ||: |
+
+					20 = TEXT
+					20 {
+						field = number_views
+					}
+				}
+
 			}
+
 			990 = TEXT
 			990 {
-				wrap = <p>|</p>
+				wrap = <p class="back">|</p>
 				field = back
 				typolink {
 					parameter.data = TSFE:id
@@ -231,6 +296,11 @@ plugin.tx_t3blog_pi1 {
 		#single wrap
 		single = COA
 		single {
+			1 = TEXT
+			1 {
+				field = navigation
+			}
+
 			10 = COA
 			10 {
 				wrap = <div class="single">|</div>
@@ -259,16 +329,14 @@ plugin.tx_t3blog_pi1 {
 					10 {
 						10 = TEXT
 						10 {
-
 							field = title
 						}
 
-
 						20 < styles.content.get
+						20.select.pidInList.field=blogPid
 						20.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid}
 					}
 				}
-
 
 				15 = COA
 				15 {
@@ -308,22 +376,79 @@ plugin.tx_t3blog_pi1 {
 							additionalParams.dataWrap = &tipUrl={field:blogUrl}
 						}
 					}
+
 					25 = TEXT
 					25 {
 						wrap = <span class="permalink">|</span>
 						field = permalink
 					}
+
 					30 = TEXT
 					30 {
 						wrap = <span class="trackback">|</span>
 						field = trackbackLink
-
 					}
 
+					40 = COA
+					40 {
+						if.isTrue.field = tagClouds
+						wrap = <br /><span class="tags">|</span>
+
+						10 = TEXT
+						10.data = LLL:EXT:t3blog/pi1/widgets/blogList/locallang.xml:tagsTitle
+						10.noTrimWrap = ||: |
+
+						20 = TEXT
+						20 {
+							field = tagClouds
+							split {
+								cObjNum = 1
+								token = ,
+								1 {
+									1 = LOAD_REGISTER
+									1 {
+										linkparam.cObject = TEXT
+										linkparam.cObject {
+											current = 1
+											trim = 1
+											htmlSpecialChars = 1
+											rawUrlEncode = 1
+										}
+									}
+									10 = TEXT
+									10 {
+										trim = 1
+										current = 1
+										htmlSpecialChars = 1
+										typolink {
+											parameter.data = TSFE:id
+											additionalParams.dataWrap = &tx_t3blog_pi1[blogList][tags]={register:linkparam}
+											useCacheHash = 1
+										}
+										noTrimWrap = | ||
+									}
+								}
+								wrap = | |*| ,|
+							}
+						}
+					}
+
+					# Number of views
+					50 = COA_INT
+					50 {
+						wrap = <br /><span class="views">|</span>
+
+						10 = TEXT
+						10.data = LLL:EXT:t3blog/pi1/widgets/blogList/locallang.xml:viewsTitle
+						10.noTrimWrap = ||: |
+
+						20 = TEXT
+						20 {
+							field = number_views
+						}
+					}
 
 				}
-
-
 			}
 
 			# listing of trackbacks and comments
@@ -358,6 +483,7 @@ plugin.tx_t3blog_pi1 {
 				}
 			}
 		}
+
 		#Navigation in singleview (previous, back, next)
 		singleNavigation = COA
 		singleNavigation {
@@ -376,7 +502,6 @@ plugin.tx_t3blog_pi1 {
 				typolink {
 					parameter.field = backId
 				}
-
 			}
 
 			30 = TEXT
@@ -388,9 +513,8 @@ plugin.tx_t3blog_pi1 {
 		}
 
 
-
 		##################################
-		#SINGLE elements
+		# SINGLE elements
 
 		titleLink = COA
 		titleLink {
@@ -443,10 +567,12 @@ plugin.tx_t3blog_pi1 {
 					strftime = %d
 				}
 			}
+
 			10 = TEXT
 			10 {
 				wrap = <span class="more">|</span>
 				field = title
+				htmlSpecialChars = 1
 				typolink {
 					parameter.data = TSFE:id
 					useCacheHash = 1
@@ -457,15 +583,15 @@ plugin.tx_t3blog_pi1 {
 			99 = RESTORE_REGISTER
 		}
 
-		#Formate the date
-		date  = TEXT
+		# Format the date
+		date = TEXT
 		date {
 			wrap = <div class="date">|</div>
 			field = date
 			strftime = %d.%m.%Y
 			required = 1
 		}
-		#Formate the time
+		# Format the time
 		time = TEXT
 		time {
 			wrap = <div class="time">|</div>
@@ -473,7 +599,7 @@ plugin.tx_t3blog_pi1 {
 			strftime = %R
 			required = 1
 		}
-		#formate a textrow
+		# Format a textrow
 		textRow = COA
 		textRow {
 		#load register
@@ -500,10 +626,11 @@ plugin.tx_t3blog_pi1 {
 				parseFunc < lib.parseFunc_RTE
 				parseFunc {
 					nonTypoTagStdWrap.encapsLines {
-								nonWrappedTag =
-							}
-						}
+						nonWrappedTag =
+					}
+				}
 			}
+
 			20 = TEXT
 			20 {
 				wrap = <p>|</p>
@@ -519,7 +646,7 @@ plugin.tx_t3blog_pi1 {
 			99 = RESTORE_REGISTER
 		}
 
-		#formates the text of a blog element.
+		# Formats the text of a blog element.
 		textFormat = TEXT
 		textFormat {
 			#wrap = <p>|</p>
@@ -528,10 +655,10 @@ plugin.tx_t3blog_pi1 {
 			parseFunc < lib.parseFunc_RTE
 		}
 
-		#Formate of a comments link (comments (#))
+		# Format of a comments link (comments (#))
 		commentsLink = COA
 		commentsLink {
-		#load register
+			#load register
 			1 = LOAD_REGISTER
 			1 {
 				year {
@@ -569,12 +696,11 @@ plugin.tx_t3blog_pi1 {
 		catList {
 			wrap = <div class="categories">|</div>
 			field = catLink
-
 		}
 
 		#a single category link wrap
-		catLink= TEXT
-		catLink{
+		catLink = TEXT
+		catLink {
 			wrap = |
 			field = text
 			htmlSpecialChars = 1
@@ -596,12 +722,14 @@ plugin.tx_t3blog_pi1 {
 		author {
 			wrap = <span class="author">|</span>
 			field = name
+			htmlSpecialChars = 1
 		}
 
 		#gravatar wrap
 		gravatar = TEXT
 		gravatar {
 			field = name
+			htmlSpecialChars = 1
 		}
 
 		noResultWrap = TEXT
@@ -613,31 +741,6 @@ plugin.tx_t3blog_pi1 {
 		mediaField < plugin.tx_t3blog_pi1.global.mediaField
 		imgField < plugin.tx_t3blog_pi1.global.imgField
 		imgFieldList < plugin.tx_t3blog_pi1.global.imgFieldList
-		#pageBrowser < plugin.tx_t3blog_pi1.global.pageBrowser
-		#pageBrowserElement < plugin.tx_t3blog_pi1.global.pageBrowserElement
-
-
-		pageBrowser = TEXT
-		pageBrowser {
-			wrap = <ul class="pageBrowser">|</ul>
-			field = pbitems
-		}
-
-		pageBrowserElement = COA
-		pageBrowserElement {
-			5 = TEXT
-			5 {
-				wrap = <li class="|">
-				field = pbitemclass
-			}
-
-			10 = TEXT
-			10 {
-				wrap = |</li>
-				field = link
-			}
-		}
-
 
 		#single tile link for navigation
 		singleNavTitleLink = COA
@@ -694,6 +797,7 @@ plugin.tx_t3blog_pi1 {
 					filelink {
 						path.dataWrap = {field:file_path}{field:file_name}
 						labelStdWrap.field = title
+						labelStdWrap.htmlSpecialChars = 1
 						icon = 1
 						jumpurl = 1
 						jumpurl.secure = 1
@@ -708,6 +812,7 @@ plugin.tx_t3blog_pi1 {
 						maxW = 50
 					}
 					altText.field = be_users.realName
+					altText.htmlSpecialChars = 1
 					imageLinkWrap = 0
 				}
 
@@ -719,6 +824,7 @@ plugin.tx_t3blog_pi1 {
 						maxW = 50
 					}
 					altText.field = be_users.realName
+					altText.htmlSpecialChars = 1
 					imageLinkWrap = 0
 				}
 				png = IMAGE
@@ -729,6 +835,7 @@ plugin.tx_t3blog_pi1 {
 						maxW = 50
 					}
 					altText.field = be_users.realName
+					altText.htmlSpecialChars = 1
 					imageLinkWrap = 0
 				}
 			}
@@ -809,34 +916,31 @@ plugin.tx_t3blog_pi1 {
 				10 = COA
 				10 {
 					wrap = <div class="formElement text">|<div class="formClear"><!-- clear --></div></div>
-
 					5 = TEXT
-								5 {
+					5 {
+						wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor">|</label></div>
+						field = comParentId_label
+						required = 1
+					}
 
-									wrap = <div class="formElement text"><div class="formLabel"><label for="commentauthor" >|</label></div>
-										field = comParentId_label
-										required = 1
-								}
+					10 = TEXT
+					10 {
+						dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div>
+						field = comParentId
+						required = 1
+					}
 
-								10 = TEXT
-								10 {
-										dataWrap = <div class="formField">{field:parentTitle}<input type="hidden" id="comParentId" class="text" name="tx_t3blog_pi1[blogList][comParentId]" value=" | " /></div><div class="formClear"><!-- clear --></div></div>
-										field = comParentId
-										required = 1
-								}
-
-								15 = TEXT
-								15 {
-
-										wrap = <div class="formLabel"><label for="commentauthor" >|</label></div>
-										field = commentauthor_label
-									}
+					15 = TEXT
+					15 {
+						wrap = <div class="formLabel"><label for="commentauthor">|</label></div>
+						field = commentauthor_label
+					}
 
 					20 = TEXT
 					20 {
 						dataWrap = <div class="formField"><input type="text" id="commentauthor" class="text" name="tx_t3blog_pi1[blogList][commentauthor]" {field:readOnly} value=" | " /></div>
-						field = commentauthor
 						htmlSpecialChars = 1
+						field = commentauthor
 					}
 				}
 
@@ -851,14 +955,11 @@ plugin.tx_t3blog_pi1 {
 
 					10 = TEXT
 					10 {
-						dataWrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commentauthoremail]" {field:readOnly} value = " | " /></div>
+						dataWrap = <div class="formField"><input type="text" class="text" id="commentauthoremail" name="tx_t3blog_pi1[blogList][commentauthoremail]" {field:readOnly} value = " | " /></div>
 						field = commentauthoremail
 						htmlSpecialChars = 1
 					}
-
-
 				}
-
 
 				30 = COA
 				30 {
@@ -871,12 +972,10 @@ plugin.tx_t3blog_pi1 {
 
 					10 = TEXT
 					10 {
-						dataWrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commentauthorwebsite]" {field:readOnly} value = " | " /></div>
+						dataWrap = <div class="formField"><input type="text" class="text" id="commentauthorwebsite" name="tx_t3blog_pi1[blogList][commentauthorwebsite]" {field:readOnly} value = " | " /></div>
 						field = commentauthorwebsite
 						htmlSpecialChars = 1
 					}
-
-
 				}
 
 				40 = COA
@@ -890,12 +989,10 @@ plugin.tx_t3blog_pi1 {
 
 					10 = TEXT
 					10 {
-						wrap = <div class="formField"><input type="text" class="text" name="tx_t3blog_pi1[blogList][commenttitle]" value = " | " /></div>
+						wrap = <div class="formField"><input type="text" class="text" id="commenttitle" name="tx_t3blog_pi1[blogList][commenttitle]" value = " | " /></div>
 						field = commenttitle
 						htmlSpecialChars = 1
 					}
-
-
 				}
 
 				50 = COA
@@ -909,8 +1006,9 @@ plugin.tx_t3blog_pi1 {
 
 					10 = TEXT
 					10 {
-						wrap = <div class="formField"><textarea class="text" name="tx_t3blog_pi1[blogList][commenttext]" >|</textarea></div>
+						wrap = <div class="formField"><textarea class="text" id="commenttext" name="tx_t3blog_pi1[blogList][commenttext]" cols="50" rows="10">|</textarea></div>
 						field = commenttext
+						htmlSpecialChars = 1
 					}
 				}
 
@@ -920,14 +1018,14 @@ plugin.tx_t3blog_pi1 {
 					wrap = <div class="formElement text">|<div class="formClear"><!-- clear --></div></div>
 					5 = TEXT
 					5 {
-						wrap =  <div class="formLabel"><label for="commenttext">&nbsp;|</label></div>
-						field = captchaimage_label
+						wrap =  <div class="formLabel"><label for="captchaimage">&nbsp;|</label></div>
 						required = 1
+						field = captchaimage_label
 					}
 
 					10 = TEXT
 					10 {
-						wrap = <div class="formField">|</div>
+						wrap = <div id="captchaimage" class="formField">|</div>
 						field = captchaimage
 						required = 1
 					}
@@ -939,14 +1037,14 @@ plugin.tx_t3blog_pi1 {
 					wrap = <div class="formElement text">|<div class="formClear"><!-- clear --></div></div>
 					5 = TEXT
 					5 {
-						wrap =  <div class="formLabel"><label for="commenttext">|</label></div>
-						field = captcha_label
+						wrap =  <div class="formLabel"><label for="captcha">|</label></div>
 						required = 1
+						field = captcha_label
 					}
 
 					10 = TEXT
 					10 {
-						wrap = <div class="formField"><input type="text" class="text" name="|" value = "" /></div>
+						wrap = <div class="formField"><input type="text" id="captcha" class="text" name="|" value = "" /></div>
 						field = captcha
 						required = 1
 					}
@@ -959,8 +1057,8 @@ plugin.tx_t3blog_pi1 {
 					5 = TEXT
 					5 {
 						wrap =  <div class="formLabel"><label for="commenttext">|</label></div>
-						field = subscribe_label
 						required = 1
+						field = subscribe_label
 					}
 
 					10 = TEXT
@@ -976,10 +1074,9 @@ plugin.tx_t3blog_pi1 {
 				90 = COA
 				90 {
 					wrap = <div class="formElement">|<div class="formClear"><!-- clear --></div></div>
-
 					5 = TEXT
 					5 {
-						wrap = <div class="formLabel"><!-- empty --></div><div class="formField"><input type="submit" class="button" name="tx_t3blog_pi1[blogList][commentsubmit]" value=" | " /></div>
+						wrap = <div class="formLabel"><label for="comment_submit">&nbsp;</label></div><div class="formField"><input type="submit" id="comment_submit" class="button" name="tx_t3blog_pi1[blogList][commentsubmit]" value=" | " /></div>
 						field = submit_label
 					}
 				}
@@ -1032,23 +1129,21 @@ plugin.tx_t3blog_pi1 {
 		comment = COA
 		comment {
 			stdWrap {
+				# WARNING! Do not change "comment_" if you use RSS feed for comments!
 				dataWrap = <div class="item {field:odd}" id="comment_{field:uid}" style="margin-left:{field:margin}">|</div>
 			}
 
 			5 = TEXT
 			5 {
-
-				dataWrap        = <div class="commentComments">|</div><div class="clear"></div>
-									field           	= parentcom
-									required        = 1
+				dataWrap = <div class="commentComments">|</div><div class="clear"><!-- clear --></div>
+				field = parentcom
+				required = 1
 				typolink {
-														parameter.field = blog_uid
-														useCacheHash = 1
-														additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
-								section.dataWrap = comment
-						}
-
-
+					parameter.field = blog_uid
+					useCacheHash = 1
+					additionalParams.dataWrap = &tx_t3blog_pi1[blogList][comParentId]={field:uid}&tx_t3blog_pi1[blogList][comParentTitle]={field:title}&tx_t3blog_pi1[blogList][showUid]={field:fk_post}&tx_t3blog_pi1[blogList][year]={field:blog_year}&tx_t3blog_pi1[blogList][month]={field:blog_month}&tx_t3blog_pi1[blogList][day]={field:blog_day}
+					section.dataWrap = comment
+				}
 			}
 
 			10 = TEXT
@@ -1109,7 +1204,6 @@ plugin.tx_t3blog_pi1 {
 			}
 
 		}
-
 
 		noCommentAllowedWrap = COA
 		noCommentAllowedWrap {
@@ -1200,7 +1294,6 @@ plugin.tx_t3blog_pi1 {
 				10 {
 					wrap = <h5>|</h5>
 					field = title
-					htmlSpecialChars = 1
 					typolink {
 						parameter.field = url
 					}
@@ -1209,7 +1302,6 @@ plugin.tx_t3blog_pi1 {
 				20 {
 					wrap = <p>|</p>
 					field = text
-					htmlSpecialChars = 1
 				}
 			}
 

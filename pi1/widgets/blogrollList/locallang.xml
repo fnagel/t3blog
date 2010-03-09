@@ -32,6 +32,9 @@
 		<languageKey index="de" type="array">
 			<label index="back">Zurück</label>
 		</languageKey>
-
 	</data>
+	<orig_hash type="array">
+	</orig_hash>
+	<orig_text type="array">
+	</orig_text>
 </T3locallang>

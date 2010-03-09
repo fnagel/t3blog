@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2007 snowflake <info@snowflake.ch>
+*  (c) 2007 snowflake <typo3@snowflake.ch>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,7 +28,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
  *
- * @author		snowflake <info@snowflake.ch>
+ * @author		snowflake <typo3@snowflake.ch>
  * @package		TYPO3
  * @subpackage	tx_t3blog
  */
@@ -43,12 +43,13 @@ class rss extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
-	var $cObj;
+	public $cObj;
 
+	protected $feedType;
 
 	/**
 	 * The main method of the PlugIn
-	 * @author Meile Simon <smeile@snowflake.ch>
+	 * @author snowflake <typo3@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
 	 * @param	array		$conf: The PlugIn configuration
@@ -58,9 +59,8 @@ class rss extends tslib_pibase {
 
 		$this->globalPiVars = $piVars;
 		$this->localPiVars 	= $piVars[$this->prefixId];
+		$this->feedType = $this->localPiVars['feed_type'];
 
-		// needed to differ between posts and comments
-		define('TYPE', $this->localPiVars['value']);
 
 		$this->conf 		= $conf;
 		$this->init();
@@ -84,21 +84,20 @@ class rss extends tslib_pibase {
 			);
 
 			// typoscript function
-			$content .= t3blog_div::getSingle($data,'list');
+			$content .= t3blog_div::getSingle($data, 'list', $this->conf);
 
 			// the navigation content
 			return $this->pi_wrapInBaseClass($content);
 
 		} else {
-
 			// the xml content
-			$content = $this->make_xml($content,$conf);
-			return $content;
+			return $this->make_xml($content,$conf);
+
 		}
 	}
 
 
-	/**
+	 /**
 	 * Create XML for RSS-Feed
 	 *
 	 * @param	string		$content: The PlugIn content
@@ -108,51 +107,56 @@ class rss extends tslib_pibase {
 	 */
 	function make_xml($content,$conf) {
 
-		$this->conf		=$conf;
-		$this->feed_id 	= $this->localPiVars['feed_id'];
 
-			// default feed is 2.0
-			if (empty($this->feed_id)) {
-				$this->feed_id = '2.0';
-			}
+		$this->conf = $conf;
+		$this->feed_id = $this->localPiVars['feed_id'];
 
-			$className 	= t3lib_div::makeInstanceClassName('rss');
-			$xmlObj 	= new $className('rss_export');
+		// default feed is 2.0
+		if (empty($this->feed_id)) {
+			$this->feed_id = '2.0';
+		}
 
-			$xmlObj->init();
-			$xmlObj->XMLdebug	=0;
-			$xmlObj->conf 		= $conf;
+		// FIXME It makes instance of itself!!! Using 'clone' here to copy all fields of the current object.
+		$xmlObj = clone $this;//t3lib_div::makeInstance('rss');
 
-			// get RSS version
-			$xmlObj->rssversion = $this->feed_id;
+		$xmlObj->init();
 
-			// Creating header object
-			$xmlObj->renderHeader();
+		$xmlObj->XMLdebug = 0;
+		$xmlObj->conf = $conf;
 
-			// get the posts
-			if ($this->localPiVars['value'] == $this->pi_getLL('rss_click_post') || empty($this->localPiVars['value'])) {
+		// get RSS version
+		$xmlObj->rssversion = $this->feed_id;
 
-				$xmlObj->setRecFields('tx_t3blog_post','title,author,uid,cat,date');
+		// Creating header object
+		$xmlObj->renderHeader();
 
+
+		// get the posts
+		if ($this->localPiVars['feed_type'] == 'post' || empty($this->localPiVars['feed_type'])) {
+			$xmlObj->setRecFields('tx_t3blog_post','title,author,uid,date,text');
+			// Add page content information
+			$res = $this->getContentResult('tx_t3blog_post',$xmlObj->rssversion);
+			$xmlObj->renderRecords('tx_t3blog_post', $res);
+			$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		}
+		else {
+			// get the comments
+			if ($this->localPiVars['feed_type'] == 'comment') {
+
+				$xmlObj->setRecFields('tx_t3blog_com','title,author,uid,fk_post,date,text');
 				// Add page content information
-				$xmlObj->renderRecords('tx_t3blog_post',$this->getContentResult('tx_t3blog_post',$xmlObj->rssversion));
-
-			} else {
-
-				// get the comments
-				if ($this->localPiVars['value'] == $this->pi_getLL('rss_click_comment')) {
-
-					$xmlObj->setRecFields('tx_t3blog_com','title,author,uid,fk_post,date,text');
-
-					// Add page content information
-					$xmlObj->renderRecords('tx_t3blog_com',$this->getContentResult('tx_t3blog_com',$xmlObj->rssversion));
-				}
+				$res = $this->getContentResult('tx_t3blog_com',$xmlObj->rssversion);
+				$xmlObj->renderRecords('tx_t3blog_com', $res);
+				$GLOBALS['TYPO3_DB']->sql_free_result($res);
 			}
+		}
 
-			// Add footer information
-			$xmlObj->renderFooter();
+		// Add footer information
+		$xmlObj->renderFooter();
 
-			return $xmlObj->getResult();
+		return $xmlObj->getResult();
+
 	}
 
 
@@ -166,10 +170,7 @@ class rss extends tslib_pibase {
 	 * @return	xml-rss feed
 	 */
 	function getContentResult($table,$rssversion) {
-
-		global $TCA;
-
-		if ($TCA[$table]) {
+		if ($GLOBALS['TCA'][$table]) {
 
 			$select = $table.'.* ';
 
@@ -186,11 +187,9 @@ class rss extends tslib_pibase {
 				$limit = '';
 			}
 			else {
-
-				if ($limit > '15' and $rssversion=='0.91'){
-					$limit = '15';
+				if ($limit > 15 and $rssversion=='0.91'){
+					$limit = 15;
 				}
-
 				$limit 		= ' LIMIT 0,'.$limit;
 			}
 
@@ -199,41 +198,27 @@ class rss extends tslib_pibase {
 			}
 
 			$groupBy 		= '';
-			$orderBy_limit 	= ' '.$orderBy.$limit;
+			$orderBy_limit 	= '  '.$orderBy.$limit;
 
-			$where = ' WHERE '.$table.'.deleted = 0 AND '.$table.'.hidden = 0';
+			$where = ' WHERE ' . $table . '.pid=' . t3blog_div::getBlogPid();
+			$where .= $this->cObj->enableFields($table);
 
-			// checks for posts only available on specific fe-users
-			$fe_groupCheck	= $GLOBALS['TSFE']->fe_user->groupData[uid];
-
-			if(empty($fe_groupCheck)) {
-
-				$where.= ' AND '.$table.'.fe_group = "0"';
-			} else {
-				$where.= ' AND ('.$table.'.fe_group = 0 OR '.$table.'.fe_group = '.$fe_groupCheck['1'].')';
-			}
-
-
-			if($table == 'tx_t3blog_com') {
-				$where .= ' AND '.$table.'.spam = 0 AND '.$table.'.approved = 1 ';
-			}
-
-			if($table == 'tx_t3blog_post'){
+			// FIXME This function is not supposed to know about table details!
+			if ($table == 'tx_t3blog_post') {
 				$select 	.= ', CONCAT(tt_content.header, \' \', tt_content.bodytext) AS text ';
 				$table 		.= ' JOIN tt_content ON ( tt_content.irre_parentid = tx_t3blog_post.uid AND tt_content.irre_parenttable = \'tx_t3blog_post\' )';
-				$where 		.= ' AND tt_content.hidden = 0 AND tt_content.deleted = 0';
+				$where 		.= $this->cObj->enableFields('tt_content');
 				$groupBy 	.= ' GROUP BY tx_t3blog_post.uid ';
 			}
+			elseif ($table == 'tx_t3blog_com') {
+				$where .= ' AND tx_t3blog_com.approved=1 AND tx_t3blog_com.spam=0';
+			}
 
-
-			$query 	= 'SELECT '.$select.' FROM '.$table.$where.$groupBy.$orderBy_limit;
-			$res 	= mysql(TYPO3_db,$query);
+			$query = 'SELECT ' . $select . ' FROM ' . $table . $where . $groupBy . $orderBy_limit;
+			$res = $GLOBALS['TYPO3_DB']->sql_query($query);
 			return $res;
 		}
 	}
-
-
-
 
 	function setRecFields($table,$list)	{
 		$this->XML_recFields[$table]=$list;
@@ -260,38 +245,40 @@ class rss extends tslib_pibase {
 		}else{
 			$feedimage = $this->conf['feedImage'];
 		}
-		//echo 'this is the image'.$feedimage;
 		// the XML structure
-		$this->lines[]='<?xml version="1.0" encoding="UTF-8"?>';
+		$this->lines[] = '<?xml version="1.0" encoding="' . $this->getCharset() . '"?>';
 
 		if($this->rssversion == '2.0') {
 			$this->lines[].='<rss version="'.$this->rssversion.'" '.$this->specialContent.'>';
 		} else {
 			$this->lines[].='<rss version="'.$this->rssversion.'">';
 		}
+
+		$feedLanguage = $this->conf['feedLanguage'] != '' ? $this->conf['feedLanguage'] : 'en-en';
+
 		$this->lines[].='<channel>
-		<title>'.htmlspecialchars(substr($this->conf['feedTitle'],0,100)).'</title>
-		<link>'.substr($this->conf['feedLink'],0,500).'</link>
-		<description>'.substr(htmlspecialchars($this->conf['feedDescription']),0,$this->conf['feedItemDescLength']).'</description>
-		<language>'.($GLOBALS['TSFE']->config['config']['language']).'</language>
-		<generator>'.$this->conf['generator'].' '.$GLOBALS['TYPO_VERSION'].'</generator>
-		';
+		 <title>'.htmlspecialchars(substr($this->conf['feedTitle'],0,100)).'</title>
+		 <link>'.substr($this->conf['feedLink'],0,500).'</link>
+		 <description>'.substr(htmlspecialchars($this->conf['feedDescription']),0,$this->conf['feedItemDescLength']).'</description>
+		 <language>'.$feedLanguage.'</language>
+		 <generator>'.$this->conf['generator'].' '.$GLOBALS['TYPO_VERSION'].'</generator>
+		 ';
 				if ($this->rssversion=='2.0') {
 					$this->lines[].='<docs>http://blogs.law.harvard.edu/tech/rss</docs>';
 				} else {
 					$this->lines[].='<docs>http://backend.userland.com/rss091</docs>';
 				}
 
-		$this->lines[].='
-		<copyright>'.$this->conf['feedCopyright'].'</copyright>
-		<managingEditor>'.$this->conf['feedManagingEditor'].'</managingEditor>
-		<webMaster>'.$this->conf['feedWebMaster'].'</webMaster>
-		<image>
+		 $this->lines[].='
+		 <copyright>'.$this->conf['feedCopyright'].'</copyright>
+		 <managingEditor>'.$this->conf['feedManagingEditor'].'</managingEditor>
+		 <webMaster>'.$this->conf['feedWebMaster'].'</webMaster>
+		 <image>
 			<title>'.substr($this->conf['feedTitle'],0,100).'</title>
 			<url>'.$feedimage.'</url>
 			<link>'.substr($this->conf['feedLink'],0,500).'</link>
 			<description>'.substr($this->conf['feedDescription'],0,$this->conf['feedItemDescLength']).'</description>
-		</image>
+		 </image>
 		';
 
 	}
@@ -373,12 +360,11 @@ class rss extends tslib_pibase {
 	 * @param	string	$row: row to save records
 	 */
 	function getRowInXML($table,$row)	{
+
 		$fields = t3lib_div::trimExplode(',',$this->XML_recFields[$table],1);
 		reset($fields);
 		unset($this->item);
-
 		while(list(,$field)=each($fields))	{
-
 			$this->lines[]=$this->Icode.$this->fieldWrap($field,$this->substNewline($row[$field]),$row['date']);
 		}
 	}
@@ -391,7 +377,7 @@ class rss extends tslib_pibase {
 	 * @return	substituted string
 	 */
 	function substNewline($string)	{
-		return ereg_replace(chr(10),'',$string);
+		return str_replace(chr(10), '', $string);
 	}
 
 
@@ -403,44 +389,39 @@ class rss extends tslib_pibase {
 	 */
 	function getPostCategories($value) {
 
-		$fields	= 'catname';
-		$table	= 'tx_t3blog_cat';
-		$where	=  'deleted = 0 and hidden = 0 and uid = '.$value	;
-
-		// checks for posts only available on specific fe-users
-		$fe_groupCheck	= $GLOBALS['TSFE']->fe_user->groupData[uid];
-
-		if(empty($fe_groupCheck)) {
-
-			$where.= ' AND '.$table.'.fe_group = "0"';
-		} else {
-			$where.= ' AND ('.$table.'.fe_group = 0 OR '.$table.'.fe_group = '.$fe_groupCheck['1'].')';
-		}
+		$fields	= 'uid_foreign';
+		$table	= 'tx_t3blog_post_cat_mm';
+		$where .= ' tx_t3blog_post_cat_mm.uid_local=' . intval($value);
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where);
-		$catlist = '';
+		$data = '';
 		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-
-			$data = $row['catname'];
+			if ($data != '') {
+				$data .= ', ';
+			}
+			$data .= t3blog_div::getCategoryNameByUid($row['uid_foreign']);
 		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
 		return $data;
 	}
 
 
 	/**
-	 * Takes the Date from the Database
+	 * Takes the Date from the database
 	 *
 	 * @param 	int		$value: uid of the post
 	 * @return 	the date string
 	 */
 	function getDate($value)	{
 
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('date','tx_t3blog_post', 'deleted = 0 and hidden = 0 and uid = '.intval($value));
-		while ($row =  $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-			$data = $row['date'];
-		}
+		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('date','tx_t3blog_post',
+			'uid=' . t3lib_div::intval_positive($value) .
+			$this->cObj->enableFields('tx_t3blog_post'));
+
 		// format the timestamp
-		$formatedDate = date('Y/m/d',$data);
+		// FIXME What if there is no row?
+		$formatedDate = date('Y/m/d', $data['date']);
 
 		// the new date string
 		return $formatedDate;
@@ -448,23 +429,15 @@ class rss extends tslib_pibase {
 
 
 	/**
-	 * Takes the author from the Database
+	 * Takes the author from the database
 	 *
 	 * @param 	int $value: uid of the be user
 	 * @return 	the realName
 	 */
-	function getAuthor($value) {
-
-		if(is_numeric($value)){
-
-			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('email','be_users', 'uid = "' . intval($value) . '"','');
-			while ($row =  $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-				$data = $row['email'];
-			}
-		} else {
-			$data = $value;
-		}
-		return $data;
+	function getAuthorByPost($value) {
+		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('email, realName',
+				'be_users', 'uid=' . intval($value));
+		return is_array($data) ? $data : array();
 	}
 
 
@@ -475,15 +448,14 @@ class rss extends tslib_pibase {
 	 * @return 	the realName of the post
 	 */
 	function getFkPost($value) {
-
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('title','tx_t3blog_post', 'deleted = 0 and hidden = 0 and uid ='.intval($value).'','');
-
-		while ($row =  $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-			$data = $row['title'];
+		$result = '';
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title', 'tx_t3blog_post',
+			'uid=' . intval($value) . $this->cObj->enableFields('tx_t3blog_post'));
+		if (is_array($row)) {
+			$result = $row['title'];
 		}
-		return $data;
+		return $result;
 	}
-
 
 	/**
 	 * Gets the post uid
@@ -492,12 +464,13 @@ class rss extends tslib_pibase {
 	 * @return 	the uid of the post
 	 */
 	function getFkPostID($value) {
-
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('fk_post','tx_t3blog_com', 'deleted = 0 and hidden = 0 and uid ='.intval($value).'','');
-		while ($row =  $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-			$data = $row['fk_post'];
+		$result = 0;
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('fk_post', 'tx_t3blog_com',
+			'uid=' . intval($value));
+		if (is_array($row)) {
+			$result = $row['fk_post'];
 		}
-		return $data;
+		return $result;
 	}
 
 
@@ -511,68 +484,101 @@ class rss extends tslib_pibase {
 	 * @return Wraps the fields
 	 */
 	function fieldWrap($field,$value,$date)	{
-
 		switch($field) {
-
 			case 'author':
-				if($value != '') {
-					if($this->localPiVars['value'] == $this->pi_getLL('rss_click_comment')) {
+				if ($value != '') {
+					if ($this->feedType == 'comment') {
 						return '<author>' . htmlspecialchars($value) . '</author>';
-					} else {
-						$author = $this->getAuthor($value);
-						return '<author>' . htmlspecialchars($author) . '</author>';
+					}
+					else {
+						$author = $this->getAuthorByPost($value);
+	          			return '<author>' . htmlspecialchars($author['email']) .
+							' (' . htmlspecialchars($author['realName']) . ')' . '</author>';
 					}
 				}
 				break;
 
-			case 'cat':
-				$category = $this->getPostCategories($value);
-				return '<category>'.$category.'</category>';
-				break;
-
 			case 'fk_post':
-				if($value != '')
-				$fkpost = $this->getFkPost($value);
-				return '<fk_post>' . htmlspecialchars($fkpost) . '</fk_post>';
+				if ($value != '') {
+					return '<fk_post>'.htmlspecialchars($this->getFkPost($value)).'</fk_post>';
+				}
 				break;
 
 			case 'uid':
 				$newDate = $this->getDate($value);
-				$postid		= TYPE == 'Comments' ? $this->getFkPostID($value) : $value;
+				$postid		= $this->feedType == 'comment' ? $this->getFkPostID($value) : $value;
 				$day 	= strftime('%d', $date);
 				$month 	= strftime('%m', $date);
 				$year	= strftime('%Y', $date);
 
-				return '<link>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST') . htmlspecialchars(tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid))) . '</link>
-	<guid>'.(stripos('http://',t3lib_div::getIndpEnv('HTTP_HOST'))?'':'http://').t3lib_div::getIndpEnv('HTTP_HOST') . htmlspecialchars(tslib_pibase::pi_getPageLink(t3blog_div::getBlogPid(), '', array('tx_t3blog_pi1[blogList][year]' => $year, 'tx_t3blog_pi1[blogList][month]' => $month, 'tx_t3blog_pi1[blogList][day]' => $day, 'tx_t3blog_pi1[blogList][showUid]' => $this->conf['feedItemLinkPrefix'].$postid))) . '</guid>
-	<description></description>';
-								break;
+				$typoLinkConf = array(
+					'additionalParams' => t3lib_div::implodeArrayForUrl('tx_t3blog_pi1[blogList]', array(
+						'year' => $year,
+						'month' => $month,
+						'day' => $day,
+						'showUid' => $this->conf['feedItemLinkPrefix'] . $postid
+					)),
+					'parameter' => t3blog_div::getBlogPid(),
+					'returnLast' => 'url',
+					'useCacheHash' => true
+				);
+				if ($this->feedType == 'comment') {
+					// FIXME Hard-coded! See also pi1/blogList/setup.txt, "comment" object near line 1132
+					$typoLinkConf['section'] = 'comment_' . $value;
+				}
+				$url = htmlspecialchars(t3lib_div::locationHeaderUrl($this->cObj->typoLink_URL($typoLinkConf)));
+				$link = '<link>'.$url.'</link>';
+				$guid = '<guid>'.$url.'</guid>';
+				if ($this->feedType == 'post') {
+					$category = '<category>'.htmlspecialchars($this->getPostCategories($value)).'</category>';
+				}
+
+				return $link."\n".$guid."\n".$category;
+                break;
 
 			case 'text':
-				$this->item.=' '.str_replace('###MORE###','',strip_tags($value));
+				$description = $this->cleanString($value);
 
-
-				$descr_length = 500;
-				if (strlen($this->item) > $descr_length)
-					$points='...';
-				if($this->rssversion !='2.0')
-				{
-					return '<description>'.substr(htmlspecialchars(substr($this->item,0,$descr_length).$points),0,$this->conf['feedItemDescLength']).'</description>';
-				} else {
-					return '<description>'.substr(htmlspecialchars(substr($this->item,0,50).$points),0,$this->conf['feedItemDescLength']).'</description>
-						<content:encoded><![CDATA['.$this->item.']]></content:encoded>';
-
+				if ($this->rssversion != '2.0') {
+					return '<description>'.htmlspecialchars(mb_substr($description,0,$this->conf['feedItemDescLength091'],'UTF-8')).'</description>';
+				}
+				else {
+					return '<description>'.htmlspecialchars(mb_substr($description,0,$this->conf['feedItemDescLength20'],'UTF-8')).'</description>
+					<content:encoded><![CDATA['.$description.']]></content:encoded>';
 				}
 				break;
 
 			case 'date':
-				setlocale (LC_TIME, 'de_CH.ISO8859-15');
-				return '<pubDate>'.strftime('%a, %d %b %Y %H:%M:%S %Z', $value).'</pubDate>';
+				setlocale (LC_TIME, $this->conf['feedTimeLocale']);
+				return '<pubDate>'.strftime($this->conf['feedStrftime'], $value).'</pubDate>';
 				break;
 
 			default:
 				return '<'.$field.'>'.htmlspecialchars($value).'</'.$field.'>';
 		}
+
+	}
+
+	/**
+	 * Cleans the string and removes the &
+	 *
+	 * @param	string	$string: string
+	 * @return  string  $string: cleaned string
+	 */
+	function cleanString($string){
+		$string = ' '.str_replace('###MORE###','',strip_tags($string));
+		$search = array('&quot;','&nbsp;');
+		$replace = array('"',' ');
+
+		$string = str_replace($search,$replace,$string);
+
+
+		// final cleaning
+		$search = array('&');
+		$replace = array('+');
+		$string = str_replace($search,$replace,$string);
+
+		return($string);
 
 	}
 
@@ -587,6 +593,24 @@ class rss extends tslib_pibase {
 		return true;
 	}
 
+	/**
+	 * Obtains the charset for the RSS feed
+	 * 
+	 * @return string
+	 */
+	protected function getCharset() {
+		$result = 'UTF-8';
+		
+		if ($GLOBALS['TSFE']->metaCharset) {
+			$result = $GLOBALS['TSFE']->metaCharset;
+		}
+		elseif ($GLOBALS['TSFE']->renderCharset) {
+			$result = $GLOBALS['TSFE']->renderCharset;
+		}
+		
+		return $result;
+	}
+	
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/rss/class.rss.php'])	{
