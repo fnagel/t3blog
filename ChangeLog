@@ -1,3 +1,7 @@
+2010-03-16  Dmitry Dulepov  <ddulepov@snowflake.ch>
+
+	* Released version 0.8.3
+
 2010-03-08  Dmitry Dulepov  <ddulepov@snowflake.ch>
 
 	* Fixed bug #13742: Adding t3mootools.txt
@@ -259,17 +263,17 @@
 	* bumped to version 0.5.4
 	* widget blogList: added captcha security in comment form of task 357.116
 	* backend: fixed paging bug (hidden elements were not counted) in mod2 and mod5 of task 357.122
-    * widget socialBookmarks: fixed bug in javascript-code of task 357.118
+	* widget socialBookmarks: fixed bug in javascript-code of task 357.118
 	* backend: fixed 'pass-by-reference' error in function addChildrenToNonSelectable of task 357.125
 	* widget tagCloud: fixed some encoding problems reported by marek krawczyk of task 357.123
 	* add new functionality to comment comments of task 357.117
 
 2008-12-23 Thomas Imboden <timboden@snowflake.ch>
-    * widget tagCloud: added maxTagsToShow function according task 357.106
+	* widget tagCloud: added maxTagsToShow function according task 357.106
 	* added all missing method and class comments
 
 2008-12-22 Thomas Imboden <timboden@snowflake.ch>
-    * added some missing method and class comments
+	* added some missing method and class comments
 
 2008-11-20 Thomas Imboden <timboden@snowflake.ch>
 	* fixed bugs with trackbacks, rss and paging
