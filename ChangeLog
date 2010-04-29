@@ -2,6 +2,7 @@
 
 	* Fixed bug #13867: XCLASS doesn't work in widgets because of includes in functions
 	* Fixed bug #13782: E-Mail new T3BLOG comment was created has no sender e-mail-address
+	* Fixed bug #13843: Month and Date without leading zero
 
 2010-03-16  Dmitry Dulepov  <ddulepov@snowflake.ch>
 

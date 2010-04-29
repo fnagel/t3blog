@@ -133,8 +133,8 @@ class singleFunctions extends blogList {
 				$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
 					'trackback' => 1,
 					'blogList' => array(
-						'day' => $dateInfo['mday'],
-						'month' => $dateInfo['mon'],
+						'day' => sprintf('%02d', $dateInfo['mday']),
+						'month' => sprintf('%02d', $dateInfo['mon']),
 						'year' => $dateInfo['year'],
 						'showUid' => $this->uid
 					)
@@ -236,10 +236,10 @@ class singleFunctions extends blogList {
 			// comment comments
 			if ($this->localPiVars['comParentId'] > 0) {
 				$commentFormFields = array('comParentId','commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
-			 }
+			}
 			else {
-				 $commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
-			 }
+				$commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
+			}
 
 			// captcha image
 			if ($this->conf['useCaptcha'] == 1) {
@@ -554,8 +554,8 @@ class singleFunctions extends blogList {
 	function listCommentedComments($parentId){
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 				'uid,title,author,email,website,date,text,parent_id',                                                                                                                                                                                                                                                                                                                                           // SELECT ...
-				 'tx_t3blog_com',                                                                                                                                                                                                                                                                                                                                                                                                                        // FROM ...
-				 'parent_id=' . intval($parentId) .
+				'tx_t3blog_com',                                                                                                                                                                                                                                                                                                                                                                                                                        // FROM ...
+				'parent_id=' . intval($parentId) .
 					' AND fk_post=' . intval($this->localPiVars['showUid']) .
 					' AND pid=' . t3blog_div::getBlogPid() .
 					' AND approved=1 AND spam=0 ' .
@@ -565,11 +565,11 @@ class singleFunctions extends blogList {
 		$comments = '';
 		for ($i = 0; false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)); $i++) {
 			if ($this->conf['gravatar']) {
-				 $gravatar = $this->getGravatar('', $row['email'], $row['author']);
-			 }
+				$gravatar = $this->getGravatar('', $row['email'], $row['author']);
+			}
 			else {
-				 $gravatar = '';
-			 }
+				$gravatar = '';
+			}
 
 			$dataCom = array(
 				'uid'                   => $row['uid'],
@@ -585,7 +585,7 @@ class singleFunctions extends blogList {
 				'margin'                => '20px',
 			);
 
-			 $comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
+			$comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
@@ -762,21 +762,21 @@ class singleFunctions extends blogList {
 						// assemble email
 						$unsubscribe	= '<' . $this->getUnsubscribeLink($uid, $value['code']) . '>' ."\n";
 						$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']).'"'. "\n";
-						 $address		= str_replace(array('\\n', '\\r'), '', $value['email']);
-						 $receiver   	= $address;
-						  $subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;
-						  $from       	= $this->conf['senderEmail'];
-						  $headers    	= 'From: ' . $from;
+						$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
+						$receiver   	= $address;
+						$subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;
+						$from       	= $this->conf['senderEmail'];
+						$headers    	= 'From: ' . $from;
 
-						 $message       .= $this->pi_getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
-						 $message       .= $this->pi_getLL('subscribe.notification') . "\n\n";
-						 $message       .= $text . "\n";
+						$message       .= $this->pi_getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
+						$message       .= $this->pi_getLL('subscribe.notification') . "\n\n";
+						$message       .= $text . "\n";
 
-						 // unsubscribe
-						 $message       .= $this->pi_getLL('subscribe.unsubscribe') ."\n";
+						// unsubscribe
+						$message       .= $this->pi_getLL('subscribe.unsubscribe') ."\n";
 						$message	   .= $unsubscribe;
 
-						  // send
+						// send
 						t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
 					}
 
@@ -826,19 +826,19 @@ class singleFunctions extends blogList {
 
 					$message = '';
 					$unsubscribe = '<' . $this->getUnsubscribeLink($uid, $code) . '>'."\n";
-					 $address = str_replace(array('\\n', '\\r'), '', $email);
-					 $receiver = $address;
-					 $subject = $this->pi_getLL('subscribe.confirmation').': '.$posttitle;
-					 $from = $this->conf['senderEmail'];
-					 $headers = 'From: ' . $from;
+					$address = str_replace(array('\\n', '\\r'), '', $email);
+					$receiver = $address;
+					$subject = $this->pi_getLL('subscribe.confirmation').': '.$posttitle;
+					$from = $this->conf['senderEmail'];
+					$headers = 'From: ' . $from;
 
-					 $message .= $this->pi_getLL('subscribe.confirmationHello') .
+					$message .= $this->pi_getLL('subscribe.confirmationHello') .
 						"\n" . $this->pi_getLL('subscribe.confirmationtext') . "\n";
 
-					 // unsubscribe
+					// unsubscribe
 					$message .= $unsubscribe;
 
-					 // send
+					// send
 					t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
 				}
 			}

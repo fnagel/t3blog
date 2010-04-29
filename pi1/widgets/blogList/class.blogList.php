@@ -303,7 +303,7 @@ function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 		$image['altText'] = $title;
 		$imagestring = $this->cObj->IMAGE($image);
 
-	   return $imagestring;
+	return $imagestring;
 }
 
 
@@ -319,8 +319,8 @@ function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 		$dateInfo = getdate($date);
 		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
 			'blogList' => array(
-				'day' => $dateInfo['mday'],
-				'month' => $dateInfo['mon'],
+				'day' => sprintf('%02d', $dateInfo['mday']),
+				'month' => sprintf('%02d', $dateInfo['mon']),
 				'year' => $dateInfo['year'],
 				'showUidPerma' => $uid
 			)
