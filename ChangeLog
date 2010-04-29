@@ -1,3 +1,7 @@
+2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
+
+	Fixed bug #13867: XCLASS doesn't work in widgets because of includes in functions
+
 2010-03-16  Dmitry Dulepov  <ddulepov@snowflake.ch>
 
 	* Released version 0.8.3

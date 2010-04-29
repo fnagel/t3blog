@@ -67,13 +67,13 @@ class blogList extends tslib_pibase {
 		if($this->localPiVars['showUid'] || $this->localPiVars['showUidPerma']){
 
 			//show single view
-			require_once('class.singleFunctions.php');
+			t3lib_div::requireOnce(t3lib_extMgm::extPath('t3blog', 'pi1/widgets/blogList/class.singleFunctions.php'));
 			$singleFunctions = t3lib_div::makeInstance('singleFunctions');
 			$content = $singleFunctions->main($content, $this->conf, $piVars);
 
 		}else{
 			// showlist view's
-			require_once('class.listFunctions.php');
+			t3lib_div::requireOnce(t3lib_extMgm::extPath('t3blog', 'pi1/widgets/blogList/class.listFunctions.php'));
 			$listFunctions = t3lib_div::makeInstance('listFunctions');
 			$content = $listFunctions->main($content, $this->conf, $piVars);
 		}
@@ -281,40 +281,40 @@ class blogList extends tslib_pibase {
 
 
 	/**
-    * Instantiates an IMAGE object (see TSREF for more info on that) and returns the according string
-    * ready for use in your HTML.
-    *
-    * @param    string  $imagePath: The image's path. Typically uploads/tx_pluginname/filename
-    * @param	string	$title: titel of the image
-    * @param    array   $conf: Configuration for the image. See TSREF IMAGE for more info.
-    * @param	boolean	$icon: whether icon is set or not
-    * @return   string	An image string.
-    */
-   function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
+	* Instantiates an IMAGE object (see TSREF for more info on that) and returns the according string
+	* ready for use in your HTML.
+	*
+	* @param    string  $imagePath: The image's path. Typically uploads/tx_pluginname/filename
+	* @param	string	$title: titel of the image
+	* @param    array   $conf: Configuration for the image. See TSREF IMAGE for more info.
+	* @param	boolean	$icon: whether icon is set or not
+	* @return   string	An image string.
+	*/
+function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 		$image = $conf;
 
 		if ($icon) {
-		   $image['file'] = $this->extensionPath. $imagePath;
+		$image['file'] = $this->extensionPath. $imagePath;
 		} else {
-		   $image['file'] = $this->uploadPath. $imagePath;
+		$image['file'] = $this->uploadPath. $imagePath;
 		}
 
 		$image['titleText'] = $title;
 		$image['altText'] = $title;
 		$imagestring = $this->cObj->IMAGE($image);
 
-       return $imagestring;
-   }
+	   return $imagestring;
+}
 
 
-   /**
-    * returns a link to the blog entry. or only the url.
-    *
-    * @param 	int		$uid: blogEntryUid
-    * @param 	date	$date: date of the blog entry
+/**
+	* returns a link to the blog entry. or only the url.
+	*
+	* @param 	int		$uid: blogEntryUid
+	* @param 	date	$date: date of the blog entry
 	* @param 	boolean	$onlyUrl: whether to display only the url or with a link
-    * @return 	string	permalink
-    */
+	* @return 	string	permalink
+	*/
 	function getPermalink($uid, $date, $onlyUrl = false) {
 		$dateInfo = getdate($date);
 		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
@@ -338,13 +338,13 @@ class blogList extends tslib_pibase {
 		$cObj = t3lib_div::makeInstance('tslib_cObj');
 		$permaLink = $cObj->typoLink($this->pi_getLL('permalinkTitle'), $typolinkConf);
 
-   		return $permaLink;
-   }
+		return $permaLink;
+}
 
-   /**
-    * returns the number of views by each post
-    *
-    */
+/**
+	* returns the number of views by each post
+	*
+	*/
 	function getNumberOfViews($numberOfViews) {
 
 		return($numberOfViews);
