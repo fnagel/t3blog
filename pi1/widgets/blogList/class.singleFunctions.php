@@ -35,7 +35,7 @@ class singleFunctions extends blogList {
 	var $scriptRelPath = 'pi1/widgets/blogList/class.singleFunctions.php';	// Path to this script relative to the extension dir.
 	var $pi_checkCHash = false;
 	var $prevPrefixId = 'blogList';
-    var $uid;
+	var $uid;
 
 
 	/**
@@ -49,7 +49,7 @@ class singleFunctions extends blogList {
 	function main($content, array $conf, $piVars) {
 		$this->globalPiVars = $piVars;
 		$this->localPiVars 	= $piVars[$this->prevPrefixId]; //blogList pvars
-        $this->uid  		= isset($this->localPiVars['showUid']) ? $this->localPiVars['showUid'] : $this->localPiVars['showUidPerma'];
+		$this->uid  		= isset($this->localPiVars['showUid']) ? $this->localPiVars['showUid'] : $this->localPiVars['showUidPerma'];
 		$this->conf 		= $conf;
 		$this->init();
 		$this->cObj 		= t3lib_div::makeInstance('tslib_cObj');
@@ -160,7 +160,7 @@ class singleFunctions extends blogList {
 
 				$data = array(
 					'uid'			=>	$row['postuid'],
-                    'blogPid'		=>	t3blog_div::getBlogPid(),
+					'blogPid'		=>	t3blog_div::getBlogPid(),
 					'title'			=>	$this->getTitleLinked($row['title'], $this->uid, $row['date']),
 					'date'			=>	$this->getDate($row['date']),
 					'time'			=>	$this->getTime($row['date']),
@@ -235,16 +235,16 @@ class singleFunctions extends blogList {
 
 			// comment comments
 			if ($this->localPiVars['comParentId'] > 0) {
- 				$commentFormFields = array('comParentId','commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
- 		    }
+				$commentFormFields = array('comParentId','commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
+			 }
 			else {
- 		        $commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
- 		    }
+				 $commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
+			 }
 
-		 	// captcha image
-		 	if ($this->conf['useCaptcha'] == 1) {
-		 		array_push($commentFormFields, 'captcha', 'captchaimage');
-			 	$captchaHTMLoutput = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
+			// captcha image
+			if ($this->conf['useCaptcha'] == 1) {
+				array_push($commentFormFields, 'captcha', 'captchaimage');
+				$captchaHTMLoutput = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
 					'pi1/widgets/blogList/captcha/captcha.php?' .
 					'font=' . htmlspecialchars($this->conf['captchaFont']) .
 					'&amp;fontSize=' . htmlspecialchars($this->conf['captchaFontSize']) .
@@ -258,8 +258,8 @@ class singleFunctions extends blogList {
 			}
 
 			// subscribe for comments
-		 	if ($this->conf['subscribeForComments'] == 1) {
-		 		array_push($commentFormFields, 'subscribe');
+			if ($this->conf['subscribeForComments'] == 1) {
+				array_push($commentFormFields, 'subscribe');
 			}
 
 			//check if i'ts editing a comment
@@ -518,9 +518,9 @@ class singleFunctions extends blogList {
 				'entrydate'	=> $date,
 				'parentcom' => $row['parent_id'] > 0 || $this->conf['commentComments'] == 0 ? '' : $this->pi_getLL('commentComment'),
 				'blog_uid'  => t3blog_div::getBlogPid(),
- 				'blog_year' => $this->localPiVars['year'],
- 				'blog_month'=> $this->localPiVars['month'],
- 				'blog_day' 	=> $this->localPiVars['day'],
+				'blog_year' => $this->localPiVars['year'],
+				'blog_month'=> $this->localPiVars['month'],
+				'blog_day' 	=> $this->localPiVars['day'],
 				'edit' 		=> ($editable?$this->pi_getLL('editLink'):''),
 				'parent_id' => $row['parent_id'],
 				'fk_post' 	=> $this->localPiVars['showUid'],
@@ -546,30 +546,30 @@ class singleFunctions extends blogList {
 
 	/**
 	* Lists all the comments referenced to a parent comment.
- 	* @author Thomas Imboden <timboden@snowflake.ch>
- 	*
- 	* @param       int		$parentId: UID of the parent comment
- 	* @return      			comment listing
- 	*/
- 	function listCommentedComments($parentId){
- 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
- 				'uid,title,author,email,website,date,text,parent_id',                                                                                                                                                                                                                                                                                                                                           // SELECT ...
- 		        'tx_t3blog_com',                                                                                                                                                                                                                                                                                                                                                                                                                        // FROM ...
- 		        'parent_id=' . intval($parentId) .
+	 * @author Thomas Imboden <timboden@snowflake.ch>
+	 *
+	 * @param       int		$parentId: UID of the parent comment
+	 * @return      			comment listing
+	 */
+	function listCommentedComments($parentId){
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+				'uid,title,author,email,website,date,text,parent_id',                                                                                                                                                                                                                                                                                                                                           // SELECT ...
+				 'tx_t3blog_com',                                                                                                                                                                                                                                                                                                                                                                                                                        // FROM ...
+				 'parent_id=' . intval($parentId) .
 					' AND fk_post=' . intval($this->localPiVars['showUid']) .
 					' AND pid=' . t3blog_div::getBlogPid() .
 					' AND approved=1 AND spam=0 ' .
 					$this->cObj->enableFields('tx_t3blog_com'), '', 'date'
- 		);
+		);
 
- 		$comments = '';
- 		for ($i = 0; false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)); $i++) {
- 			if ($this->conf['gravatar']) {
- 		    	$gravatar = $this->getGravatar('', $row['email'], $row['author']);
- 		    }
+		$comments = '';
+		for ($i = 0; false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)); $i++) {
+			if ($this->conf['gravatar']) {
+				 $gravatar = $this->getGravatar('', $row['email'], $row['author']);
+			 }
 			else {
- 		        $gravatar = '';
- 		    }
+				 $gravatar = '';
+			 }
 
 			$dataCom = array(
 				'uid'                   => $row['uid'],
@@ -585,12 +585,12 @@ class singleFunctions extends blogList {
 				'margin'                => '20px',
 			);
 
- 		    $comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
- 		}
+			 $comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
+		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
- 		return $comments;
- 	}
+		return $comments;
+	}
 
 
 	/**
@@ -640,57 +640,57 @@ class singleFunctions extends blogList {
 		$fe_group	= $rowpost['fe_group'];
 
 		if (isset($author)) {	// set cookie
-		    setcookie('currentCommentAuthor', $author, time()+36000, '/');
-		    setcookie('currentCommentEmail', $email, time()+36000, '/');
-		    setcookie('currentCommentWebsite', $website, time()+36000, '/');
-	    }
+			setcookie('currentCommentAuthor', $author, time()+36000, '/');
+			setcookie('currentCommentEmail', $email, time()+36000, '/');
+			setcookie('currentCommentWebsite', $website, time()+36000, '/');
+		}
 
-	    list($error, $errorMsg) = array(false, '');	//check entry
-	    if (!$this->checkRequired($author, 'commentauthor')) {	//check author
-    		$error = true;
-    		$errorMsg .= t3blog_div::getSingle(array('value' => $this->pi_getLL('error_commentauthor')), 'errorWrap', $this->conf);
-	   	}
+		list($error, $errorMsg) = array(false, '');	//check entry
+		if (!$this->checkRequired($author, 'commentauthor')) {	//check author
+			$error = true;
+			$errorMsg .= t3blog_div::getSingle(array('value' => $this->pi_getLL('error_commentauthor')), 'errorWrap', $this->conf);
+		}
 
 		if (!$this->checkRequired($title,'commenttitle')) {	//check title
-    		$error = true;
-    		$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttitle')), 'errorWrap', $this->conf);
-	   	}
+			$error = true;
+			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttitle')), 'errorWrap', $this->conf);
+		}
 
 		if (!$this->checkRequired($text,'commenttext')) {	//check text
-    		$error = true;
-    		$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttext')), 'errorWrap', $this->conf);
-	   	}
+			$error = true;
+			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttext')), 'errorWrap', $this->conf);
+		}
 
 		if (!$this->checkRequired($email,'commentauthoremail') 	//check email
 				|| ($email && t3blog_div::checkEmail($email))) {
-    		$error = true;
-    		$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthoremail')), 'errorWrap', $this->conf);
-	   	}
+			$error = true;
+			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthoremail')), 'errorWrap', $this->conf);
+		}
 
 		if (!$this->checkRequired($website,'commentauthorwebsite') 	//check website
 				|| ($website && t3blog_div::checkExternalUrl($website))) {
-    		$error = true;
-    		$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthorwebsite')), 'errorWrap', $this->conf);
-	   	}
+			$error = true;
+			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthorwebsite')), 'errorWrap', $this->conf);
+		}
 
-	   	// captcha
-	   	if ($this->conf['useCaptcha'] == 1) {
+		// captcha
+		if ($this->conf['useCaptcha'] == 1) {
 			session_start();
 			$captchaStr = $_SESSION['tx_captcha_string'];
 			$_SESSION['tx_captcha_string'] = '';
 
-		   	if (!strlen($captchaStr) || $this->localPiVars['captcha'] != $captchaStr) {
+			if (!strlen($captchaStr) || $this->localPiVars['captcha'] != $captchaStr) {
 				$error = true;
-			   	$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_captcha')), 'errorWrap', $this->conf);
-		   	}
-   		}
+				$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_captcha')), 'errorWrap', $this->conf);
+			}
+		}
 
-	    if ($error) {
-	    	$this->localPiVars['errorMsg']=$errorMsg;
-	    }
+		if ($error) {
+			$this->localPiVars['errorMsg']=$errorMsg;
+		}
 		else {
-	    	// unset the comment form values
-	    	unset($this->piVars[$this->prevPrefixId]['commenttitle']);
+			// unset the comment form values
+			unset($this->piVars[$this->prevPrefixId]['commenttitle']);
 			unset($this->piVars[$this->prevPrefixId]['commenttext']);
 			unset($this->piVars[$this->prevPrefixId]['uid']);
 			unset($this->piVars[$this->prevPrefixId]['editUid']);
@@ -762,22 +762,22 @@ class singleFunctions extends blogList {
 						// assemble email
 						$unsubscribe	= '<' . $this->getUnsubscribeLink($uid, $value['code']) . '>' ."\n";
 						$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']).'"'. "\n";
-	 	            	$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
-	 	            	$receiver   	= $address;
-	 	             	$subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;
-	 	             	$from       	= $this->conf['senderEmail'];
-	 	             	$headers    	= 'From: ' . $from;
+						 $address		= str_replace(array('\\n', '\\r'), '', $value['email']);
+						 $receiver   	= $address;
+						  $subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;
+						  $from       	= $this->conf['senderEmail'];
+						  $headers    	= 'From: ' . $from;
 
-	 	            	$message       .= $this->pi_getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
-	 	            	$message       .= $this->pi_getLL('subscribe.notification') . "\n\n";
-	 	            	$message       .= $text . "\n";
+						 $message       .= $this->pi_getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
+						 $message       .= $this->pi_getLL('subscribe.notification') . "\n\n";
+						 $message       .= $text . "\n";
 
-	 	            	// unsubscribe
-	 	            	$message       .= $this->pi_getLL('subscribe.unsubscribe') ."\n";
-					 	$message	   .= $unsubscribe;
+						 // unsubscribe
+						 $message       .= $this->pi_getLL('subscribe.unsubscribe') ."\n";
+						$message	   .= $unsubscribe;
 
-	 	             	// send
-				  		t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
+						  // send
+						t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
 					}
 
 					// update lastsent to the last comment time
@@ -788,9 +788,9 @@ class singleFunctions extends blogList {
 			}
 
 			// insert if subscribe was marked
-	    	if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
+			if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
 
-			    $table_nl 	= 'tx_t3blog_com_nl';
+				$table_nl 	= 'tx_t3blog_com_nl';
 
 				// check if subscriber is already listed for this post
 				$fields_nl = 'uid';
@@ -826,25 +826,25 @@ class singleFunctions extends blogList {
 
 					$message = '';
 					$unsubscribe = '<' . $this->getUnsubscribeLink($uid, $code) . '>'."\n";
-	 	            $address = str_replace(array('\\n', '\\r'), '', $email);
-	 	            $receiver = $address;
-	 	            $subject = $this->pi_getLL('subscribe.confirmation').': '.$posttitle;
-	 	            $from = $this->conf['senderEmail'];
-	 	            $headers = 'From: ' . $from;
+					 $address = str_replace(array('\\n', '\\r'), '', $email);
+					 $receiver = $address;
+					 $subject = $this->pi_getLL('subscribe.confirmation').': '.$posttitle;
+					 $from = $this->conf['senderEmail'];
+					 $headers = 'From: ' . $from;
 
-	 	            $message .= $this->pi_getLL('subscribe.confirmationHello') .
+					 $message .= $this->pi_getLL('subscribe.confirmationHello') .
 						"\n" . $this->pi_getLL('subscribe.confirmationtext') . "\n";
 
-	 	            // unsubscribe
+					 // unsubscribe
 					$message .= $unsubscribe;
 
-	 	            // send
-				  	t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
+					 // send
+					t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
 				}
 			}
-	    }
+		}
 
-	    return !$error;
+		return !$error;
 	}
 
 	/**
@@ -900,7 +900,8 @@ class singleFunctions extends blogList {
 		t3lib_div::plainMailEncoded(
 			$this->conf['adminsCommentsEmail'],			//email (receiver)
 			$this->pi_getLL('commentAdminMailSubject'),	//subject
-			$messageText								//message
+			$messageText,								//message
+			'From: ' . $this->conf['adminsCommentsEmail']
 		);
 	}
 
@@ -1053,15 +1054,15 @@ class singleFunctions extends blogList {
 		 * Mit USER_INT arbeiten?
 		 */
 
-		 // if a BE user is logged and these views should not be count we immediatly can switch back
-		 if($_COOKIE['be_typo_user'] and !($this->conf['countBEUsersViews'])){
-		 	return($rise);
-		 }
+		// if a BE user is logged and these views should not be count we immediatly can switch back
+		if($_COOKIE['be_typo_user'] and !($this->conf['countBEUsersViews'])){
+			return($rise);
+		}
 
-		 $cookieKey = md5($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'].$this->uid);
-		 if($_COOKIE['fe_typo_user'] and ($_COOKIE['T3BLOGvisit'.$cookieKey]!= $this->uid)){
-		 	setcookie('T3BLOGvisit'.$cookieKey, $this->uid, time()+$this->conf['timePeriodToRecountView']);
-		 	$rise = true;
+		$cookieKey = md5($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'].$this->uid);
+		if($_COOKIE['fe_typo_user'] and ($_COOKIE['T3BLOGvisit'.$cookieKey]!= $this->uid)){
+			setcookie('T3BLOGvisit'.$cookieKey, $this->uid, time()+$this->conf['timePeriodToRecountView']);
+			$rise = true;
 		}elseif(!$_COOKIE['fe_typo_user']){ // cookies are not accepted by the user...
 			$rise = false;
 		}
