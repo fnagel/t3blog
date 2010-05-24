@@ -7,6 +7,7 @@
 	* Fixed bug #6886: class.calendar / $startDay / $startMonth / $dayNames
 	* Fixed bug #7799: single item navigation does not work
 	* Fixed bug #7424: hardcoded navigation in single view
+	* Fixed bug #7800: show filter information in single view when filtering happens by date
 
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 

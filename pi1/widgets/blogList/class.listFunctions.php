@@ -199,19 +199,7 @@ class listFunctions extends blogList {
 
 		$singleData['tags'] = $tagtitle;
 		if ($this->globalPiVars) {
-			if ($this->globalPiVars['sword']) {
-				$singleData['filtered'] = htmlspecialchars($this->globalPiVars['sword']);
-			}
-			elseif ($this->localPiVars['tags']) {
-				$singleData['filtered'] = htmlspecialchars($this->localPiVars['tags']);
-			}
-			elseif ($this->localPiVars['author']) {
-				$singleData['filtered'] = t3blog_div::getAuthorByUid($this->localPiVars['author']);
-			}
-			elseif ($this->localPiVars['category']) {
-				$singleData['filtered'] = t3blog_div::getCategoryNameByUid($this->localPiVars['category']);
-			}
-
+			$singleData['filtered'] = $this->getFilteredBy();
 			$singleData['text']	= $this->pi_getLL('filteredByText');
 			$singleData['resetText'] = $this->pi_getLL('resetText');
 		}
@@ -265,7 +253,7 @@ class listFunctions extends blogList {
 			}
 			$data = array(
 				'uid'			=> $row['uid'],
-                                'blogPid'		=> t3blog_div::getBlogPid(),
+								'blogPid'		=> t3blog_div::getBlogPid(),
 				'oddeven'		=> ($i%2==0 ? 'odd' : 'even'),
 				'title'			=> $this->getTitleLinked($row['title'], $row['uid'], $row['date']),
 				'date'			=> $this->getDate($row['date']),
@@ -302,6 +290,39 @@ class listFunctions extends blogList {
 		return $content;
 	}
 
+
+	/**
+	 * Obtains filter information for the current URL
+	 *
+	 * @return string
+	 */
+	protected function getFilteredBy() {
+		$result = '';
+
+		if ($this->globalPiVars['sword']) {
+			$result = htmlspecialchars($this->globalPiVars['sword']);
+		}
+		elseif ($this->localPiVars['tags']) {
+			$result = htmlspecialchars($this->localPiVars['tags']);
+		}
+		elseif ($this->localPiVars['author']) {
+			$result = t3blog_div::getAuthorByUid($this->localPiVars['author']);
+		}
+		elseif ($this->localPiVars['category']) {
+			$result = t3blog_div::getCategoryNameByUid($this->localPiVars['category']);
+		}
+		elseif ($this->localPiVars['datefrom']) {
+			if (function_exists('strptime')) {
+				$tm = strptime($this->localPiVars['datefrom'], '%Y-%m-%d');
+				$date = mktime(0, 0, 0, $tm['tm_mon'] + 1, $tm['tm_mday'], $tm['tm_year']);
+			}
+			else {
+				$date = strtotime($this->localPiVars['datefrom']);
+			}
+			$result = strftime($this->pi_getLL('filter_date_format'), $date);
+		}
+		return $result;
+	}
 
 	/**
 	 * gets the hierarchic categories and putsthem in the commaseparated list
