@@ -74,8 +74,8 @@ class calendar extends tslib_pibase {
 		$this->pi_loadLL();
 
 		// Initialize localized data
-		$this->startDay = intval($this->conf['startDay']);
-		$this->startMonth = max(1, intval($this->conf['startMonth']));
+		$this->startDay = min(6, max(0, intval($this->conf['startDay'])));
+		$this->startMonth = min(12, max(1, intval($this->conf['startMonth'])));
 		$this->dayNames = array();
 		for ($day = 0; $day < 7; $day++) {
 			$this->dayNames[] = $this->pi_getLL('day_' . $day);
