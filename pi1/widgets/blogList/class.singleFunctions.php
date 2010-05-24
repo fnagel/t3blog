@@ -180,13 +180,11 @@ class singleFunctions extends blogList {
 					'addcomment'	=> (!$this->localPiVars['isAjax']) ? $this->showCommentForm($row['allow_comments']) : $this->addCommentToPost($this->uid),
 					'tagClouds'		=>	$row['tagClouds'],
 					'number_views'	=>	$this->getNumberOfViews($row['number_views']),
+					'navigation'    => $this->getSingleNavigation($this->uid)
 				);
 
 				$content = t3blog_div::getSingle($data, 'single', $this->conf);
 				$content = str_replace('###MORE###', '', $content);
-				if ($content) {
-					$content = $this->getSingleNavigation($this->uid) . $content;
-				}
 			}
 		}
 

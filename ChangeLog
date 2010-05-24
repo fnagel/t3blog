@@ -6,6 +6,7 @@
 	* Fixed bug #7490: sort tag cloud alphabetically
 	* Fixed bug #6886: class.calendar / $startDay / $startMonth / $dayNames
 	* Fixed bug #7799: single item navigation does not work
+	* Fixed bug #7424: hardcoded navigation in single view
 
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
