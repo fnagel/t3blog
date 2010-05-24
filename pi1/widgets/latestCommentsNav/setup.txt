@@ -7,7 +7,7 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				wrap = <h3>|</h3>
-				field=  title
+				field = title
 			}
 			20 = TEXT
 			20 {
