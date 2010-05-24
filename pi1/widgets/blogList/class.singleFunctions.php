@@ -918,6 +918,7 @@ class singleFunctions extends blogList {
 		$listFunctions = t3lib_div::makeInstance('listFunctions');
 		$listFunctions->cObj = $listFunctions->localcObj = $this->cObj;
 		$listFunctions->conf = $this->conf;
+		$this->conf['numberOfRecords'] = $listFunctions->getListItems(true, false);
 		$items = $listFunctions->getListItems(false, true);
 		$data = array();
 
