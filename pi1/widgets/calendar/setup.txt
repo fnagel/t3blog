@@ -19,17 +19,20 @@ plugin.tx_t3blog_pi1 {
 				additionalParams.dataWrap = &tx_t3blog_pi1[blogList][datefrom]={field:date}&tx_t3blog_pi1[blogList][dateto]={field:date}
 			}
 		}
-	
+
 		navLink = TEXT
 		navLink {
 			typolink {
 				useCacheHash = 1
 				parameter.data = TSFE:id
-				additionalParams.dataWrap = &tx_t3blog_pi1[blogList][month]={field:month}&tx_t3blog_pi1[blogList][year]={field:year} 
+				additionalParams.dataWrap = &tx_t3blog_pi1[blogList][month]={field:month}&tx_t3blog_pi1[blogList][year]={field:year}
 				returnLast = url
 			}
 		}
 		nextString = &raquo;
 		prevString = &laquo;
+
+		startDay = 0
+		startMonth = 1
 	}
 }

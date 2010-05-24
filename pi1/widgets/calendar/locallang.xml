@@ -21,6 +21,13 @@
 			<label index="month_10">October</label>
 			<label index="month_11">November</label>
 			<label index="month_12">December</label>
+			<label index="day_0">S</label>
+			<label index="day_1">M</label>
+			<label index="day_2">T</label>
+			<label index="day_3">W</label>
+			<label index="day_4">T</label>
+			<label index="day_5">F</label>
+			<label index="day_6">S</label>
 		</languageKey>
 		<languageKey index="de" type="array">
 			<label index="back">Zurück</label>

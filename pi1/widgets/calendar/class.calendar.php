@@ -13,7 +13,7 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
 
 class calendar extends tslib_pibase {
 	var $prefixId      = 'calendar';		// Same as class name
-	var $scriptRelPath = 'pi1/widgets/archive/class.calendar.php';	// Path to this script relative to the extension dir.
+	var $scriptRelPath = 'pi1/widgets/calendar/class.calendar.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
 	var $pi_checkCHash = false;
 	var $localPiVars;
@@ -72,6 +72,18 @@ class calendar extends tslib_pibase {
 		$this->localCobj = t3lib_div::makeInstance('tslib_cObj');
 		$this->cObj = $this->localCobj;
 		$this->pi_loadLL();
+
+		// Initialize localized data
+		$this->startDay = intval($this->conf['startDay']);
+		$this->startMonth = max(1, intval($this->conf['startMonth']));
+		$this->dayNames = array();
+		for ($day = 0; $day < 7; $day++) {
+			$this->dayNames[] = $this->pi_getLL('day_' . $day);
+		}
+		$this->monthNames = array();
+		for ($month = 1; $month <= 12; $month++) {
+			$this->monthNames[] = $this->pi_getLL('month_' . $month);
+		}
 	}
 
 
@@ -511,26 +523,25 @@ class calendar extends tslib_pibase {
 	The start day of the week. This is the day that appears in the first column
 	of the calendar. Sunday = 0.
 	*/
-	var $startDay = 0;
+	var $startDay;
 
 	/*
 	The start month of the year. This is the month that appears in the first slot
 	of the calendar in the year view. January = 1.
 	*/
-	var $startMonth = 1;
+	var $startMonth;
 
 	/*
 	The labels to display for the days of the week. The first entry in this array
 	represents Sunday.
 	*/
-	var $dayNames = array("S", "M", "T", "W", "T", "F", "S");
+	var $dayNames;
 
 	/*
 	The labels to display for the months of the year. The first entry in this array
 	represents January.
 	*/
-	var $monthNames = array("January", "February", "March", "April", "May", "June",
-	"July", "August", "September", "October", "November", "December");
+	var $monthNames;
 
 
 	/*

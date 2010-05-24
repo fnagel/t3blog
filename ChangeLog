@@ -4,6 +4,7 @@
 	* Fixed bug #7875: typo3conf/ext/t3blog is hard-coded in source files
 	* Fixed bug #7491: ending ellipsis after RSS description
 	* Fixed bug #7490: sort tag cloud alphabetically
+	* Fixed bug #6886: class.calendar / $startDay / $startMonth / $dayNames
 
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
