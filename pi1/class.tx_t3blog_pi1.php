@@ -37,7 +37,7 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	var $scriptRelPath = 'pi1/class.tx_t3blog_pi1.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
 	var $pi_checkCHash = true;
-	var $widgetFolder = 'typo3conf/ext/t3blog/pi1/widgets/';
+	var $widgetFolder;
 
 	/**
 	 * The cObj
@@ -97,6 +97,7 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 *
 	 */
 	function init(){
+		$this->widgetFolder = t3lib_extMgm::siteRelPath('t3blog') . '/pi1/widgets/';
 		$this->localcObj = t3lib_div::makeInstance('tslib_cObj');
 
 		//include classes
@@ -146,10 +147,10 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 */
 	function includeJavaScript($path, $file)	{
 		$rc =
-	   		'<script src="'.	/*t3lib_extMgm::siteRelPath($this->extKey).dirname($this->scriptRelPath).*/
-	   		$path.$file. '" type="text/javascript"></script>';
+			'<script src="'.	/*t3lib_extMgm::siteRelPath($this->extKey).dirname($this->scriptRelPath).*/
+			$path.$file. '" type="text/javascript"></script>';
 
-	   	return $rc;
+		return $rc;
 	}
 
 	/**
@@ -171,10 +172,10 @@ class tx_t3blog_pi1 extends tslib_pibase {
 		//Parse and return the result.
 		return $this->localCobj->cObjGetSingle($this->conf[$ts], $this->conf[$ts.'.']);
 	}
-	
+
 	/**
 	 * Generates a pingback URL
-	 * 
+	 *
 	 * @return string
 	 */
 	protected function getPingbackUrl() {

@@ -68,16 +68,17 @@ class rss extends tslib_pibase {
 		// frontend output of RSS-links for the blog
 		if(!t3lib_div::_GP('type') or t3lib_div::_GP('type') == 0) {
 
+			$siteRelPath = t3lib_extMgm::siteRelPath('t3blog');
 			$data = array(
 				'title'				=>	$this->pi_getLL('rss_click_here'),
-				'src091'    		=>	'typo3conf/ext/t3blog/icons/new_rss091.png',
+				'src091'    		=>	$siteRelPath . '/icons/new_rss091.png',
 				'postLinkTitle'		=>	$this->pi_getLL('rss_click_post'),
 				'pid'				=> 	t3blog_div::getBlogPid(),
 				'valuePost091'		=>	$this->pi_getLL('rss_click_post'),
 				'valueComments091'	=>	$this->pi_getLL('rss_click_comment'),
 				'feed091'			=>	'0.91',
 				'commentLinkTitle'	=>	$this->pi_getLL('rss_click_comment'),
-				'src20'        		=>  'typo3conf/ext/t3blog/icons/new_rss20.png',
+				'src20'        		=>  $siteRelPath . '/icons/new_rss20.png',
 				'feed20'			=>	'2.0',
 				'valuePost20'		=>	$this->pi_getLL('rss_click_post'),
 				'valueComments20'	=>	$this->pi_getLL('rss_click_comment'),
@@ -97,7 +98,7 @@ class rss extends tslib_pibase {
 	}
 
 
-	 /**
+	/**
 	 * Create XML for RSS-Feed
 	 *
 	 * @param	string		$content: The PlugIn content
@@ -241,7 +242,7 @@ class rss extends tslib_pibase {
 	 */
 	function renderHeader()	{
 		if(strlen($this->conf['feedImage']) < 10){
-			$feedimage = $this->conf['feedLink'].'/typo3conf/ext/t3blog/icons/rss.png';
+			$feedimage = $this->conf['feedLink'] . '/' . t3lib_extMgm::siteRelPath('3blog') . '/icons/rss.png';
 		}else{
 			$feedimage = $this->conf['feedImage'];
 		}
@@ -257,28 +258,28 @@ class rss extends tslib_pibase {
 		$feedLanguage = $this->conf['feedLanguage'] != '' ? $this->conf['feedLanguage'] : 'en-en';
 
 		$this->lines[].='<channel>
-		 <title>'.htmlspecialchars(substr($this->conf['feedTitle'],0,100)).'</title>
-		 <link>'.substr($this->conf['feedLink'],0,500).'</link>
-		 <description>'.substr(htmlspecialchars($this->conf['feedDescription']),0,$this->conf['feedItemDescLength']).'</description>
-		 <language>'.$feedLanguage.'</language>
-		 <generator>'.$this->conf['generator'].' '.$GLOBALS['TYPO_VERSION'].'</generator>
-		 ';
+		<title>'.htmlspecialchars(substr($this->conf['feedTitle'],0,100)).'</title>
+		<link>'.substr($this->conf['feedLink'],0,500).'</link>
+		<description>'.substr(htmlspecialchars($this->conf['feedDescription']),0,$this->conf['feedItemDescLength']).'</description>
+		<language>'.$feedLanguage.'</language>
+		<generator>'.$this->conf['generator'].' '.$GLOBALS['TYPO_VERSION'].'</generator>
+		';
 				if ($this->rssversion=='2.0') {
 					$this->lines[].='<docs>http://blogs.law.harvard.edu/tech/rss</docs>';
 				} else {
 					$this->lines[].='<docs>http://backend.userland.com/rss091</docs>';
 				}
 
-		 $this->lines[].='
-		 <copyright>'.$this->conf['feedCopyright'].'</copyright>
-		 <managingEditor>'.$this->conf['feedManagingEditor'].'</managingEditor>
-		 <webMaster>'.$this->conf['feedWebMaster'].'</webMaster>
-		 <image>
+		$this->lines[].='
+		<copyright>'.$this->conf['feedCopyright'].'</copyright>
+		<managingEditor>'.$this->conf['feedManagingEditor'].'</managingEditor>
+		<webMaster>'.$this->conf['feedWebMaster'].'</webMaster>
+		<image>
 			<title>'.substr($this->conf['feedTitle'],0,100).'</title>
 			<url>'.$feedimage.'</url>
 			<link>'.substr($this->conf['feedLink'],0,500).'</link>
 			<description>'.substr($this->conf['feedDescription'],0,$this->conf['feedItemDescLength']).'</description>
-		 </image>
+		</image>
 		';
 
 	}
@@ -492,7 +493,7 @@ class rss extends tslib_pibase {
 					}
 					else {
 						$author = $this->getAuthorByPost($value);
-	          			return '<author>' . htmlspecialchars($author['email']) .
+						return '<author>' . htmlspecialchars($author['email']) .
 							' (' . htmlspecialchars($author['realName']) . ')' . '</author>';
 					}
 				}
@@ -534,7 +535,7 @@ class rss extends tslib_pibase {
 				}
 
 				return $link."\n".$guid."\n".$category;
-                break;
+				break;
 
 			case 'text':
 				$description = $this->cleanString($value);
@@ -595,22 +596,22 @@ class rss extends tslib_pibase {
 
 	/**
 	 * Obtains the charset for the RSS feed
-	 * 
+	 *
 	 * @return string
 	 */
 	protected function getCharset() {
 		$result = 'UTF-8';
-		
+
 		if ($GLOBALS['TSFE']->metaCharset) {
 			$result = $GLOBALS['TSFE']->metaCharset;
 		}
 		elseif ($GLOBALS['TSFE']->renderCharset) {
 			$result = $GLOBALS['TSFE']->renderCharset;
 		}
-		
+
 		return $result;
 	}
-	
+
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/rss/class.rss.php'])	{

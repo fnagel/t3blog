@@ -1,6 +1,7 @@
 2010-05-24  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #7814: wrap for catLinkDivider (thanks to Hauke Hain)
+	* Fixed bug #7875: typo3conf/ext/t3blog is hard-coded in source files
 
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
