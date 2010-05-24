@@ -212,8 +212,13 @@ class tagCloud extends tslib_pibase {
 		$_c = array();
 		$cloud = '';
 
-		uasort($_tags, array($this, 'sortByCountValue'));
-		array_splice($_tags, $this->maxTagsToShow);
+		if ($this->conf['sortBy'] == 'tag') {
+			uasort($_tags, array($this, 'sortByTag'));
+		}
+		else {
+			uasort($_tags, array($this, 'sortByCountValue'));
+			array_splice($_tags, $this->maxTagsToShow);
+		}
 		// End
 
 		foreach ($_tags as $k => $v) {
@@ -259,6 +264,15 @@ class tagCloud extends tslib_pibase {
 	}
 
 	/**
+	 * Compare arrays by "count" attribute
+	 *
+	 * @return int
+	 */
+	function sortByTag($a, $b) {
+		return strcmp($a['tag'], $b['tag']);
+	}
+
+	/**
 	 * Gets link to cloud
 	 *
 	 * @param 	string		$str: name of the cloud
@@ -267,7 +281,7 @@ class tagCloud extends tslib_pibase {
 	 *
 	 * @return	link to cloud
 	 *
- 	*/
+	 */
 	function getLink($str, $overrulePIVars, $additionalATagParams) {
 		$overrulePIVars = t3lib_div::array_merge_recursive_overrule($this->piVars, $overrulePIVars);
 		$conf = array(
@@ -290,7 +304,7 @@ class tagCloud extends tslib_pibase {
 	 *
 	 * @return	sorted array
 	 *
- 	*/
+	 */
 	function arraySort2D($array, $key, $descasc='asc') {
 		if (!is_array($array) || empty($array)) {
 			return FALSE;
@@ -318,7 +332,7 @@ class tagCloud extends tslib_pibase {
 	 * @param	array		$_b
 	 *
 	 * @return	amount
- 	*/
+	 */
 	function countCompare($_a, $_b) {
 		if ($_a['count'] == $_b['count']) {
 			return strnatcasecmp($_a['tag'], $_b['tag']);
@@ -340,7 +354,7 @@ class tagCloud extends tslib_pibase {
 	 * @param	string		$thresholds
 	 *
 	 * @return	rounded tag size
- 	*/
+	 */
 	function getTagSizeLinear($count, $mincount, $maxcount, $minsize, $maxsize, $thresholds) {
 		if (!is_int($thresholds) || $thresholds<2) {
 			$thresholds = $maxsize-$minsize;
@@ -370,7 +384,7 @@ class tagCloud extends tslib_pibase {
 	 * @param	string		$thresholds
 	 *
 	 * @return	rounded tag size
- 	*/
+	 */
 	function getTagSizeLogarithmic($count, $mincount, $maxcount, $minsize, $maxsize, $thresholds) {
 		if (!is_int($thresholds) || $thresholds<2) {
 			$thresholds = $maxsize-$minsize;
@@ -392,7 +406,7 @@ class tagCloud extends tslib_pibase {
 	 * @param	string		$thresholds
 	 *
 	 * @return	color of threshold
- 	*/
+	 */
 	function getColorThresholds($c1, $c2, $thresholds) {
 		$c1 = str_replace('#', '', $c1);
 		$c2 = str_replace('#', '', $c2);
