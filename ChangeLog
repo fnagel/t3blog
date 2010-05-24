@@ -1,3 +1,7 @@
+2010-05-24  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
+
+	* Fixed bug #7814: wrap for catLinkDivider (thanks to Hauke Hain)
+
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #13867: XCLASS doesn't work in widgets because of includes in functions

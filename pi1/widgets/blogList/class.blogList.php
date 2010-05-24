@@ -215,6 +215,9 @@ class blogList extends tslib_pibase {
 		);
 
 		$catDivider = $this->conf['catLinkDivider'];
+		if (isset($this->conf['catLinkDivider.'])) {
+			$catDivider = $this->localcObj->stdWrap($catDivider, $this->conf['catLinkDivider.']);;
+		}
 		$catlist = '';
 		$index = 1;
 		$items = array();
