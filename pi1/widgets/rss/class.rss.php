@@ -540,14 +540,17 @@ class rss extends tslib_pibase {
 			case 'text':
 				$description = $this->cleanString($value);
 
-				if ($this->rssversion != '2.0') {
-					return '<description>'.htmlspecialchars(mb_substr($description,0,$this->conf['feedItemDescLength091'],'UTF-8')).'</description>';
+				$descriptionLength = $this->conf[($this->rssversion != '2.0' ? 'feedItemDescLength091' : 'feedItemDescLength20')];
+				$descriptionSubstr = mb_substr($description, 0, $descriptionLength, 'UTF-8');
+				if (mb_strlen($description, 'UTF-8') != mb_strlen($descriptionSubstr, 'UTF-8')) {
+					$descriptionSubstr += '...';
 				}
-				else {
-					return '<description>'.htmlspecialchars(mb_substr($description,0,$this->conf['feedItemDescLength20'],'UTF-8')).'</description>
-					<content:encoded><![CDATA['.$description.']]></content:encoded>';
+				$result = '<description>' . htmlspecialchars($descriptionSubstr) . '</description>';
+
+				if ($this->rssversion == '2.0') {
+					$result .= '<content:encoded><![CDATA[' . $description . ']]></content:encoded>';
 				}
-				break;
+				return $result;
 
 			case 'date':
 				setlocale (LC_TIME, $this->conf['feedTimeLocale']);

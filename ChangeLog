@@ -2,6 +2,7 @@
 
 	* Fixed bug #7814: wrap for catLinkDivider (thanks to Hauke Hain)
 	* Fixed bug #7875: typo3conf/ext/t3blog is hard-coded in source files
+	* Fixed bug #7491: ending ellipsis after RSS description
 
 2010-04-29  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
