@@ -71,14 +71,14 @@ class rss extends tslib_pibase {
 			$siteRelPath = t3lib_extMgm::siteRelPath('t3blog');
 			$data = array(
 				'title'				=>	$this->pi_getLL('rss_click_here'),
-				'src091'    		=>	$siteRelPath . '/icons/new_rss091.png',
+				'src091'    		=>	$siteRelPath . 'icons/new_rss091.png',
 				'postLinkTitle'		=>	$this->pi_getLL('rss_click_post'),
 				'pid'				=> 	t3blog_div::getBlogPid(),
 				'valuePost091'		=>	$this->pi_getLL('rss_click_post'),
 				'valueComments091'	=>	$this->pi_getLL('rss_click_comment'),
 				'feed091'			=>	'0.91',
 				'commentLinkTitle'	=>	$this->pi_getLL('rss_click_comment'),
-				'src20'        		=>  $siteRelPath . '/icons/new_rss20.png',
+				'src20'        		=>  $siteRelPath . 'icons/new_rss20.png',
 				'feed20'			=>	'2.0',
 				'valuePost20'		=>	$this->pi_getLL('rss_click_post'),
 				'valueComments20'	=>	$this->pi_getLL('rss_click_comment'),
