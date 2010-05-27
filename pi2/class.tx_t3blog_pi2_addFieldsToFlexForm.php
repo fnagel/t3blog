@@ -5,148 +5,133 @@ class tx_t3blog_pi2_addFieldsToFlexForm {
 	 * fetch the available widgets
 	 *
 	 * @author 	kay stenschke <kstenschke@snowflake.ch>
-	 *
 	 * @param 	array 	$config
-	 * @param 	bool 	$getAsKeyValArray	if true: render just an ass. array (to be used not in flexform rendering, but to resolve the values again)
-	 *
 	 * @return	widget array
 	 */
-	function getWidgets($config, $getAsKeyValArray = false)	{
-		$optionsList = array();
+	public function getWidgets(array $config) {
+		$widgets = $this->getWidgetDirectories();
+		$this->updateTCEFormsItems($config, $widgets);
 
-		// fetch widgets folders:
-		$pathT3blogWidgets = t3lib_extMgm::extPath('t3blog', 'pi1/widgets');
-		$folders = $this->getFolderContents($pathT3blogWidgets, true);	// fetch list of contained folders
-		asort($folders);
-
-		// render options list from widgets and widgets TS:
-		$i = 0;
-		$assWidgetsArray = array(); // associative widgets array, for usage from other than ff-renderer to resolve the widgets' keys
-		if (is_array($folders)) 	{
-			foreach($folders as $folder)	{
-				if ($folder != '.svn')	{
-					list($widgetTitle, $widgetDescription) = $this->fetchWidgetTitleDescriptionLL($folder);
-					$optionsList[] = array(
-						0	=> $widgetTitle. ($widgetDescription[0] ? ' - '. $widgetDescription : ''),		// option
-						1	=> $i, //trim($older),	// value
-					);
-
-					$assWidgetsArray[$i] = array(
-						'folder'		=> $folder,
-						'title' 		=> $widgetTitle,
-						'desctiption'	=> $widgetDescription,
-					);
-					$i++;
-
-				}
-			}
-			if (is_array($optionsList)) {
-				if (! $config['items'] || ! is_array($config['items'])) {
-					$config['items'] = array();
-				}
-				$config['items'] = array_merge($config['items'], $optionsList);
-			}
-		}
-
-		return $getAsKeyValArray == false ? $config : $assWidgetsArray;
+		return $config;
 	}
 
+	/**
+	 * Obtains directories from t3blog and other extensions
+	 *
+	 * @return array Keys are widget keys, values are directories in EXT: or site-related format
+	 */
+	protected function getWidgetDirectories() {
+		$defaultWidgetPath = t3lib_extMgm::extPath('t3blog', 'pi1/widgets');
+		$folders = $this->getWidgetFolders($defaultWidgetPath, true);	// fetch list of contained folders
+		$this->fetchExternalWidgets($folders);
+		ksort($folders);
+
+		return $folders;
+	}
 
 	/**
-	 * fetch title and description to widget from the resp. locallang file
+	 * Fetches widget list
 	 *
-	 * @author 	kay stenschke <kstenschke@snowflake.ch>
-	 *
-	 * @param 	string $widgetFoldername
-	 * @return 	mixed
+	 * @return array
+	 * @see tx_t3blog_pi2::fetchWidgetKeys()
 	 */
-	function fetchWidgetTitleDescriptionLL($widgetFoldername) {
-		$pathT3blogWidgets = t3lib_extMgm::extPath('t3blog', 'pi1/widgets/');
-		$llFile = $pathT3blogWidgets.'/'. $widgetFoldername. '/locallang.xml';
-		if (file_exists($llFile))	{
-			$llData = $this->getFileContent($llFile);
-			$title = $this->explortXMLlabelValue($llData, 'title');
-			if ($title == '') {
-				$title = 'Empty title label ('. $llFile. ')';
-			} else {
-				if (strpos($llData, 'widgetSelector.description') !== false) {	// append description to title
-					$descr = $this->explortXMLlabelValue($llData, 'widgetSelector.description');
+	public function getWidgetList() {
+		$widgets = $this->getWidgetDirectories();
+		$widgetsArray = array(); // associative widgets array, for usage from other than ff-renderer to resolve the widgets' keys
+		foreach($widgets as $widgetKey => $widgetDirectory)	{
+			list($widgetTitle, $widgetDescription) = $this->fetchWidgetTitleAndDescription($widgetDirectory);
+			$widgetsArray[$widgetKey] = array(
+				'folder' => $widgetDirectory,
+				'key' => $widgetKey,
+				'title' => $widgetTitle,
+				'desctiption' => $widgetDescription,
+			);
+		}
+		return $widgetsArray;
+	}
 
+	/**
+	 * Updates items in TCEforms config array
+	 *
+	 * @param array $config Config array (in and out)
+	 * @param array $widgets Widgets
+	 * @return void
+	 */
+	protected function updateTCEFormsItems(array &$config, array $widgets) {
+		$widgetsArray = array();
+		foreach ($widgets as $widgetKey => $folder)	{
+			list($widgetTitle, $widgetDescription) = $this->fetchWidgetTitleAndDescription($folder);
+			$optionsList[] = array(
+				0 => $widgetTitle . ($widgetDescription ? ' &ndash; ' . $widgetDescription : ''),
+				1 => $widgetKey
+			);
+		}
+		$config['items'] = array_merge($config['items'], $optionsList);
+	}
+
+	/**
+	 * Fetches folders for external widgets
+	 *
+	 * @param array $folders
+	 * @return void
+	 */
+	protected function fetchExternalWidgets(array &$folders) {
+		$params = array();
+		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['getWidgets'])) {
+			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['getWidgets'] as $hookFunc) {
+				$folderArray = t3lib_div::callUserFunction($hookFunc, $params, $this);
+				if (is_array($folderArray)) {
+					foreach ($folderArray as $widgetName => $folder) {
+						if (!isset($folders[$widgetName])) {
+							$testFolder = t3lib_div::getFileAbsFileName($folder);
+							if (is_dir($testFolder)) {
+								$folders[$widgetName] = rtrim($folder, '/');
+							}
+						}
+					}
 				}
 			}
-		} else {
-			$title = 'Title label missing ('. $llFile. ')';
+		}
+	}
+
+	/**
+	 * Fetch title and description for the widget from the locallang file
+	 *
+	 * @param 	string $pathToWidget
+	 * @return 	array
+	 */
+	protected function fetchWidgetTitleAndDescription($pathToWidget) {
+		$languageFile = $pathToWidget . '/locallang.xml';
+		$languageKey = $BE_USER->uc['lang'] ? $BE_USER->uc['lang'] : 'default';
+		$localLang = t3lib_div::readLLfile($languageFile, $languageKey);
+		if (is_array($localLang) && isset($localLang[$languageKey])) {
+			return array($localLang[$languageKey]['title'], $localLang[$languageKey]['widgetSelector.description']);
 		}
 
-		return array($title, $descr);
+		return array('?', '?');
 	}
 
-
 	/**
-	 * fetch locallang value
-	 * (export key's value via exploding of xml data content)
+	 * Fetch all widget subdirectories of given directory
 	 *
-	 * @author kay stenschke <kstenschke@snowflake.ch>
-	 *
-	 * @param 	string 	$llData
-	 * @param 	string 	$key
-	 *
-	 * @return 	xml label value
+	 * @param	string	$searchInFolder Absolute folder to scan
+	 * @return	array 	Key is name, value is a path to the folder
 	 */
-	function explortXMLlabelValue($llData, $key) {
-		$rc = explode('<label index="'. $key. '">', $llData);
-		$rc = $rc[1];
-		$rc = explode('</label>', $rc);
-		$rc = trim($rc[0]);
+	protected function getWidgetFolders($searchInFolder) {
+		$files = array();
 
-		return $rc;
-	}
-
-
-	/**
-	 * Fetch all files of given folder into an array
-	 *
-	 * @param	string	$folder: folder to read-out
-	 * @param	bool	$foldersOnly
-	 *
-	 * @return	array 	$files: array of found files
-	 */
-	function getFolderContents($folder, $foldersOnly = false) {
-		$listDir= opendir($folder);
-		while(($file = readdir($listDir)) !== false) {
-			if ($file != '.' && $file != '..') {
-				if (! $foldersOnly || is_dir($folder.'/'.$file))
-				$files[]= $file;
+		$dir = opendir($searchInFolder);
+		while (($file = readdir($dir)) !== false) {
+			if ($file{0} != '.') {
+				$testPath = $searchInFolder . DIRECTORY_SEPARATOR . $file;
+				if (is_dir($testPath) && file_exists($testPath . DIRECTORY_SEPARATOR . 'locallang.xml')) {
+					$files[$file] = $testPath;
+				}
 			}
 		}
-		closedir ($listDir);
+		closedir($dir);
 
 		return $files;
-	}
-
-
-	/**
-	 * Read content of file
-	 *
-	 * @author	kay stenschke <kstenschke@snowflake.ch>
-	 *
-	 * @param	string		$filename: name of the file
-	 * @return	string		content of the file
-	 */
-	function getFileContent($filename) {
-		$handle = fopen ($filename, "rb");
-		if (!$handle) {
-			echo'Unable to open file '.$filename .' !';
-			exit();
-		} else {
-			$contents='';
-			while(!feof($handle)) {
-				$contents= $contents.(fread($handle, 4096));
-				//flush();
-			}
-			fclose ($handle);
-			return $contents;
-		}
 	}
 }
 

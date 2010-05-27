@@ -23,6 +23,9 @@
 ***************************************************************/
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
+require_once(t3lib_extMgm::extPath('t3blog', 'pi1/lib/class.t3blog_div.php'));
+require_once(t3lib_extMgm::extPath('t3blog', 'pi1/lib/class.t3blog_db.php'));
+require_once(t3lib_extMgm::extPath('t3blog', 'pi1/class.tx_t3blog_pi1.php'));
 
 /**
  * Plugin 'Blog Widget Selector' for the 't3blog' extension.
@@ -50,16 +53,21 @@ class tx_t3blog_pi2 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 
-		$this->init();	//initial method
-		t3blog_div::setAlternativeBlogPid($this->internal['storagePid']);
-		require_once (realpath(PATH_typo3conf. '/ext/t3blog/pi1/class.tx_t3blog_pi1.php'));
-		$t3blog_pi1 = t3lib_div::makeInstance('tx_t3blog_pi1');
-
-		// @note: the widgets conf TS is declared inside: ext/t3blog/static/setup.txt under plugin.tx_t3blog_pi2 {...
-		$widgetconf = $conf[$this->widgetParams['folder'].'.'];
-		$content = $t3blog_pi1->callWidget($this->widgetParams['folder'], $widgetconf);
+		$this->init();
+		$content = $this->callWidget();
 
 		return $this->pi_wrapInBaseClass($content);
+	}
+
+	protected function callWidget() {
+		$widgetConf = (array)$this->conf[$this->widgetParams['key'] . '.'];
+
+		$t3blog_pi1 = t3lib_div::makeInstance('tx_t3blog_pi1');
+		/* @var $t3blog_pi1 tx_t3blog_pi1 */
+		$t3blog_pi1->init();
+		$content = $t3blog_pi1->callWidget($this->widgetParams['key'], $widgetConf);
+
+		return $content;
 	}
 
 
@@ -72,17 +80,11 @@ class tx_t3blog_pi2 extends tslib_pibase {
 		$this->pi_initPIflexForm();	// init flexform
 
 		$this->internal['code'] = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'display', 'sDEF');
-		$this->internal['storagePid'] =  $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'storagePid', 'sDEF');
+		$this->internal['storagePid'] = $this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'storagePid', 'sDEF');
+		t3blog_div::setAlternativeBlogPid($this->internal['storagePid']);
 
-		$widgetArr = $this->fetchWidgetKeys();	// have the flexform initializer fetch the available widgets titles+ descriptions
+		$widgetArr = $this->fetchWidgetKeys();	// have the flexform initializer fetch the available widgets titles and descriptions
 		$this->widgetParams = $widgetArr[$this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'widget', 'sDEF')];	// widgets are stored numeric, need to be retranslated to widget names
-		
-		// load blog lib classes:
-		
-		//include classes
-		include_once(t3lib_extMgm::extPath('t3blog').'pi1/lib/class.t3blog_div.php');
-		include_once(t3lib_extMgm::extPath('t3blog').'pi1/lib/class.t3blog_db.php');
-		
 	}
 
 
@@ -93,12 +95,10 @@ class tx_t3blog_pi2 extends tslib_pibase {
 	 * @return array
 	 */
 	function fetchWidgetKeys() {
-		require_once(realpath(PATH_typo3conf.'/ext/t3blog/pi2/class.tx_t3blog_pi2_addFieldsToFlexForm.php'));
-		$widgetsFlexformPrep = new tx_t3blog_pi2_addFieldsToFlexForm;
-		$widgetsArr = array();
-		$widgetsArr = $widgetsFlexformPrep->getWidgets($widgetsArr, true);
-
-		return $widgetsArr;
+		t3lib_div::requireOnce(t3lib_extMgm::extPath('t3blog', 'pi2/class.tx_t3blog_pi2_addFieldsToFlexForm.php'));
+		$widgetListGenerator = t3lib_div::makeInstance('tx_t3blog_pi2_addFieldsToFlexForm');
+		/* @var $widgetListGenerator tx_t3blog_pi2_addFieldsToFlexForm */
+		return $widgetListGenerator->getWidgetList();
 	}
 
 }

@@ -13,7 +13,7 @@
 			<label index="submit_button_label">Click here to submit value</label>
 			<label index="pi_flexform.defaultTab">General setup</label>
 			<label index="pi_flexform.select_widget">Blog Widget:</label>
-			<label index="pi_flexform.storage_pid">Widget Startingpoint:</label>
+			<label index="pi_flexform.storage_pid">Widget starting point:</label>
 		</languageKey>
 	</data>
 	<orig_hash type="array">

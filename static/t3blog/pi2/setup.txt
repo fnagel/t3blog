@@ -32,5 +32,5 @@ plugin.tx_t3blog_pi2 {
 	socialBookmarks < plugin.tx_t3blog_pi1.socialBookmarks
 	tagCloud		 < plugin.tx_t3blog_pi1.tagCloud
 	searchBox		 < plugin.tx_t3blog_pi1.searchBox
-        views			< plugin.tx_t3blog_pi1.views
+	views			< plugin.tx_t3blog_pi1.views
 }

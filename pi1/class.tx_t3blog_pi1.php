@@ -23,6 +23,8 @@
 ***************************************************************/
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
+require_once(t3lib_extMgm::extPath('t3blog') . 'pi1/lib/class.t3blog_div.php');
+require_once(t3lib_extMgm::extPath('t3blog') . 'pi1/lib/class.t3blog_db.php');
 
 
 /**
@@ -75,7 +77,7 @@ class tx_t3blog_pi1 extends tslib_pibase {
 					}
 					if($widgetconf['jsFiles.']){	//get js files
 						foreach ($widgetconf['jsFiles.'] as $file){
-							$js .= $this->includeJavaScript($this->widgetFolder. $widgetname. '/', $file);
+							$js .= $this->includeJavaScript($this->widgetFolder . $widgetname. '/', $file);
 						}
 					}
 				}
@@ -97,12 +99,8 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 *
 	 */
 	function init(){
-		$this->widgetFolder = t3lib_extMgm::siteRelPath('t3blog') . '/pi1/widgets/';
+		$this->widgetFolder = t3lib_extMgm::siteRelPath('t3blog') . 'pi1/widgets/';
 		$this->localcObj = t3lib_div::makeInstance('tslib_cObj');
-
-		//include classes
-		include_once(t3lib_extMgm::extPath('t3blog').'pi1/lib/class.t3blog_div.php');
-		include_once(t3lib_extMgm::extPath('t3blog').'pi1/lib/class.t3blog_db.php');
 	}
 
 	/**
@@ -110,20 +108,35 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 *
 	 * @param 	string 	$widgetname
 	 * @param 	array 	$widgetconf
-	 * @return 	string 	(html content)
+	 * @return 	string 	html content
 	 */
-	function callWidget($widgetname, $widgetconf){
-		$fullWidgetPath = $this->widgetFolder. $widgetname. '/class.'. $widgetname.'.php';
-		if(is_file($fullWidgetPath)) {
-			t3lib_div::requireOnce($fullWidgetPath);
-			$widget = t3lib_div::makeInstance($widgetname);
-			$content = $widget->main('', $widgetconf, $this->piVars, $this->localcObj);
+	function callWidget($widgetName, array $widgetConf){
+		$content = '';
 
-			return $content;
-		}else{
-			//class not found
-			return '';
+		$widgetPath = $this->getWidgetPath($widgetName, $widgetConf);
+		if (is_file($widgetPath)) {
+			t3lib_div::requireOnce($widgetPath);
+			$widget = t3lib_div::makeInstance($widgetName);
+			$content = $widget->main('', $widgetConf, $this->piVars, $this->localcObj);
 		}
+		return $content;
+	}
+
+	/**
+	 * Obtains a path to the widget
+	 *
+	 * @param string $widgetKey
+	 * @param array $widgetConf
+	 * @return A path to the widget
+	 */
+	protected function getWidgetPath($widgetKey, array $widgetConf) {
+		if (isset($widgetConf['includeLibs'])) {
+			$widgetPath = $GLOBALS['TSFE']->tmpl->getFileName($widgetConf['includeLibs']);
+		}
+		else {
+			$widgetPath = $this->widgetFolder . $widgetKey . '/class.' . $widgetKey . '.php';
+		}
+		return $widgetPath;
 	}
 
 	/**

@@ -1,3 +1,7 @@
+2010-05-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
+
+	* Fixed bug #7622: add new widgets into separate extensions
+
 2010-05-24  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #7814: wrap for catLinkDivider (thanks to Hauke Hain)
