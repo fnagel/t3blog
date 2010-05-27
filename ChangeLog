@@ -1,6 +1,13 @@
 2010-05-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #7622: add new widgets into separate extensions
+	* Released version 0.9.0
+
+	!!!!!!!!!!!!!!!!!!!
+	WARNING! If you use pi2 plugin to add individual widgets to your pages,
+	you will need to rebuild the layout after upgrade!
+	!!!!!!!!!!!!!!!!!!!
+
 
 2010-05-24  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
