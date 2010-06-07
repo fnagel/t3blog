@@ -1,6 +1,7 @@
 2010-06-07  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Added entryCounter TS variable to blogList
+	* Fixed bug #8015: Filter for posts in a certain month in archive widget is not correct
 
 2010-05-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 

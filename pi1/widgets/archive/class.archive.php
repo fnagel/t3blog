@@ -83,8 +83,8 @@ class archive extends tslib_pibase {
 				for ($month = 12; $month > 0; $month--) {
 
 					$table = 'tx_t3blog_post';
-					$from = strtotime($actYear. '-'. $month. '-01');
-					$to = strtotime($actYear. '-'. $month. '-31');
+					$from = mktime(0, 0, 0, $month, 1, $actYear);
+					$to = mktime(0, 0, -1, $month + 1, 1, $actYear);
 					$where = 'pid = '. t3blog_div::getBlogPid(). ' AND date <= '. $GLOBALS['TYPO3_DB']->fullQuoteStr($to, $table). ' AND date >= '. $GLOBALS['TYPO3_DB']->fullQuoteStr($from, $table);
 					$list = t3blog_db::getPostByWhere($where, 'date ASC');
 
@@ -199,12 +199,12 @@ class archive extends tslib_pibase {
 				$years[$actYear]['entries'] = $entriesInMonth;
 			}
 
-			if($years){	//go throu years
+			if($years){	//go through years
 				foreach ($years as $year => $row) {	//wrap year li
 					$dataCatLinkYear = array(
 						'text'		=> $year,
-						'datefrom'	=> strtotime($year.'-01-01'),
-						'dateto'	=> strtotime($year.'-12-31'),
+						'datefrom'	=> mktime(0, 0, 0, 1, 1, $year),
+						'dateto'	=> mktime(23, 59, 59, 12, 31, $year),
 						'entries'	=> $row['entries'],
 						'id'		=> $year
 					);
