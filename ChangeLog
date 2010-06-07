@@ -3,6 +3,7 @@
 	* Added entryCounter TS variable to blogList
 	* Fixed bug #8015: Filter for posts in a certain month in archive widget is not correct
 	* Fixed bug #7997: TS setting dateformat doesn't seem to have any effect
+	* Fixed bug #8016: Clicking a day in the calendar always shows 'filtered by january 1' on some systems
 
 2010-05-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 

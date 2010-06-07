@@ -315,7 +315,7 @@ class listFunctions extends blogList {
 		elseif ($this->localPiVars['datefrom']) {
 			if (function_exists('strptime')) {
 				$tm = strptime($this->localPiVars['datefrom'], '%Y-%m-%d');
-				$date = mktime(0, 0, 0, $tm['tm_mon'] + 1, $tm['tm_mday'], $tm['tm_year']);
+				$date = mktime(0, 0, 0, $tm['tm_mon'] + 1, $tm['tm_mday'], $tm['tm_year'] + 1900);
 			}
 			else {
 				$date = strtotime($this->localPiVars['datefrom']);
