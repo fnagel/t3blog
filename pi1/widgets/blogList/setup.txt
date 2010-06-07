@@ -37,7 +37,6 @@ plugin.tx_t3blog_pi1 {
 
 		numberOfRecords = 5
 		maxPages = 1000
-		dateformat = %Y.%m.%d
 
 		#gravatar | ratings: g, pg, r, or x
 		gravatar = 1
@@ -144,7 +143,7 @@ plugin.tx_t3blog_pi1 {
 					20 {
 						if.isTrue.field = contentUids
 						10 < styles.content.get
-                        10.select.pidInList.field=blogPid
+						10.select.pidInList.field=blogPid
 						10.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid} AND uid in ( {field:contentUids} )
 					}
 					30 = TEXT

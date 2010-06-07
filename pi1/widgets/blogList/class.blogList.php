@@ -154,17 +154,14 @@ class blogList extends tslib_pibase {
 
 
 	/**
-	 * returns the date formated with the config dateformat or d.m.Y
-	 * also wrapped in the typoscript date
+	 * Returns the date formated by the typoscript 'date' object
 	 *
 	 * @author 	snowflake <typo3@snowflake.ch>
 	 * @param 	date 	$date: date to be formated
 	 *
 	 * @return 	string
 	 */
-	function getDate($date){
-		$format 		= $this->conf['dateformat'] ? $this->conf['dateformat'] : 'd.m.Y';
-		$formatedDate 	= date($format, $date);
+	function getDate($date) {
 		$data = array(
 			'date'	=> $date
 		);

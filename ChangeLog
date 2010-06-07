@@ -2,6 +2,7 @@
 
 	* Added entryCounter TS variable to blogList
 	* Fixed bug #8015: Filter for posts in a certain month in archive widget is not correct
+	* Fixed bug #7997: TS setting dateformat doesn't seem to have any effect
 
 2010-05-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
