@@ -272,6 +272,7 @@ class listFunctions extends blogList {
 				'back'			=>	$back,
 				'tagClouds'		=>	$row['tagClouds'],
 				'number_views'	=>	$this->getNumberOfViews($row['number_views']),
+				'entryCounter'  => $i
 			);
 			$content .= t3blog_div::getSingle($data, 'listItem', $this->conf);
 			$i++;
