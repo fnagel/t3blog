@@ -1,6 +1,7 @@
 2010-06-08  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #7985: widget selector displays "? - ?" on Windows
+	* Fixed bug #7981: add a hooks after comment insertion
 
 2010-06-07  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
