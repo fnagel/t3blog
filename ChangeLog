@@ -2,6 +2,7 @@
 
 	* Fixed bug #7985: widget selector displays "? - ?" on Windows
 	* Fixed bug #7981: add a hooks after comment insertion
+	* Fixed bug #8039: RSS feed doesn't show text if it exceeds the max length
 
 2010-06-07  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
