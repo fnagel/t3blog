@@ -123,8 +123,8 @@ class tx_t3blog_pi2_addFieldsToFlexForm {
 		$dir = opendir($searchInFolder);
 		while (($file = readdir($dir)) !== false) {
 			if ($file{0} != '.') {
-				$testPath = $searchInFolder . DIRECTORY_SEPARATOR . $file;
-				if (is_dir($testPath) && file_exists($testPath . DIRECTORY_SEPARATOR . 'locallang.xml')) {
+				$testPath = $searchInFolder . '/' . $file;
+				if (is_dir($testPath) && file_exists($testPath . '/locallang.xml')) {
 					$files[$file] = $testPath;
 				}
 			}
