@@ -721,6 +721,19 @@ class singleFunctions extends blogList {
 			if ($this->allowedToEditComment($editUid)) {
 				$GLOBALS['TYPO3_DB']->exec_UPDATEquery($table, 'uid=' . $editUid, $data);
 				$this->updateRefIndex($table, $editUid);
+
+				//Hook after comment update
+    		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'])) {
+    			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'] as $userFunc) {
+    			  $params = array(
+    					'data' => &$data,
+    					'table' => $table,
+    					'postUid' => $uid,
+    					'commentUid' => $editUid,
+    				);
+    				t3lib_div::callUserFunction($userFunc, $params, $this);
+    			}
+    		}
 			}
 			else {
 				// Insert comment
@@ -730,6 +743,19 @@ class singleFunctions extends blogList {
 				$data['date'] = $time;
 				$GLOBALS['TYPO3_DB']->exec_INSERTquery($table, $data);
 				$this->updateRefIndex($table, $GLOBALS['TYPO3_DB']->sql_insert_id());
+
+				//Hook after comment insertion
+    		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
+    			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'] as $userFunc) {
+    			  $params = array(
+    					'data' => &$data,
+    					'table' => $table,
+    					'postUid' => $uid,
+    					'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
+    				);
+    				t3lib_div::callUserFunction($userFunc, $params, $this);
+    			}
+    		}
 			}
 
 			// send emails if comments must not be approved
