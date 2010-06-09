@@ -4,6 +4,7 @@
 	* Fixed bug #7981: add a hooks after comment insertion
 	* Fixed bug #8039: RSS feed doesn't show text if it exceeds the max length
 	* Fixed bug #7978: function getSingleNavigation with max. 5 items
+	* Fixed bug #7980: Double semicolon
 
 2010-06-07  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
