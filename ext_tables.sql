@@ -3,12 +3,12 @@
 #
 #
 CREATE TABLE tx_t3blog_post_content_mm (
-uid_local int(11) DEFAULT '0' NOT NULL,
-uid_foreign int(11) DEFAULT '0' NOT NULL,
-tablenames varchar(30) DEFAULT '' NOT NULL,
-sorting int(11) DEFAULT '0' NOT NULL,
-KEY uid_local (uid_local),
-KEY uid_foreign (uid_foreign)
+	uid_local int(11) DEFAULT '0' NOT NULL,
+	uid_foreign int(11) DEFAULT '0' NOT NULL,
+	tablenames varchar(30) DEFAULT '' NOT NULL,
+	sorting int(11) DEFAULT '0' NOT NULL,
+	KEY uid_local (uid_local),
+	KEY uid_foreign (uid_foreign)
 );
 
 
@@ -17,12 +17,12 @@ KEY uid_foreign (uid_foreign)
 #
 #
 CREATE TABLE tx_t3blog_post_cat_mm (
-uid_local int(11) DEFAULT '0' NOT NULL,
-uid_foreign int(11) DEFAULT '0' NOT NULL,
-tablenames varchar(30) DEFAULT '' NOT NULL,
-sorting int(11) DEFAULT '0' NOT NULL,
-KEY uid_local (uid_local),
-KEY uid_foreign (uid_foreign)
+	uid_local int(11) DEFAULT '0' NOT NULL,
+	uid_foreign int(11) DEFAULT '0' NOT NULL,
+	tablenames varchar(30) DEFAULT '' NOT NULL,
+	sorting int(11) DEFAULT '0' NOT NULL,
+	KEY uid_local (uid_local),
+	KEY uid_foreign (uid_foreign)
 );
 
 
@@ -47,8 +47,8 @@ CREATE TABLE tx_t3blog_post (
 	sys_language_uid int(11) DEFAULT '0' NOT NULL,
 	l18n_parent int(11) DEFAULT '0' NOT NULL,
 	l18n_diffsource mediumblob NOT NULL,
-	deleted tinyint(4) DEFAULT '0' NOT NULL,
-	hidden tinyint(4) DEFAULT '0' NOT NULL,
+	deleted tinyint(1) DEFAULT '0' NOT NULL,
+	hidden tinyint(1) DEFAULT '0' NOT NULL,
 	starttime int(11) DEFAULT '0' NOT NULL,
 	endtime int(11) DEFAULT '0' NOT NULL,
 	fe_group int(11) DEFAULT '0' NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE tx_t3blog_post (
 	trackback_hash varchar(130) DEFAULT '' NOT NULL,
 	number_views int(11) DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	KEY parent (pid)
+	KEY sel01 (pid,deleted,hidden,crdate)
 );
 
 
@@ -138,7 +138,7 @@ CREATE TABLE tx_t3blog_cat (
 	description tinytext NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid)
+	KEY sel01 (pid,deleted,hidden)
 );
 
 
@@ -151,8 +151,8 @@ CREATE TABLE tx_t3blog_com (
 	tstamp int(11) DEFAULT '0' NOT NULL,
 	crdate int(11) DEFAULT '0' NOT NULL,
 	cruser_id int(11) DEFAULT '0' NOT NULL,
-	deleted tinyint(4) DEFAULT '0' NOT NULL,
-	hidden tinyint(4) DEFAULT '0' NOT NULL,
+	deleted tinyint(1) DEFAULT '0' NOT NULL,
+	hidden tinyint(1) DEFAULT '0' NOT NULL,
 	starttime int(11) DEFAULT '0' NOT NULL,
 	endtime int(11) DEFAULT '0' NOT NULL,
 	fe_group int(11) DEFAULT '0' NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE tx_t3blog_com (
 	parent_id int(11) DEFAULT '0' NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid)
+	KEY sel01 (pid,deleted,hidden,crdate)
 );
 
 
@@ -207,8 +207,8 @@ CREATE TABLE tx_t3blog_pingback (
 	crdate int(11) DEFAULT '0' NOT NULL,
 	cruser_id int(11) DEFAULT '0' NOT NULL,
 	sorting int(10) DEFAULT '0' NOT NULL,
-	deleted tinyint(4) DEFAULT '0' NOT NULL,
-	hidden tinyint(4) DEFAULT '0' NOT NULL,
+	deleted tinyint(1) DEFAULT '0' NOT NULL,
+	hidden tinyint(1) DEFAULT '0' NOT NULL,
 	starttime int(11) DEFAULT '0' NOT NULL,
 	endtime int(11) DEFAULT '0' NOT NULL,
 	title tinytext NOT NULL,
@@ -257,5 +257,5 @@ CREATE TABLE tt_content (
 	irre_parentid int(11) DEFAULT '0' NOT NULL,
 	irre_parenttable tinytext NOT NULL,
 
-	KEY t3blog(irre_parentid,irre_parenttable(10))
+	KEY t3blog (irre_parentid,sorting)
 );

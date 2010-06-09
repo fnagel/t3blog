@@ -136,20 +136,16 @@ class rss extends tslib_pibase {
 		if ($this->localPiVars['feed_type'] == 'post' || empty($this->localPiVars['feed_type'])) {
 			$xmlObj->setRecFields('tx_t3blog_post','title,author,uid,date,text');
 			// Add page content information
-			$res = $this->getContentResult('tx_t3blog_post',$xmlObj->rssversion);
-			$xmlObj->renderRecords('tx_t3blog_post', $res);
-			$GLOBALS['TYPO3_DB']->sql_free_result($res);
-
+			$rows = $this->getPostRows($xmlObj->rssversion);
+			$xmlObj->renderRecords('tx_t3blog_post', $rows);
 		}
 		else {
 			// get the comments
 			if ($this->localPiVars['feed_type'] == 'comment') {
-
 				$xmlObj->setRecFields('tx_t3blog_com','title,author,uid,fk_post,date,text');
 				// Add page content information
-				$res = $this->getContentResult('tx_t3blog_com',$xmlObj->rssversion);
-				$xmlObj->renderRecords('tx_t3blog_com', $res);
-				$GLOBALS['TYPO3_DB']->sql_free_result($res);
+				$rows = $this->getCommentRows($xmlObj->rssversion);
+				$xmlObj->renderRecords('tx_t3blog_com', $rows);
 			}
 		}
 
@@ -160,7 +156,77 @@ class rss extends tslib_pibase {
 
 	}
 
+	/**
+	 * Obtains comment rows. Note that the order in WHERE statement is significant
+	 * because it affects database indexes.
+	 *
+	 * @param string $rssVersion
+	 * @return array
+	 */
+	protected function getCommentRows($rssVersion) {
+		$where = 'pid=' . t3blog_div::getBlogPid() .
+			' AND approved=1 AND spam=0' .
+			$this->cObj->enableFields('tx_t3blog_com');
 
+		$orderBy = $this->conf['postItemOrderBy'] ? $this->conf['postItemOrderBy'] : 'crdate DESC';
+
+		$limit = '';
+		if (t3lib_div::testInt($this->conf['postItemCount'])) {
+			$limit = $this->conf['postItemCount'];
+			if ($rssVersion == '0.91' && $limit > 15) {
+				$limit = 15;
+			}
+		}
+
+		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
+			'tx_t3blog_com', $where, '', $this->getOrderBy(), $this->getLimit($rssVersion));
+		return $rows;
+	}
+
+	/**
+	 * Obtains post rows. Note that the order in WHERE statement is significant
+	 * because it affects database indexes.
+	 *
+	 * @param string $rssVersion
+	 * @return array
+	 */
+	protected function getPostRows($rssVersion) {
+		$where = 'pid=' . t3blog_div::getBlogPid() .
+			$this->cObj->enableFields('tx_t3blog_post');
+
+		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
+			'tx_t3blog_post', $where, '', $this->getOrderBy(), $this->getLimit($rssVersion));
+
+		foreach ($rows as &$row) {
+			list($contentRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+				'TRIM(CONCAT(header, \' \', bodytext)) AS text',
+				'tt_content', 'irre_parentid=' . $row['uid'] .
+				' AND irre_parenttable=\'tx_t3blog_post\'' .
+				' AND CType IN (\'text\', \'textpic\')' .
+				' AND TRIM(bodytext)<>\'\'' .
+				$this->cObj->enableFields('tt_content'), '', 'sorting', 1);
+			if (is_array($contentRow)) {
+				$row['text'] = $contentRow['text'];
+			}
+		}
+
+		return $rows;
+	}
+
+	protected function getLimit($rssVersion) {
+		$limit = '';
+		if (t3lib_div::testInt($this->conf['postItemCount'])) {
+			$limit = $this->conf['postItemCount'];
+			if ($rssVersion == '0.91' && $limit > 15) {
+				$limit = 15;
+			}
+		}
+		return $limit;
+	}
+
+	protected function getOrderBy() {
+		return $this->conf['postItemOrderBy'] ? $this->conf['postItemOrderBy'] : 'crdate DESC';
+	}
 
 	/**
 	 * Gets content of requested table
@@ -170,7 +236,7 @@ class rss extends tslib_pibase {
 	 *
 	 * @return	xml-rss feed
 	 */
-	function getContentResult($table,$rssversion) {
+	function getContentResult($table, $rssversion, $extraWhere = '') {
 		if ($GLOBALS['TCA'][$table]) {
 
 			$select = $table.'.* ';
@@ -191,7 +257,7 @@ class rss extends tslib_pibase {
 				if ($limit > 15 and $rssversion=='0.91'){
 					$limit = 15;
 				}
-				$limit 		= ' LIMIT 0,'.$limit;
+				$limit = ' LIMIT 0,'.$limit;
 			}
 
 			if ($limit == '' && $rssversion=='0.91'){
@@ -203,17 +269,7 @@ class rss extends tslib_pibase {
 
 			$where = ' WHERE ' . $table . '.pid=' . t3blog_div::getBlogPid();
 			$where .= $this->cObj->enableFields($table);
-
-			// FIXME This function is not supposed to know about table details!
-			if ($table == 'tx_t3blog_post') {
-				$select 	.= ', CONCAT(tt_content.header, \' \', tt_content.bodytext) AS text ';
-				$table 		.= ' JOIN tt_content ON ( tt_content.irre_parentid = tx_t3blog_post.uid AND tt_content.irre_parenttable = \'tx_t3blog_post\' )';
-				$where 		.= $this->cObj->enableFields('tt_content');
-				$groupBy 	.= ' GROUP BY tx_t3blog_post.uid ';
-			}
-			elseif ($table == 'tx_t3blog_com') {
-				$where .= ' AND tx_t3blog_com.approved=1 AND tx_t3blog_com.spam=0';
-			}
+			$where .= $extraWhere;
 
 			$query = 'SELECT ' . $select . ' FROM ' . $table . $where . $groupBy . $orderBy_limit;
 			$res = $GLOBALS['TYPO3_DB']->sql_query($query);
@@ -330,11 +386,11 @@ class rss extends tslib_pibase {
 	 * Renders records
 	 *
 	 * @param 	string	$table: table with records
-	 * @param	array	$res: ressource
+	 * @param	array	$rows
 	 */
-	function renderRecords($table,$res) {
-		while($row = mysql_fetch_assoc($res))	{
-			$this->addRecord($table,$row);
+	function renderRecords($table, $rows) {
+		foreach ($rows as $row) {
+			$this->addRecord($table, $row);
 		}
 	}
 
@@ -346,11 +402,11 @@ class rss extends tslib_pibase {
 	 * @param	string	$row: row to save records
 	 */
 	function addRecord($table,$row)	{
-		$this->lines[]='<item>';
+		$this->lines[] = '<item>';
 			$this->indent(1);
-			$this->getRowInXML($table,$row);
+			$this->getRowInXML($table, $row);
 			$this->indent(0);
-		$this->lines[]='</item>';
+		$this->lines[] = '</item>';
 	}
 
 
@@ -360,7 +416,7 @@ class rss extends tslib_pibase {
 	 * @param 	string	$table: table with records
 	 * @param	string	$row: row to save records
 	 */
-	function getRowInXML($table,$row)	{
+	function getRowInXML($table, $row)	{
 
 		$fields = t3lib_div::trimExplode(',',$this->XML_recFields[$table],1);
 		reset($fields);

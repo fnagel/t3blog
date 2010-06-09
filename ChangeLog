@@ -1,6 +1,7 @@
 2010-06-09  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Added SQL index on IRRE columns for faster retrieval
+	* Fixed bug #8040: RSS feed doesn't always show first part of the blog post
 
 2010-06-08  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
