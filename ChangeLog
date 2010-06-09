@@ -3,6 +3,7 @@
 	* Added SQL index on IRRE columns for faster retrieval
 	* Fixed bug #8040: RSS feed doesn't always show first part of the blog post
 	* Clean up RSS widget code
+	* Fixed bug #7975: spam protect emails in the RSS feed
 
 2010-06-08  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
