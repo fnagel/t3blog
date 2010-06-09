@@ -47,6 +47,8 @@ class rss extends tslib_pibase {
 
 	protected $feedType;
 
+	protected $rssVersion = '2.0';
+
 	/**
 	 * The main method of the PlugIn
 	 * @author snowflake <typo3@snowflake.ch>
@@ -56,17 +58,14 @@ class rss extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars) {
-
 		$this->globalPiVars = $piVars;
 		$this->localPiVars 	= $piVars[$this->prefixId];
 		$this->feedType = $this->localPiVars['feed_type'];
-
-
-		$this->conf 		= $conf;
+		$this->conf = $conf;
 		$this->init();
 
 		// frontend output of RSS-links for the blog
-		if(!t3lib_div::_GP('type') or t3lib_div::_GP('type') == 0) {
+		if(!t3lib_div::_GP('type') || t3lib_div::_GP('type') == 0) {
 
 			$siteRelPath = t3lib_extMgm::siteRelPath('t3blog');
 			$data = array(
@@ -88,13 +87,12 @@ class rss extends tslib_pibase {
 			$content .= t3blog_div::getSingle($data, 'list', $this->conf);
 
 			// the navigation content
-			return $this->pi_wrapInBaseClass($content);
-
+			$content = $this->pi_wrapInBaseClass($content);
 		} else {
 			// the xml content
-			return $this->make_xml($content,$conf);
-
+			$content = $this->make_xml($content);
 		}
+		return $content;
 	}
 
 
@@ -106,53 +104,38 @@ class rss extends tslib_pibase {
 	 *
 	 * @return	xml-rss feed
 	 */
-	function make_xml($content,$conf) {
-
-
-		$this->conf = $conf;
-		$this->feed_id = $this->localPiVars['feed_id'];
-
-		// default feed is 2.0
-		if (empty($this->feed_id)) {
-			$this->feed_id = '2.0';
+	function make_xml($content) {
+		if (!empty($this->localPiVars['feed_id'])) {
+			$this->rssVersion = $this->localPiVars['feed_id'];
 		}
 
-		// FIXME It makes instance of itself!!! Using 'clone' here to copy all fields of the current object.
-		$xmlObj = clone $this;//t3lib_div::makeInstance('rss');
-
-		$xmlObj->init();
-
-		$xmlObj->XMLdebug = 0;
-		$xmlObj->conf = $conf;
-
-		// get RSS version
-		$xmlObj->rssversion = $this->feed_id;
+		$this->XMLdebug = 0;
 
 		// Creating header object
-		$xmlObj->renderHeader();
+		$this->renderHeader();
 
 
 		// get the posts
 		if ($this->localPiVars['feed_type'] == 'post' || empty($this->localPiVars['feed_type'])) {
-			$xmlObj->setRecFields('tx_t3blog_post','title,author,uid,date,text');
+			$this->setRecFields('tx_t3blog_post','title,author,uid,date,text');
 			// Add page content information
-			$rows = $this->getPostRows($xmlObj->rssversion);
-			$xmlObj->renderRecords('tx_t3blog_post', $rows);
+			$rows = $this->getPostRows();
+			$this->renderRecords('tx_t3blog_post', $rows);
 		}
 		else {
 			// get the comments
 			if ($this->localPiVars['feed_type'] == 'comment') {
-				$xmlObj->setRecFields('tx_t3blog_com','title,author,uid,fk_post,date,text');
+				$this->setRecFields('tx_t3blog_com','title,author,uid,fk_post,date,text');
 				// Add page content information
-				$rows = $this->getCommentRows($xmlObj->rssversion);
-				$xmlObj->renderRecords('tx_t3blog_com', $rows);
+				$rows = $this->getCommentRows();
+				$this->renderRecords('tx_t3blog_com', $rows);
 			}
 		}
 
 		// Add footer information
-		$xmlObj->renderFooter();
+		$this->renderFooter();
 
-		return $xmlObj->getResult();
+		return $this->getResult();
 
 	}
 
@@ -160,10 +143,9 @@ class rss extends tslib_pibase {
 	 * Obtains comment rows. Note that the order in WHERE statement is significant
 	 * because it affects database indexes.
 	 *
-	 * @param string $rssVersion
 	 * @return array
 	 */
-	protected function getCommentRows($rssVersion) {
+	protected function getCommentRows() {
 		$where = 'pid=' . t3blog_div::getBlogPid() .
 			' AND approved=1 AND spam=0' .
 			$this->cObj->enableFields('tx_t3blog_com');
@@ -173,13 +155,13 @@ class rss extends tslib_pibase {
 		$limit = '';
 		if (t3lib_div::testInt($this->conf['postItemCount'])) {
 			$limit = $this->conf['postItemCount'];
-			if ($rssVersion == '0.91' && $limit > 15) {
+			if ($this->rssVersion == '0.91' && $limit > 15) {
 				$limit = 15;
 			}
 		}
 
 		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
-			'tx_t3blog_com', $where, '', $this->getOrderBy(), $this->getLimit($rssVersion));
+			'tx_t3blog_com', $where, '', $this->getOrderBy(), $this->getLimit());
 		return $rows;
 	}
 
@@ -187,15 +169,14 @@ class rss extends tslib_pibase {
 	 * Obtains post rows. Note that the order in WHERE statement is significant
 	 * because it affects database indexes.
 	 *
-	 * @param string $rssVersion
 	 * @return array
 	 */
-	protected function getPostRows($rssVersion) {
+	protected function getPostRows() {
 		$where = 'pid=' . t3blog_div::getBlogPid() .
 			$this->cObj->enableFields('tx_t3blog_post');
 
 		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
-			'tx_t3blog_post', $where, '', $this->getOrderBy(), $this->getLimit($rssVersion));
+			'tx_t3blog_post', $where, '', $this->getOrderBy(), $this->getLimit());
 
 		foreach ($rows as &$row) {
 			list($contentRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
@@ -213,68 +194,29 @@ class rss extends tslib_pibase {
 		return $rows;
 	}
 
-	protected function getLimit($rssVersion) {
+	/**
+	 * Obtains the limit statement for data selection
+	 *
+	 * @return string
+	 */
+	protected function getLimit() {
 		$limit = '';
 		if (t3lib_div::testInt($this->conf['postItemCount'])) {
 			$limit = $this->conf['postItemCount'];
-			if ($rssVersion == '0.91' && $limit > 15) {
+			if ($this->rssVersion == '0.91' && $limit > 15) {
 				$limit = 15;
 			}
 		}
 		return $limit;
 	}
 
+	/**
+	 * Obtains the orderBy statement for data rows
+	 *
+	 * @return string
+	 */
 	protected function getOrderBy() {
 		return $this->conf['postItemOrderBy'] ? $this->conf['postItemOrderBy'] : 'crdate DESC';
-	}
-
-	/**
-	 * Gets content of requested table
-	 *
-	 * @param	string		$table: Name of the table
-	 * @param	string		$rssversion: Version of the rss-feed
-	 *
-	 * @return	xml-rss feed
-	 */
-	function getContentResult($table, $rssversion, $extraWhere = '') {
-		if ($GLOBALS['TCA'][$table]) {
-
-			$select = $table.'.* ';
-
-			if ($this->conf['postItemOrderBy'] == '') {
-				$orderBy = '';
-			} else {
-				$orderBy = ' ORDER BY '.$table.'.'.$this->conf['postItemOrderBy'];
-			}
-
-			// only 15 items in RSS 0.91
-			$limit = $this->conf['postItemCount'];
-
-			if ($this->conf['postItemCount'] == '') {
-				$limit = '';
-			}
-			else {
-				if ($limit > 15 and $rssversion=='0.91'){
-					$limit = 15;
-				}
-				$limit = ' LIMIT 0,'.$limit;
-			}
-
-			if ($limit == '' && $rssversion=='0.91'){
-				$limit 		= ' LIMIT 0,15';
-			}
-
-			$groupBy 		= '';
-			$orderBy_limit 	= '  '.$orderBy.$limit;
-
-			$where = ' WHERE ' . $table . '.pid=' . t3blog_div::getBlogPid();
-			$where .= $this->cObj->enableFields($table);
-			$where .= $extraWhere;
-
-			$query = 'SELECT ' . $select . ' FROM ' . $table . $where . $groupBy . $orderBy_limit;
-			$res = $GLOBALS['TYPO3_DB']->sql_query($query);
-			return $res;
-		}
 	}
 
 	function setRecFields($table,$list)	{
@@ -299,16 +241,16 @@ class rss extends tslib_pibase {
 	function renderHeader()	{
 		if(strlen($this->conf['feedImage']) < 10){
 			$feedimage = $this->conf['feedLink'] . '/' . t3lib_extMgm::siteRelPath('3blog') . '/icons/rss.png';
-		}else{
+		} else {
 			$feedimage = $this->conf['feedImage'];
 		}
 		// the XML structure
 		$this->lines[] = '<?xml version="1.0" encoding="' . $this->getCharset() . '"?>';
 
-		if($this->rssversion == '2.0') {
-			$this->lines[].='<rss version="'.$this->rssversion.'" '.$this->specialContent.'>';
+		if($this->rssVersion == '2.0') {
+			$this->lines[].='<rss version="'.$this->rssVersion.'" '.$this->specialContent.'>';
 		} else {
-			$this->lines[].='<rss version="'.$this->rssversion.'">';
+			$this->lines[].='<rss version="'.$this->rssVersion.'">';
 		}
 
 		$feedLanguage = $this->conf['feedLanguage'] != '' ? $this->conf['feedLanguage'] : 'en-en';
@@ -320,7 +262,7 @@ class rss extends tslib_pibase {
 		<language>'.$feedLanguage.'</language>
 		<generator>'.$this->conf['generator'].' '.$GLOBALS['TYPO_VERSION'].'</generator>
 		';
-				if ($this->rssversion=='2.0') {
+				if ($this->rssVersion=='2.0') {
 					$this->lines[].='<docs>http://blogs.law.harvard.edu/tech/rss</docs>';
 				} else {
 					$this->lines[].='<docs>http://backend.userland.com/rss091</docs>';
@@ -345,7 +287,7 @@ class rss extends tslib_pibase {
 	 * Renders the XML footer
 	 */
 	function renderFooter()	{
-		$this->footer='
+		$this->footer = '
 		</channel>
 		</rss>';
 	}
@@ -356,7 +298,6 @@ class rss extends tslib_pibase {
 	 * @return returns the xml output
 	 */
 	function output()	{
-
 		if ($this->XMLdebug)	{
 			return '<pre>'.$this->content.'</pre>
 			<hr /><div style="color:red;">size: '.strlen($this->content).'</div>';
@@ -372,10 +313,15 @@ class rss extends tslib_pibase {
 	 * @param 	boolean	$b
 	 * @return	string	reformatted xml
 	 */
-	function indent($b)	{
-		if ($b)	$this->XMLIndent++; else $this->XMLIndent--;
+	function indent($forward)	{
+		if ($forward)	{
+			$this->XMLIndent++;
+		}
+		else {
+			$this->XMLIndent--;
+		}
 		$this->Icode='';
-		for ($a=0;$a<$this->XMLIndent;$a++)	{
+		for ($a = 0;$a < $this->XMLIndent; $a++)	{
 			$this->Icode.=chr(9);
 		}
 		return $this->Icode;
@@ -388,7 +334,7 @@ class rss extends tslib_pibase {
 	 * @param 	string	$table: table with records
 	 * @param	array	$rows
 	 */
-	function renderRecords($table, $rows) {
+	function renderRecords($table, array $rows) {
 		foreach ($rows as $row) {
 			$this->addRecord($table, $row);
 		}
@@ -401,7 +347,7 @@ class rss extends tslib_pibase {
 	 * @param 	string	$table: table with records
 	 * @param	string	$row: row to save records
 	 */
-	function addRecord($table,$row)	{
+	function addRecord($table,$row) {
 		$this->lines[] = '<item>';
 			$this->indent(1);
 			$this->getRowInXML($table, $row);
@@ -416,13 +362,10 @@ class rss extends tslib_pibase {
 	 * @param 	string	$table: table with records
 	 * @param	string	$row: row to save records
 	 */
-	function getRowInXML($table, $row)	{
-
+	function getRowInXML($table, $row) {
 		$fields = t3lib_div::trimExplode(',',$this->XML_recFields[$table],1);
-		reset($fields);
-		unset($this->item);
-		while(list(,$field)=each($fields))	{
-			$this->lines[]=$this->Icode.$this->fieldWrap($field,$this->substNewline($row[$field]),$row['date']);
+		foreach ($fields as $field) {
+			$this->lines[] = $this->Icode . $this->fieldWrap($field, $this->substNewline($row[$field]), $row['date']);
 		}
 	}
 
@@ -433,7 +376,7 @@ class rss extends tslib_pibase {
 	 * @param 	string	$string: string to be substituted
 	 * @return	substituted string
 	 */
-	function substNewline($string)	{
+	function substNewline($string) {
 		return str_replace(chr(10), '', $string);
 	}
 
@@ -445,14 +388,13 @@ class rss extends tslib_pibase {
 	 * @return	categories
 	 */
 	function getPostCategories($value) {
-
 		$fields	= 'uid_foreign';
 		$table	= 'tx_t3blog_post_cat_mm';
 		$where .= ' tx_t3blog_post_cat_mm.uid_local=' . intval($value);
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where);
 		$data = '';
-		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
 			if ($data != '') {
 				$data .= ', ';
 			}
@@ -470,14 +412,12 @@ class rss extends tslib_pibase {
 	 * @param 	int		$value: uid of the post
 	 * @return 	the date string
 	 */
-	function getDate($value)	{
-
+	function getDate($value) {
 		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('date','tx_t3blog_post',
 			'uid=' . t3lib_div::intval_positive($value) .
 			$this->cObj->enableFields('tx_t3blog_post'));
 
 		// format the timestamp
-		// FIXME What if there is no row?
 		$formatedDate = date('Y/m/d', $data['date']);
 
 		// the new date string
@@ -596,14 +536,14 @@ class rss extends tslib_pibase {
 			case 'text':
 				$description = $this->cleanString($value);
 
-				$descriptionLength = $this->conf[($this->rssversion != '2.0' ? 'feedItemDescLength091' : 'feedItemDescLength20')];
+				$descriptionLength = $this->conf[($this->rssVersion != '2.0' ? 'feedItemDescLength091' : 'feedItemDescLength20')];
 				$descriptionSubstr = mb_substr($description, 0, $descriptionLength, 'UTF-8');
 				if (mb_strlen($description, 'UTF-8') != mb_strlen($descriptionSubstr, 'UTF-8')) {
 					$descriptionSubstr .= '...';
 				}
 				$result = '<description>' . htmlspecialchars($descriptionSubstr) . '</description>';
 
-				if ($this->rssversion == '2.0') {
+				if ($this->rssVersion == '2.0') {
 					$result .= '<content:encoded><![CDATA[' . $description . ']]></content:encoded>';
 				}
 				return $result;
