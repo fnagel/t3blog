@@ -137,12 +137,32 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 			// Preview link:
 		$title = $GLOBALS['LANG']->getLL('cm.view', true);
 		$cells .= '<a href="#" title="' . $title . '" onclick="' . htmlspecialchars(
-			t3lib_BEfunc::viewOnClick($this->id, $this->doc->backPath, '', '#blogentry' . $row['uid'])) . '">' .
+			$this->getPostViewURL($row['uid'], $row['date'])) . '">' .
 			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
 			t3lib_extMgm::extRelPath('t3blog') . 'icons/magnifier.png',
 			'width="16" height="16"') . ' alt="' . $title . '" /></a>';
 
 		return $cells;
+	}
+
+	/**
+	 * Creates a URL to the blog post for viewing from BE.
+	 *
+	 * @param int $postUid
+	 * @param int $postDate
+	 * @return string
+	 */
+	protected function getPostViewURL($postUid, $postDate) {
+		$date = getdate($postDate);
+		$url = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'blogList' => array(
+				'year' => $date['year'],
+				'month' => $date['mon'],
+				'day' => $date['mday'],
+				'showUid' => $postUid
+			)
+		));
+		return t3lib_BEfunc::viewOnClick($this->id, $this->doc->backPath, '', $url . '#blogentry');
 	}
 
 	/**
