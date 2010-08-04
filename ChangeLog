@@ -9,6 +9,7 @@
 	* Fixed bug #8200: wrong GP var when receiving trackbacks
 	* Fixed bug #8201: search does not work in BE modules
 	* Fixed bug #8154: incorrect path to RSS icon
+	* Fixed bug #8312: errors in TYPO3 log for non-admin users
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 
