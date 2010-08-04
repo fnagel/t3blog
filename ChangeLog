@@ -3,6 +3,7 @@
 	* Fixed bug #8748: permalink link does not work anymore with realurl 1.9.3
 	* Removed all references to isAjax and corresponding code because it never worked (and invocations were wrong)
 	* Fixed bug #8325: blog posts preview does not work
+	* Fixed bug #8350: remove unused file pi1/lib/send_pingback.php
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 
