@@ -240,7 +240,7 @@ class rss extends tslib_pibase {
 	 */
 	function renderHeader()	{
 		if(strlen($this->conf['feedImage']) < 10){
-			$feedimage = $this->conf['feedLink'] . '/' . t3lib_extMgm::siteRelPath('3blog') . '/icons/rss.png';
+			$feedimage = $this->conf['feedLink'] . '/' . t3lib_extMgm::siteRelPath('t3blog') . '/icons/rss.png';
 		} else {
 			$feedimage = $this->conf['feedImage'];
 		}

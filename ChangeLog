@@ -8,6 +8,7 @@
 	* Removed unused file: mod1/class.functions.php
 	* Fixed bug #8200: wrong GP var when receiving trackbacks
 	* Fixed bug #8201: search does not work in BE modules
+	* Fixed bug #8154: incorrect path to RSS icon
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 
