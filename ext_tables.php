@@ -97,11 +97,14 @@
 
 	$TCA['tx_t3blog_com_nl'] = array (
 		'ctrl' 	=> array(
-			'title'     		=> '',
-			'label'     		=> '',
+			'title'     		=> 'LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_com_nl',
+			'label'     		=> 'name',
 			'delete' 			=> 'deleted',
+			'enablecolumns'     => array(
+				'disable' => 'deleted',
+			),
 			'hideTable'			=> true,
-			'columns'			=> array()
+			'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php'
 		)
 	);
 
