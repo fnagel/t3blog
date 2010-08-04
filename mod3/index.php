@@ -426,7 +426,7 @@ class tx_t3blog_module3 extends tx_t3blog_modbase {
 					if(count($comments) > 0) {
 
 						// assemble email
-						$unsubscribe	= '<http://'.$_SERVER["SERVER_NAME"].'/index.php?id='.$this->id.'&tx_t3blog_pi1[blogList][showUidPerma]='.$postuid.'&tx_t3blog_pi1[blogList][unsubscribe]=1&tx_t3blog_pi1[blogList][code]='.$value['code'].'>' ."\n";
+						$unsubscribe	= '<http://'.$_SERVER['SERVER_NAME'].'/index.php?id='.$this->id.'&tx_t3blog_pi1[blogList][showUid]='.$postuid.'&tx_t3blog_pi1[blogList][unsubscribe]=1&tx_t3blog_pi1[blogList][code]='.$value['code'].'&no_cache=1>' ."\n";
 						$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']).'"'. "\n";
 						$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
 						$receiver   	= $address;

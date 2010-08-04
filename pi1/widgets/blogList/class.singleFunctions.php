@@ -35,8 +35,25 @@ class singleFunctions extends blogList {
 	var $scriptRelPath = 'pi1/widgets/blogList/class.singleFunctions.php';	// Path to this script relative to the extension dir.
 	var $pi_checkCHash = false;
 	var $prevPrefixId = 'blogList';
-	var $uid;
+	protected $uid = 0;
 
+	/**
+	 * Initializes the widget.
+	 *
+	 * @param array $conf
+	 * @param array $piVars
+	 * @return void
+	 */
+	function init(array $conf, array $piVars) {
+		$this->globalPiVars = $piVars;
+		$this->localPiVars = $piVars[$this->prevPrefixId];
+		$this->conf = $conf;
+
+		parent::init();
+
+		$this->setPostUid();
+		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
+	}
 
 	/**
 	 * The main method of the widget
@@ -46,35 +63,15 @@ class singleFunctions extends blogList {
 	 * @param	array		$conf: The PlugIn configuration
 	 * @return	The content that is displayed on the website
 	 */
-	function main($content, array $conf, $piVars) {
-		$this->globalPiVars = $piVars;
-		$this->localPiVars 	= $piVars[$this->prevPrefixId]; //blogList pvars
-		$this->uid  		= isset($this->localPiVars['showUid']) ? $this->localPiVars['showUid'] : $this->localPiVars['showUidPerma'];
-		$this->conf 		= $conf;
-		$this->init();
-		$this->cObj 		= t3lib_div::makeInstance('tslib_cObj');
-		$message 			= '';
+	function main($content, array $conf, array $piVars) {
+		$this->init($conf, $piVars);
 
-		// unsubscribe for comments
-		if($this->localPiVars['unsubscribe'] == 1) {
-			$table	= 'tx_t3blog_com_nl';
-			$where	= 'code=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($this->localPiVars['code'], $table);
-			$fields	= array(
-				'deleted' => 1
-			);
-
-			$GLOBALS['TYPO3_DB']->exec_UPDATEquery($table, $where, $fields);
-			$message = '<script>alert("'.$this->pi_getLL('subscribe.unsubscribe.succesfully').'");</script>';
-		}
-
-		//  saves the trackback if one is incoming from outside with the right parameters
+		$message = $this->unsubscribeFromComments();
 		$this->checkForTrackbacks();
 
 		// returns the comment form if it is called by ajax.
-		if($this->localPiVars['isAjax'] == 1)	{
-			if($this->localPiVars['createCommentForm'] == 1)	{
-				$this->showCommentForm();
-			}
+		if ($this->localPiVars['isAjax'] && $this->localPiVars['createCommentForm']) {
+			$this->showCommentForm();
 		}
 
 		// inserts a comment (+send notification email to admin)
@@ -94,9 +91,9 @@ class singleFunctions extends blogList {
 
 		// shows the blog entry if a "showUid" is set.
 		$content = '';
-		if ($this->uid){
+		if ($this->uid) {
 			// Rise the number of views
-			if($this->checkRiseViewNumber() === true){
+			if ($this->checkRiseViewNumber() === true) {
 				$this->riseViewNumber($this->uid);
 			}
 
@@ -111,7 +108,7 @@ class singleFunctions extends blogList {
 			);
 
 
-			if($row){
+			if($row) {
 				$row = $row[0];
 				if($this->conf['gravatar']){	// set Gravatar
 					$gravatar = $this->getGravatar($row['useruid'], $row['email'], $row['realName']);
@@ -190,6 +187,38 @@ class singleFunctions extends blogList {
 
 		return $content;
 
+	}
+
+	/**
+	 * Unsubscribes from comments and returns HTML code to display a corresponding
+	 * message if necessary.
+	 *
+	 * @return string
+	 */
+	protected function unsubscribeFromComments() {
+		$result = '';
+		if ($this->localPiVars['unsubscribe']) {
+			$GLOBALS['TYPO3_DB']->exec_UPDATEquery('tx_t3blog_com_nl',
+				'code=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($this->localPiVars['code'], 'tx_t3blog_com_nl'),
+				array('deleted' => 1));
+			$result = '<script>alert("'.$this->pi_getLL('subscribe.unsubscribe.succesfully').'");</script>';
+		}
+		return $result;
+	}
+
+	/**
+	 * Sets the uid of the current post from the URL parameters.
+	 *
+	 * @return void
+	 */
+	protected function setPostUid() {
+		if (isset($this->localPiVars['showUid'])) {
+			$this->uid = intval($this->localPiVars['showUid']);
+		}
+		else if (isset($this->localPiVars['showUidPerma'])) {
+			// showUidPerma is deprecated!
+			$this->uid = intval($this->localPiVars['showUidPerma']);
+		}
 	}
 
 	/**
@@ -549,12 +578,12 @@ class singleFunctions extends blogList {
 	 * @param       int		$parentId: UID of the parent comment
 	 * @return      			comment listing
 	 */
-	function listCommentedComments($parentId){
+	protected function listCommentedComments($parentId){
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 				'uid,title,author,email,website,date,text,parent_id',                                                                                                                                                                                                                                                                                                                                           // SELECT ...
 				'tx_t3blog_com',                                                                                                                                                                                                                                                                                                                                                                                                                        // FROM ...
 				'parent_id=' . intval($parentId) .
-					' AND fk_post=' . intval($this->localPiVars['showUid']) .
+					' AND fk_post=' . $this->uid .
 					' AND pid=' . t3blog_div::getBlogPid() .
 					' AND approved=1 AND spam=0 ' .
 					$this->cObj->enableFields('tx_t3blog_com'), '', 'date'
@@ -1133,7 +1162,7 @@ class singleFunctions extends blogList {
 	protected function getUnsubscribeLink($postUid, $code) {
 		$additionalParams = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
 			'blogList' => array(
-				'showUidPerma' => $postUid,
+				'showUid' => $postUid,
 				'unsubscribe' => 1,
 				'code' => $code
 			)));

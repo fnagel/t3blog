@@ -322,7 +322,7 @@ function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 				'day' => sprintf('%02d', $dateInfo['mday']),
 				'month' => sprintf('%02d', $dateInfo['mon']),
 				'year' => $dateInfo['year'],
-				'showUidPerma' => $uid
+				'showUid' => $uid
 			)
 		));
 		$typolinkConf = array(

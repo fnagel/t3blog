@@ -1,3 +1,7 @@
+2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed bug #8748: permalink link does not work anymore with realurl 1.9.3
+
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Added a chapter about integration with TemplaVoila to the manual
