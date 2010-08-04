@@ -1,6 +1,7 @@
 2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #8748: permalink link does not work anymore with realurl 1.9.3
+	* Removed all references to isAjax and corresponding code because it never worked (and invocations were wrong)
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 

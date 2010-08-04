@@ -69,11 +69,6 @@ class singleFunctions extends blogList {
 		$message = $this->unsubscribeFromComments();
 		$this->checkForTrackbacks();
 
-		// returns the comment form if it is called by ajax.
-		if ($this->localPiVars['isAjax'] && $this->localPiVars['createCommentForm']) {
-			$this->showCommentForm();
-		}
-
 		// inserts a comment (+send notification email to admin)
 		if($this->localPiVars['insert']==1){
 			if ($this->insertComment()) {
@@ -174,7 +169,7 @@ class singleFunctions extends blogList {
 					'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
 					'blogUrl'		=>	$this->getPermalink($this->uid, $row['date'], true),
 					'permalink'		=> 	$this->getPermalink($this->uid,$row['date']),
-					'addcomment'	=> (!$this->localPiVars['isAjax']) ? $this->showCommentForm($row['allow_comments']) : $this->addCommentToPost($this->uid),
+					'addcomment'	=> $this->showCommentForm($row['allow_comments']),
 					'tagClouds'		=>	$row['tagClouds'],
 					'number_views'	=>	$this->getNumberOfViews($row['number_views']),
 					'navigation'    => $this->getSingleNavigation($this->uid)
@@ -232,22 +227,6 @@ class singleFunctions extends blogList {
 				$this->trackback();
 			}
 		}
-	}
-
-	/**
-	 * Function to add a comment to blog-post
-	 *
-	 * @author 	Nicolas Karrer <nkarrer@snowflake.ch>	 *
-	 * @param 	int 	$postUid
-	 */
-	function addCommentToPost($postUid = 1)	{
-		$data = array(
-			'name'	  		=> 'add Comment',
-			'url'			=> '\''.$this->pi_linkTP_keepPIvars_url(array($this->prevPrefixId => array_merge(array('isAjax' => 1, 'createCommentForm' => 1),$this->piVars[$this->prevPrefixId])),1).'\'',
-			'urlforlink'	=> $this->pi_linkTP_keepPIvars_url(array($this->prevPrefixId => array_merge(array('createCommentForm' => 1),$this->piVars[$this->prevPrefixId])),1),
-		);
-
-		return t3blog_div::getSingle($data, 'addcommentlink', $this->conf);
 	}
 
 
@@ -379,22 +358,8 @@ class singleFunctions extends blogList {
 			$data['closelink'] 		= '';
 			unset($this->piVars[$this->prevPrefixId]['createCommentForm']);
 
-			$data['action'] = htmlspecialchars(
-				$this->pi_linkTP_keepPIvars_url(
-					array (
-							$this->prevPrefixId => (
-							is_array($this->piVars[$this->prevPrefixId])?
-								array_merge(
-									array('isAjax' => $this->localPiVars['isAjax'],'insert'=>1,'uid'=>t3lib_div::intval_positive($this->uid)),
-									$this->piVars[$this->prevPrefixId]
-								)
-							:
-								array ('isAjax' => $this->localPiVars['isAjax'],'insert'=>1,'uid'=>t3lib_div::intval_positive($this->uid))
-					)),
-					0,
-					0,
-					0
-			));
+			$data['action'] = htmlspecialchars($this->getCommentFormAction());
+
 			// display error msg
 			if($this->localPiVars['errorMsg']){
 				$data['errorMsg'] = $this->localPiVars['errorMsg'];
@@ -405,17 +370,17 @@ class singleFunctions extends blogList {
 			$data['editUid'] = $editUid;
 			$content = t3blog_div::getSingle($data, 'commentForm', $this->conf);
 
-			if ($this->localPiVars['isAjax'] != 1) {
-				return '<div id="commentFormNonAjax" class="commentFormStyle">'.$content.'</div>';
-			}
-
-			die($content);
+			return '<div id="commentFormNonAjax" class="commentFormStyle">' .
+				$content .
+				'</div>';
 		}
 		else {
 			// return login status message
 			if ($allowComments == 1) {
 				// no comments allowed at all
-				return t3blog_div::getSingle(array('text'=>$this->pi_getLL('notAllowedToComment')), 'noCommentAllowedWrap', $this->conf);
+				return t3blog_div::getSingle(array(
+					'text' => $this->pi_getLL('notAllowedToComment')),
+						'noCommentAllowedWrap', $this->conf);
 			}
 			else {
 				// not logged in message
@@ -425,10 +390,35 @@ class singleFunctions extends blogList {
 						'text'=>$this->pi_getLL('notAllowedToComment'),
 						'loginPid'=>$this->conf['loginPid'],
 						'loginLinkText'=>$this->pi_getLL('loginLinkText'),
-						'redirect_url'=>'http://' . t3lib_div::getIndpEnv('HTTP_HOST') . '/'.$returnLink
+						'redirect_url'=> t3lib_div::locationHeaderUrl($returnLink)
 					), 'noCommentAllowedWrap', $this->conf);
 			}
 		}
+	}
+
+	/**
+	 * Creates a comment form action URL.
+	 *
+	 * @return string
+	 */
+	protected function getCommentFormAction() {
+		$actionParameters = t3lib_div::array_merge_recursive_overrule(
+			$this->localPiVars,
+			array(
+				'insert' => 1,
+				'uid' => $this->uid
+			)
+		);
+		foreach ($actionParameters as $parameterName => $parameterValue) {
+			if (substr($parameterName, 0, 7) == 'comment') {
+				unset($actionParameters[$parameterName]);
+			}
+		}
+		return $this->pi_linkTP_keepPIvars_url(
+			array (
+				$this->prevPrefixId => $actionParameters
+			)
+		);
 	}
 
 

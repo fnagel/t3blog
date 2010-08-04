@@ -868,27 +868,8 @@ plugin.tx_t3blog_pi1 {
 		#Comment form
 		commentForm = COA
 		commentForm {
-			5 = COA
-			5 {
-				wrap = <div class="formHeader" id="comment">|</div>
-/*
-	if this should be used, use the ext20 script
-*/
-				5 = TEXT
-				5 {
-					wrap = <h3 onmousedown="dragstart(document.getElementById('commentForm'))" onmouseup="dragstop();">|</h3>
-					value = Comment this Post
-					if.isTrue.field = isAjax
-				}
-
-				10 = TEXT
-				10 {
-					wrap = <div class="closebutton"><a href="#" onclick="document.getElementById('commentForm').style.display='none';return false;">|</a></div>
-					field = closeicon
-					if.isTrue.field = isAjax
-				}
-
-			}
+			5 = TEXT
+			5.value = <div class="formHeader" id="comment"></div>
 
 			6 = TEXT
 			6 {
