@@ -223,7 +223,7 @@ class singleFunctions extends blogList {
 	 */
 	protected function checkForTrackbacks() {
 		if (intval($this->globalPiVars['trackback']) == 1) {
-			if (t3lib_div::_GP('title') && t3lib_div::_GP('blog_name') && t3lib_div::_GP('excerpt') && t3lib_div::_GP('fromurl')) {
+			if (t3lib_div::_GP('title') && t3lib_div::_GP('blog_name') && t3lib_div::_GP('excerpt') && t3lib_div::_GP('url')) {
 				$this->trackback();
 			}
 		}
