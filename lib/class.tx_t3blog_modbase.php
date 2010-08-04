@@ -339,7 +339,7 @@ class tx_t3blog_modbase extends t3lib_SCbase {
 		if (trim($searchField) != '') {
 			$searchFields = $this->getSearchFields($table);
 			$like = ' LIKE ' . $GLOBALS['TYPO3_DB']->fullQuoteStr('%' . $searchField . '%', $table);
-			$queryPart = ' AND (' . implode($like . ' OR ', $searchFields) . $like . ')';
+			$result = ' AND (' . implode($like . ' OR ', $searchFields) . $like . ')';
 		}
 
 		return $result;

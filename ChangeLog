@@ -7,6 +7,7 @@
 	* Fixed bug #8153: CSS file is not loaded properly in Backend modules
 	* Removed unused file: mod1/class.functions.php
 	* Fixed bug #8200: wrong GP var when receiving trackbacks
+	* Fixed bug #8201: search does not work in BE modules
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 
