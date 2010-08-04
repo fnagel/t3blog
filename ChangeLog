@@ -4,6 +4,7 @@
 	* Removed all references to isAjax and corresponding code because it never worked (and invocations were wrong)
 	* Fixed bug #8325: blog posts preview does not work
 	* Fixed bug #8350: remove unused file pi1/lib/send_pingback.php
+	* Fixed bug #8153: CSS file is not loaded properly in Backend modules
 
 2010-07-19  Dmitry Dulepov  <dmitry@typo3.org>
 

@@ -453,7 +453,7 @@ class tx_t3blog_modbase extends t3lib_SCbase {
 
 		}
 		else {
-			$this->doc->addStyleSheet('t3blog_css', t3lib_extMgm::siteRelPath('t3blog') . 'lib/styles.css');
+			$this->doc->addStyleSheet('t3blog_css', t3lib_div::resolveBackPath($this->doc->backPath . t3lib_extMgm::extRelPath('t3blog') . 'lib/styles.css'));
 		}
 	}
 
