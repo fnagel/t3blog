@@ -69,25 +69,32 @@ class listFunctions extends blogList {
 	 */
 	function main($content,$conf,$piVars){
 		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prevPrefixId]; //blogList pvars
-
+		$this->localPiVars = $piVars[$this->prevPrefixId];
 		$this->conf = $conf;
+
 		$this->init();
 
-		$content = $this->getListItems();
-
 		$data = array(
-			'pageBrowser' => t3blog_div::getPageBrowser(
-				$this->getNumberOfListItems(),
-				'tx_t3blog_post', $this->prefixId, array(
-					'previous' => $this->pi_getLL('previous'),
-					'next' => $this->pi_getLL('next')
-				), $this->localPiVars, $this->conf,
-				$this->conf['numberOfRecords'], $this->conf['maxPages']),
-			'listItems' => $content
+			'pageBrowser' => $this->getPageBrowser(),
+			'listItems' => $this->getListItems()
 		);
 
 		return t3blog_div::getSingle($data, 'list', $this->conf);
+	}
+
+	/**
+	 * Creates the page browser.
+	 *
+	 * @return string
+	 */
+	protected function getPageBrowser() {
+		return t3blog_div::getPageBrowser(
+			$this->getNumberOfListItems(),
+			'tx_t3blog_post', $this->prefixId, array(
+				'previous' => $this->pi_getLL('previous'),
+				'next' => $this->pi_getLL('next')
+			), $this->localPiVars, $this->conf,
+			$this->conf['numberOfRecords'], $this->conf['maxPages']);
 	}
 
 	/**
@@ -96,7 +103,7 @@ class listFunctions extends blogList {
 	 * @return string
 	 */
 	protected function getWhere() {
-		$where = 'tx_t3blog_post.pid=' . t3blog_div::getBlogPid(); // only from current page
+		$where = 'tx_t3blog_post.pid=' . t3blog_div::getBlogPid();
 		$where .= ' AND be_users.uid = tx_t3blog_post.author';
 		$where .= $this->localcObj->enableFields('tx_t3blog_post');
 		$where .= $this->getDateCondition();

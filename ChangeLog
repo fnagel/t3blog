@@ -6,6 +6,7 @@
 	* Refactoring blogList widget: extracted lost of code to separate methods
 	* Marked duplicate functions
 	* Finish refactoring of getListItems()
+	* Refactored main() in listFunctions of blogList
 
 2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
 
