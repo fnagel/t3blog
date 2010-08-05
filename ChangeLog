@@ -1,3 +1,7 @@
+2010-08-05  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed bug #9142: search is not excluding deleted and/or hidden content elements
+
 2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #8748: permalink link does not work anymore with realurl 1.9.3

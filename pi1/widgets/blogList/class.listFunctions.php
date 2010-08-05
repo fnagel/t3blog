@@ -123,6 +123,7 @@ class listFunctions extends blogList {
 			$where .= ' OR tx_t3blog_post.title LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' OR tx_t3blog_post.tagClouds LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' ) ';
+			$where .= $this->cObj->enableFields('tt_content');
 		}
 
 		// SET  group by and order by
@@ -171,7 +172,7 @@ class listFunctions extends blogList {
 				$fromdate = $tmpdate;
 			}
 			if ($fromdate == $todate){
-				$divOneDay = '86400';
+				$divOneDay = 86400;
 				$todate = $todate + $divOneDay;
 			}
 			$where .= ' AND date >= '.$fromdate.' AND date <= '.$todate.' ';
@@ -180,7 +181,7 @@ class listFunctions extends blogList {
 		// add limit
 		$limit = ($justNumOfItems ? '' : $this->getListItemsLimit());
 
-		$RES = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+		$resPosts = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			$fields,
 			$table.$additionalTables,
 			$where,
@@ -191,9 +192,9 @@ class listFunctions extends blogList {
 
 
 		// if only num of results is requested jump in this.
-		if ($justNumOfItems == true)	{
-			$count = $GLOBALS['TYPO3_DB']->sql_num_rows($RES);
-			$GLOBALS['TYPO3_DB']->sql_free_result($RES);
+		if ($justNumOfItems) {
+			$count = $GLOBALS['TYPO3_DB']->sql_num_rows($resPosts);
+			$GLOBALS['TYPO3_DB']->sql_free_result($resPosts);
 			return $count;
 		}
 
@@ -208,8 +209,8 @@ class listFunctions extends blogList {
 
 		$itemArray = array();
 		$i = 0;
-		$numRows = $GLOBALS['TYPO3_DB']->sql_num_rows($RES);
-		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($RES))) {
+		$numRows = $GLOBALS['TYPO3_DB']->sql_num_rows($resPosts);
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resPosts))) {
 			$itemArray[] = $row;
 
 			$convertTimestamp = date('Y-m-d', $row['date']);
@@ -228,7 +229,7 @@ class listFunctions extends blogList {
 				'irre_parentid = ' . $row['uid'] .
 					' AND irre_parenttable=\'tx_t3blog_post\' ' .
 					$this->localcObj->enableFields('tt_content'),
-				'uid',		// GROUP BY ...
+				'',		// GROUP BY ...
 				'sorting'		// ORDER BY ...
 			);
 			$uidContentList = '';
@@ -277,7 +278,7 @@ class listFunctions extends blogList {
 			$content .= t3blog_div::getSingle($data, 'listItem', $this->conf);
 			$i++;
 		}
-		$GLOBALS['TYPO3_DB']->sql_free_result($RES);
+		$GLOBALS['TYPO3_DB']->sql_free_result($resPosts);
 
 		// if only the array is requested return it withour html parsing.
 		if($justItemArray)	{
