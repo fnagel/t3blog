@@ -5,6 +5,7 @@
 	* Fixed incorrect function definition
 	* Refactoring blogList widget: extracted lost of code to separate methods
 	* Marked duplicate functions
+	* Finish refactoring of getListItems()
 
 2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
 

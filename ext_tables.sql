@@ -63,7 +63,8 @@ CREATE TABLE tx_t3blog_post (
 	trackback_hash varchar(130) DEFAULT '' NOT NULL,
 	number_views int(11) DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	KEY sel01 (pid,deleted,hidden,crdate)
+	KEY sel01 (pid,deleted,hidden,crdate),
+	KEY listItems (pid,deleted,hidden,`date`)
 );
 
 

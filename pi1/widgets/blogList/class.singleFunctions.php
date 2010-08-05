@@ -960,11 +960,12 @@ class singleFunctions extends blogList {
 		include_once('class.listFunctions.php');
 
 		$listFunctions = t3lib_div::makeInstance('listFunctions');
+		/* @var listFunctions $listFunctions */
 		$listFunctions->cObj = $listFunctions->localcObj = $this->cObj;
 
-		$this->conf['numberOfRecords'] = $listFunctions->getListItems(true, false);
+		$this->conf['numberOfRecords'] = $listFunctions->getNumberOfListItems();
 		$listFunctions->conf = $this->conf;
-		$items = $listFunctions->getListItems(false, true);
+		$items = $listFunctions->getDatabaseRowsForList();
 		$data = array();
 
 		foreach ($items as $key => $item) {

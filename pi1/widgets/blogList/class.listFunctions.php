@@ -39,6 +39,26 @@ class listFunctions extends blogList {
 	var $localPiVars;
 	var $globalPiVars;
 
+	protected $fields = array(
+		'tx_t3blog_post.uid',
+		'tx_t3blog_post.tagClouds',
+		'tx_t3blog_post.title',
+		'tx_t3blog_post.author',
+		'tx_t3blog_post.date',
+		'tx_t3blog_post.cat',
+		'tx_t3blog_post.number_views',
+		'be_users.email',
+		'be_users.uid AS useruid',
+		'be_users.username',
+		'be_users.realName',
+		'be_users.tx_t3blog_avatar'
+	);
+	protected $tables = array(
+		'tx_t3blog_post',
+		'be_users /*! FORCE INDEX (PRIMARY) */'
+	);
+	protected $tagTitle = '';
+	protected $back = '';
 
 	/**
 	 * The main method of the PlugIn
@@ -57,13 +77,68 @@ class listFunctions extends blogList {
 		$content = $this->getListItems();
 
 		$data = array(
-			'pageBrowser' 	=> t3blog_div::getPageBrowser($this->getListItems(true), 'tx_t3blog_post', $this->prefixId, array('previous' => $this->pi_getLL('previous'), 'next' => $this->pi_getLL('next')), $this->localPiVars, $this->conf, $this->conf['numberOfRecords'], $this->conf['maxPages']),
-			'listItems'		=> $content,
+			'pageBrowser' => t3blog_div::getPageBrowser(
+				$this->getNumberOfListItems(),
+				'tx_t3blog_post', $this->prefixId, array(
+					'previous' => $this->pi_getLL('previous'),
+					'next' => $this->pi_getLL('next')
+				), $this->localPiVars, $this->conf,
+				$this->conf['numberOfRecords'], $this->conf['maxPages']),
+			'listItems' => $content
 		);
 
 		return t3blog_div::getSingle($data, 'list', $this->conf);
 	}
 
+	/**
+	 * Creates where condition for the query.
+	 *
+	 * @return string
+	 */
+	protected function getWhere() {
+		$where = 'tx_t3blog_post.pid=' . t3blog_div::getBlogPid(); // only from current page
+		$where .= ' AND be_users.uid = tx_t3blog_post.author';
+		$where .= $this->localcObj->enableFields('tx_t3blog_post');
+		$where .= $this->getDateCondition();
+		$where .= $this->getAuthorCondition();
+		$where .= $this->getCategoryCondition();
+		$where .= $this->getTagCondition();
+		$where .= $this->getSearchCondition();
+
+		return $where;
+	}
+
+	/**
+	 * Obtains a number of items in the list.
+	 *
+	 * @return int
+	 */
+	public function getNumberOfListItems() {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'COUNT(tx_t3blog_post.uid) AS t',
+			implode(',', $this->tables),
+			$this->getWhere()
+		);
+		$result = is_array($row) ? $row['t'] : 0;
+		return intval($result);
+	}
+
+	/**
+	 * Obtains database rows for the list.
+	 *
+	 * @return array
+	 * @deprecated There is no need to use this function at all.
+	 */
+	public function getDatabaseRowsForList() {
+		return $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			implode(',', $this->fields),
+			implode(',', $this->tables),
+			$this->getWhere(),
+			$this->getGroupBy(),
+			$this->getOrderBy(),
+			$this->getListItemsLimit()
+		);
+	}
 
 	/**
 	 * lists the blog entries and prepares the data.
@@ -77,112 +152,106 @@ class listFunctions extends blogList {
 	 * @return string with the content html.
 	 */
 	function getListItems($justNumOfItems = false, $justItemArray = false){
-		// prepare SQL statement for LIST view
-		$fields = 'tx_t3blog_post.uid AS uid,tx_t3blog_post.tagClouds, tx_t3blog_post.pid,tx_t3blog_post.tstamp,tx_t3blog_post.crdate,tx_t3blog_post.cruser_id,tx_t3blog_post.title,tx_t3blog_post.author,tx_t3blog_post.date,tx_t3blog_post.allow_comments,tx_t3blog_post.cat, tx_t3blog_post.number_views, be_users.email, be_users.uid AS useruid, be_users.username, be_users.realName, be_users.tx_t3blog_avatar';
-		$table = 'tx_t3blog_post';
-		$additionalTables = ' JOIN be_users ON be_users.uid = tx_t3blog_post.author ';
-		$where = 'tx_t3blog_post.pid = ' . t3blog_div::getBlogPid(); // only from current page
-		$where .= $this->localcObj->enableFields($table);
-		$tagTitle = $back = '';
-
-		$where .= $this->getDateCondition();
-		$where .= $this->getAuthorCondition();
-		$where .= $this->getCategoryCondition($additionalTables);
-		$where .= $this->getTagCondition($tagTitle, $back);
-		$where .= $this->getSearchCondition($additionalTables);
-
-		if ($justItemArray) {
-			$result = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-				$fields,
-				$table . $additionalTables,
-				$where,
-				$this->getGroupBy(),
-				$this->getOrderBy(),
-				$this->getListItemsLimit()
-			);
+		if ($justNumOfItems) {
+			die('Please, use getNumberOfListItems() instead of getListItems() to get number of items from now on.');
 		}
-		elseif ($justNumOfItems) {
-			list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-				'COUNT(' . $table . '.uid) AS t',
-				$table . $additionalTables,
-				$where
-			);
-			$result = is_array($row) ? $row['t'] : 0;
+		elseif ($justItemArray) {
+			die('Please, use getDatabaseRowsForList() instead of getListItems() to get rows from now on.');
 		}
-		else {
 
-			$resPosts = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-				$fields,
-				$table . $additionalTables,
-				$where,
-				$this->getGroupBy(),
-				$this->getOrderBy(),
-				$this->getListItemsLimit()
-			);
+		$result = $this->getListItemHeader();
+		$entryCount = 0;
 
-			$result = $this->getListItemHeader($tagTitle);
-
-			$entryCount = 0;
-			while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resPosts))) {
-				$convertTimestamp = date('Y-m-d', $row['date']);
-
-				$gravatar = $this->getGravatar($row['useruid'], $row['email'], $row['realName']);
-
-				// get all content elemenets
-				$resContent = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-					'uid,bodytext', 'tt_content',
-					'irre_parentid=' . $row['uid'] .
-						' AND irre_parenttable=\'tx_t3blog_post\'' .
-						$this->localcObj->enableFields('tt_content'),
-					'', 'sorting'
-				);
-				$contentUidArray = array();
-				$hasDivider = false;
-				while (false !== ($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resContent))) {
-					$dividerPosition = strpos($rowContent['bodytext'], '###MORE###');
-					if ($dividerPosition !== false) {
-						$textBeforeDivider = substr($rowContent['bodytext'], 0, $dividerPosition);
-						$hasDivider = true;
-						break;
-					}
-					$contentUidArray[] = $rowContent['uid'];
-				}
-				$GLOBALS['TYPO3_DB']->sql_free_result($resContent);
-
-				$data = array(
-					'uid'			=> $row['uid'],
-					'blogPid'		=> t3blog_div::getBlogPid(),
-					'oddeven'		=> ($entryCount % 2 ? 'even' : 'odd'),
-					'title'			=> $this->getTitleLinked($row['title'], $row['uid'], $row['date']),
-					'date'			=> $this->getDate($row['date']),
-					'author'		=> $this->getAuthor($row['realName']),
-					'authorId'		=> $row['author'],
-					'gravatar'		=> $gravatar,
-					'email' 		=> $row['email'],
-					'showMore'		=> $hasDivider ? $textBeforeDivider . '<br/>' . $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink') : '',
-					'contentUids'	=> implode(',', $contentUidArray),
-					'time'			=> $this->getTime($row['date']),
-					'categories'	=> $this->getCategoriesLinked($row['uid']),
-					'comments'		=> $this->getCommentsLink($row['uid'], $row['date']),
-					'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
-					'blogUrl'		=> $this->getPermalink($row['uid'], $row['date'], true),
-					'permalink'		=> $this->getPermalink($row['uid'], $row['date']),
-					'back'			=> $back,
-					'tagClouds'		=> $row['tagClouds'],
-					'number_views'	=> $this->getNumberOfViews($row['number_views']),
-					'entryCounter'  => $entryCount
-				);
-				$result .= t3blog_div::getSingle($data, 'listItem', $this->conf);
-				$entryCount++;
-			}
-			$GLOBALS['TYPO3_DB']->sql_free_result($resPosts);
-
-			// if no results have been found and any kind of filters have been sent...
-			if ($entryCount == 0 && (count($this->globalPiVars) > 0 || count($this->localPiVars) > 0)) {
-				$result .= t3blog_div::getSingle(array('text'=>$this->pi_getLL('noResult')), 'noResultWrap', $this->conf);
-			}
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+			implode(',', $this->fields),
+			implode(',', $this->tables),
+			$this->getWhere(),
+			$this->getGroupBy(),
+			$this->getOrderBy(),
+			$this->getListItemsLimit()
+		);
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$result .= $this->renderSingleListPos($row, $entryCount);
+			$entryCount++;
 		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		// if no results have been found and any kind of filters have been sent...
+		if ($entryCount == 0 && (count($this->globalPiVars) > 0 || count($this->localPiVars) > 0)) {
+			$result .= t3blog_div::getSingle(array('text'=>$this->pi_getLL('noResult')), 'noResultWrap', $this->conf);
+		}
+
 		return $result;
+	}
+
+	/**
+	 * Renders a single post for the list view.
+	 *
+	 * @param array $row
+	 * @param int $entryCount
+	 * @return string
+	 */
+	protected function renderSingleListPos(array $row, $entryCount) {
+		$contentUidArray = array(); $hasDivider = false; $textBeforeDivider = '';
+		$this->fetchContentData($row['uid'], $contentUidArray, $hasDivider, $textBeforeDivider);
+
+		$data = array(
+			'uid'			=> $row['uid'],
+			'blogPid'		=> t3blog_div::getBlogPid(),
+			'oddeven'		=> ($entryCount % 2 ? 'even' : 'odd'),
+			'title'			=> $this->getTitleLinked($row['title'], $row['uid'], $row['date']),
+			'date'			=> $this->getDate($row['date']),
+			'author'		=> $this->getAuthor($row['realName']),
+			'authorId'		=> $row['author'],
+			'gravatar'		=> $this->getGravatar($row['useruid'], $row['email'], $row['realName']),
+			'email' 		=> $row['email'],
+			'showMore'		=> $hasDivider ? $textBeforeDivider . '<br/>' . $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink') : '',
+			'contentUids'	=> implode(',', $contentUidArray),
+			'time'			=> $this->getTime($row['date']),
+			'categories'	=> $this->getCategoriesLinked($row['uid']),
+			'comments'		=> $this->getCommentsLink($row['uid'], $row['date']),
+			'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
+			'blogUrl'		=> $this->getPermalink($row['uid'], $row['date'], true),
+			'permalink'		=> $this->getPermalink($row['uid'], $row['date']),
+			'back'			=> $this->back,
+			'tagClouds'		=> $row['tagClouds'],
+			'number_views'	=> $this->getNumberOfViews($row['number_views']),
+			'entryCounter'  => $entryCount
+		);
+		$result = t3blog_div::getSingle($data, 'listItem', $this->conf);
+
+		return $result;
+	}
+
+	/**
+	 * Fetches content data for the current post.
+	 *
+	 * @param int $postId
+	 * @param array $contentUidArray
+	 * @param boolean $hasDivider
+	 * @param string $textBeforeDivider
+	 */
+	protected function fetchContentData($postId, &$contentUidArray, &$hasDivider, &$textBeforeDivider) {
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+			'uid,bodytext', 'tt_content',
+			'irre_parentid=' . $postId .
+				' AND irre_parenttable=\'tx_t3blog_post\'' .
+				$this->localcObj->enableFields('tt_content'),
+			'', 'sorting'
+		);
+		$contentUidArray = array();
+		$hasDivider = false;
+		$textBeforeDivider = '';
+		while (false !== ($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$dividerPosition = strpos($rowContent['bodytext'], '###MORE###');
+			if ($dividerPosition !== false) {
+				$textBeforeDivider = substr($rowContent['bodytext'], 0, $dividerPosition);
+				$hasDivider = true;
+				break;
+			}
+			$contentUidArray[] = $rowContent['uid'];
+		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 	}
 
 	/**
@@ -203,11 +272,10 @@ class listFunctions extends blogList {
 	/**
 	 * Creates header for the list of items.
 	 *
-	 * @param string $tagTitle
 	 * @return string
 	 */
-	protected function getListItemHeader($tagTitle) {
-		$singleData = array('tags' => $tagTitle);
+	protected function getListItemHeader() {
+		$singleData = array('tags' => $this->tagTitle);
 		if ($this->globalPiVars) {
 			$singleData['filtered'] = $this->getFilteredBy();
 			$singleData['text']	= $this->pi_getLL('filteredByText');
@@ -260,16 +328,16 @@ class listFunctions extends blogList {
 	/**
 	 * Creates limit condition for searched phrase.
 	 *
-	 * @param string $additionalTables
 	 * @return string
 	 */
-	protected function getSearchCondition(&$additionalTables) {
+	protected function getSearchCondition() {
 		$result = '';
 		if (trim($this->globalPiVars['sword'])) {
 			$searchWord = $GLOBALS['TYPO3_DB']->quoteStr($this->globalPiVars['sword'], 'tx_t3blog_post');
 
-			$additionalTables .= ' JOIN tt_content ON (tt_content.irre_parentid = tx_t3blog_post.uid AND tt_content.irre_parenttable = \'tx_t3blog_post\')';
-
+			$this->tables['tt_content'] = 'tt_content';
+			$result .= ' AND tt_content.irre_parentid = tx_t3blog_post.uid ' .
+				'AND tt_content.irre_parenttable = \'tx_t3blog_post\'';
 			$result .= ' AND (';
 			$result .= ' tt_content.header LIKE \''.$searchWord.'%\' ';
 			$result .= ' OR tt_content.bodytext LIKE \''.$searchWord.'%\' ';
@@ -285,17 +353,15 @@ class listFunctions extends blogList {
 	/**
 	 * Creates tag limit condition.
 	 *
-	 * @param string $tagTitle
-	 * @param string $back
 	 * @return string
 	 */
-	protected function getTagCondition(&$tagTitle, &$back) {
+	protected function getTagCondition() {
 		$result = '';
 		if ($this->localPiVars['tags']) {
 			$tags = $this->localPiVars['tags'];
 			$result = ' AND (tagClouds LIKE \'%'. $GLOBALS['TYPO3_DB']->quoteStr($tags, 'tx_t3blog_post'). '%\') ';
-			$tagTitle = 'Tag '. $tags;
-			$back = $this->pi_getLL('back');
+			$this->tagTitle = 'Tag '. $tags;
+			$this->back = $this->pi_getLL('back');
 		}
 		return $result;
 	}
@@ -303,13 +369,12 @@ class listFunctions extends blogList {
 	/**
 	 * Obtains category limit condition
 	 *
-	 * @param string $additionalTables
 	 * @return string
 	 */
-	protected function getCategoryCondition(&$additionalTables) {
+	protected function getCategoryCondition() {
 		$result = '';
 		if ($this->localPiVars['category']) {
-			$additionalTables .= ',tx_t3blog_post_cat_mm as mm';
+			$this->tables['tx_t3blog_post_cat_mm'] = 'tx_t3blog_post_cat_mm as mm';
 			$uidList = $this->localPiVars['category'];
 			$this->getCommaSeparatedCategories($uidList, $uidList);
 			$result = ' AND tx_t3blog_post.uid=mm.uid_local AND mm.uid_foreign IN ('.
