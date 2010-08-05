@@ -2,6 +2,8 @@
 
 	* Fixed bug #9142: search is not excluding deleted and/or hidden content elements
 	* Refactoring blogList widget: move date condition out of getListItems()
+	* Fixed incorrect function definition
+	* Refactoring blogList widget: extracted lost of code to separate methods
 
 2010-08-04  Dmitry Dulepov  <dmitry@typo3.org>
 
