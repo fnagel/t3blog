@@ -259,7 +259,7 @@ class blogList extends tslib_pibase {
 	 * @param 	string	$username: name of the user
 	 * @return 	string 	(wrapped img)
 	 */
-	function getGravatar($userUid, $email, $username){
+	function getGravatar($userUid, $email, $username) {
 
 		// userUid only specified when BE User
 		if ($userUid){
