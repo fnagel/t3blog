@@ -951,8 +951,9 @@ class singleFunctions extends blogList {
 	/**
 	 * Builds the Navigation for the Single view (next/previous entries).
 	 *
-	 * @param 	int $current: current navigation point
+	 * TODO Refactor this to get previous and next items without loading all the rest! Note that this function works only for the furst 10 items in the list because of the limit imposed on lists!
 	 *
+	 * @param 	int $current: current navigation point
 	 * @return 	string
 	 */
 	function getSingleNavigation($current)	{
