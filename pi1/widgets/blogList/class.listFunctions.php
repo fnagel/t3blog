@@ -418,12 +418,14 @@ class listFunctions extends blogList {
 	/**
 	 * gets the hierarchic categories and putsthem in the commaseparated list
 	 *
+	 * FIXME This is an exact duplicate of ../categories/class.categories.php
+	 *
 	 * @author snowflake <typo3@snowflake.ch>
 	 *
 	 * @param 	int 	$parent
 	 * @param 	string 	$uidList
 	 */
-	function getCommaSeparatedCategories($parent, &$uidList)	{
+	protected function getCommaSeparatedCategories($parent, &$uidList)	{
 		$table = 'tx_t3blog_cat';
 		$fields = 'uid';
 		$where = 'parent_id='. intval($parent);

@@ -203,12 +203,14 @@ class categories extends tslib_pibase {
 	/**
 	 * gets the hirarchic categories and put it in the commaseparated list
 	 *
+	 * FIXME This is an exact duplicate of ../blogList/class.listFunctions.php
+	 *
 	 * @author 	Nicolas Karrer <nkarrer@snowflake.ch>
 	 *
 	 * @param 	int 	$parent
 	 * @param 	string 	$uidList
 	 */
-	function getCommaSeparatedCategories($parent, &$uidList)	{
+	protected function getCommaSeparatedCategories($parent, &$uidList)	{
 		$table = 'tx_t3blog_cat';
 		$fields = 'uid';
 		$where = 'parent_id=' . intval($parent);
