@@ -123,7 +123,7 @@ class listFunctions extends blogList {
 			$where .= ' OR tx_t3blog_post.title LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' OR tx_t3blog_post.tagClouds LIKE \'%'.$searchWord.'%\' ';
 			$where .= ' ) ';
-			$where .= $this->cObj->enableFields('tt_content');
+			$where .= $this->localcObj->enableFields('tt_content');
 		}
 
 		// SET  group by and order by
@@ -146,37 +146,7 @@ class listFunctions extends blogList {
 		//where additions
 		$this->localPiVars['catIn'];
 
-		//add DATEfrom and DATEto ->  where
-		//convert url paramter datefrom and dateto in timestamp
-		list($yearFromdate, $monthFromdate, $dayFromdate) = explode('-', $this->localPiVars['datefrom']);
-		if ($dayFromdate != ''){
-			$fromdate = mktime(0, 0, 0, $monthFromdate, $dayFromdate, $yearFromdate);
-		}
-
-		list ($yearTodate ,$monthTodate, $dayTodate ) = explode('-', $this->localPiVars['dateto']);
-		if ($dayTodate != ''){
-			$todate = mktime(0, 0, 0, $monthTodate, $dayTodate, $yearTodate);
-		}
-
-		if($todate || $fromdate){
-			if(!$fromdate){
-				$fromdate = 1;
-			}
-			if(!$todate){
-				$todate = '9999999999';
-			}
-
-			if($fromdate > $todate){	//check if from to is wrongly twisted.
-				$tmpdate = $todate;
-				$todate = $fromdate;
-				$fromdate = $tmpdate;
-			}
-			if ($fromdate == $todate){
-				$divOneDay = 86400;
-				$todate = $todate + $divOneDay;
-			}
-			$where .= ' AND date >= '.$fromdate.' AND date <= '.$todate.' ';
-		}
+		$where .= $this->getDateCondition();
 
 		// add limit
 		$limit = ($justNumOfItems ? '' : $this->getListItemsLimit());
@@ -281,7 +251,7 @@ class listFunctions extends blogList {
 		$GLOBALS['TYPO3_DB']->sql_free_result($resPosts);
 
 		// if only the array is requested return it withour html parsing.
-		if($justItemArray)	{
+		if ($justItemArray)	{
 			return $itemArray;
 		}
 
@@ -290,6 +260,56 @@ class listFunctions extends blogList {
 			$content .= t3blog_div::getSingle(array('text'=>$this->pi_getLL('noResult')), 'noResultWrap', $this->conf);
 		}
 		return $content;
+	}
+
+	/**
+	 * Converts a date (YYY-mm-dd) in $this->localPiVars to a Unix time stamp.
+	 *
+	 * @param string $piVarName
+	 * @return int
+	 */
+	protected function getUnixTstampFromPiVar($piVarName) {
+		$result = 0;
+
+		if (isset($this->localPiVars[$piVarName])) {
+			$year = $month = $day = 0;
+			if (sscanf($this->localPiVars[$piVarName], '%4d-%2d-%2d', $year, $month, $day) == 3) {
+				$result = mktime(0, 0, 0, $month, $day, $year);
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Obtains date limit condition for posts from two dates.
+	 *
+	 * @return string
+	 */
+	protected function getDateCondition() {
+		$result = '';
+
+		$fromDate = $this->getUnixTstampFromPiVar('datefrom');
+		$toDate = $this->getUnixTstampFromPiVar('dateto');
+
+		if ($toDate < $fromDate) {
+			list($fromDate, $toDate) = array($toDate, $fromDate);
+		}
+
+		if ($fromDate != 0) {
+			if ($fromDate == $toDate) {
+				// Until the end of date.
+				$toDate += 24*60*60;
+			}
+
+			$result .= ' AND date>=' . $fromDate;
+		}
+
+		if ($toDate != 0) {
+			$result .= ' AND date<=' . $toDate;
+		}
+
+		return $result;
 	}
 
 
