@@ -148,7 +148,57 @@ class listFunctions extends blogList {
 	}
 
 	/**
-	 * lists the blog entries and prepares the data.
+	 * Obtainst posts closest to the current. The result is an array with the
+	 * first member is a previous post and the second member is a next post.
+	 * Any of these two can be null.
+	 *
+	 * @param int $currentPostId
+	 * @return array
+	 */
+	public function getClosestPosts($currentPostId) {
+		$sorting = $this->getSortingForPost(intval($currentPostId));
+
+		$result = array(
+			$this->getPostBySorting('<', $sorting),
+			$this->getPostBySorting('>', $sorting),
+		);
+		return $result;
+	}
+
+	/**
+	 * Obtains sorting value for the given post id.
+	 *
+	 * @param string $postId
+	 * @return int
+	 */
+	protected function getSortingForPost($postId) {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'crdate', 'tx_t3blog_post',
+			'uid=' . $postId, '', '', '1');
+		return is_array($row) ? intval($row['crdate']) : 0;
+	}
+
+	/**
+	 * Obtains a post by sorting operator and value.
+	 *
+	 * @param string $operator '<' or '>'
+	 * @param int $sorting
+	 * @return array
+	 */
+	protected function getPostBySorting($operator, $sorting) {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'tx_t3blog_post.uid,tx_t3blog_post.crdate,tx_t3blog_post.title',
+			implode(',', $this->tables),
+			'tx_t3blog_post.crdate' . $operator . $sorting . ' AND ' . $this->getWhere(),
+			'tx_t3blog_post.crdate ' . ($operator == '<' ? 'DESC' : 'ASC'),
+			'', '1');
+		return $row;
+	}
+
+
+
+	/**
+	 * Lists the blog entries and prepares the data.
 	 * possible piVars: groupBy, orderBy, orderByDir, catIn, datefrom, dateto, pointer
 	 *
 	 * @author 	snowflake <typo3@snowflake.ch>

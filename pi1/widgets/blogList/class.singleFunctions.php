@@ -964,37 +964,33 @@ class singleFunctions extends blogList {
 		$listFunctions->cObj = $listFunctions->localcObj = $this->cObj;
 
 		$this->conf['numberOfRecords'] = $listFunctions->getNumberOfListItems();
-		$listFunctions->conf = $this->conf;
-		$items = $listFunctions->getDatabaseRowsForList();
-		$data = array();
 
-		foreach ($items as $key => $item) {
-			if ($item['uid'] == $current) {
-				if ($items[$key+1]) {
-					$title = $items[$key+1]['title'];
-					if (strlen($title) > 28) {
-						$title = t3lib_div::fixed_lgd_cs($title, 25);
-					}
-					$data['next'] = $this->getTitleLinked($title, $items[$key+1]['uid'], $items[$key+1]['crdate'], 'singleNavTitleLink',$items[$key+1]['title']);
-				}
-				$data['backId'] = t3blog_div::getBlogPid();
-				$data['backText'] = $this->pi_getLL('backText');
-				if($items[$key-1])	{
-					$title = $items[$key-1]['title'];
-					if(strlen($title)>28){
-						$title = t3lib_div::fixed_lgd_cs($title, 25);
-					}
-					$data['previous'] = $this->getTitleLinked($title, $items[$key-1]['uid'], $items[$key-1]['crdate'], 'singleNavTitleLink',$items[$key+1]['title']);
-				}
-
-				return t3blog_div::getSingle($data, 'singleNavigation', $this->conf);
-			}
-		}
+		$posts = $listFunctions->getClosestPosts($current);
+		$data = array(
+			'next' => is_array($posts[0]) ? $this->getTitleLinkedFromRow($posts[0]) : '',
+			'previous' => is_array($posts[1]) ? $this->getTitleLinkedFromRow($posts[1]) : ''
+		);
+		return t3blog_div::getSingle($data, 'singleNavigation', $this->conf);
 	}
 
+	/**
+	 * A wrapper for the getTitleLinkedFromRow that does some magic on row values.
+	 *
+	 * @param array $postRow
+	 * @return array
+	 * @see getTitleLinked
+	 */
+	protected function getTitleLinkedFromRow(array $postRow) {
+		$title = $postRow['title'];
+		if (strlen($title) > 28) {
+			$title = t3lib_div::fixed_lgd_cs($title, 25);
+		}
+		return $this->getTitleLinked($title, $postRow['uid'],
+			$postRow['crdate'], 'singleNavTitleLink', $postRow['title']);
+	}
 
 	/**
-	 * checks if the comment is one of the currently logged in user
+	 * Checks if the comment is one of the currently logged in user
 	 *
 	 * @param 	int $editUid: of the comment id $editUid
 	 * @return 	true or false
