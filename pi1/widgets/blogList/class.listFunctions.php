@@ -267,7 +267,7 @@ class listFunctions extends blogList {
 			'authorId'		=> $row['author'],
 			'gravatar'		=> $this->getGravatar($row['useruid'], $row['email'], $row['realName']),
 			'email' 		=> $row['email'],
-			'showMore'		=> $hasDivider ? $textBeforeDivider . '<br/>' . $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink') : '',
+			'showMore'		=> $hasDivider ? $this->getShowMore($textBeforeDivider, $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink')) : '',
 			'contentUids'	=> implode(',', $contentUidArray),
 			'time'			=> $this->getTime($row['date']),
 			'categories'	=> $this->getCategoriesLinked($row['uid']),
@@ -283,6 +283,20 @@ class listFunctions extends blogList {
 		$result = t3blog_div::getSingle($data, 'listItem', $this->conf);
 
 		return $result;
+	}
+
+	/**
+	 * Crerates a '[more]' section (including the cropped text.
+	 *
+	 * @param string $text
+	 * @param string $moreLink
+	 * @return string
+	 */
+	protected function getShowMore($text, $moreLink) {
+		return t3blog_div::getSingle(array(
+			'text' => $text,
+			'moreLink' => $moreLink,
+		), 'showMore', $this->conf);
 	}
 
 	/**

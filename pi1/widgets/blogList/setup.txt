@@ -80,6 +80,11 @@ plugin.tx_t3blog_pi1 {
 		# if you want to use this, make sure you have installed the extension and the specified pid (see constants) points to the correct page
 		useTipAFriend = {$CONFIGURATION.useTipAFriend}
 
+		showMore = TEXT
+		showMore {
+			dataWrap = {field:text}<br />{field:moreLink}
+		}
+
 		# Title of the blogentry
 		titelListItem = COA
 		titelListItem {
@@ -150,7 +155,6 @@ plugin.tx_t3blog_pi1 {
 					30 {
 						field = showMore
 						if.isTrue.field = showMore
-
 					}
 
 				}
