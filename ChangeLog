@@ -1,6 +1,7 @@
 2010-08-10  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #9190: SQL error in blog list with category filter
+	* Fixed bug #9226: Text is cropped incorrectly in the list view
 
 2010-08-09  Dmitry Dulepov  <dmitry@typo3.org>
 

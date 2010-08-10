@@ -295,7 +295,7 @@ class listFunctions extends blogList {
 	 */
 	protected function fetchContentData($postId, &$contentUidArray, &$hasDivider, &$textBeforeDivider) {
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'uid,bodytext', 'tt_content',
+			'uid,bodytext,CType', 'tt_content',
 			'irre_parentid=' . $postId .
 				' AND irre_parenttable=\'tx_t3blog_post\'' .
 				$this->localcObj->enableFields('tt_content'),
@@ -305,15 +305,46 @@ class listFunctions extends blogList {
 		$hasDivider = false;
 		$textBeforeDivider = '';
 		while (false !== ($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			$dividerPosition = strpos($rowContent['bodytext'], '###MORE###');
-			if ($dividerPosition !== false) {
-				$textBeforeDivider = substr($rowContent['bodytext'], 0, $dividerPosition);
-				$hasDivider = true;
-				break;
+			if ($rowContent['CType'] == 'text' || $rowContent['CType'] == 'textpic') {
+				$dividerPosition = strpos($rowContent['bodytext'], '###MORE###');
+				if ($dividerPosition !== false) {
+					$textBeforeDivider = $this->cropText($rowContent, $dividerPosition);
+					$hasDivider = true;
+					break;
+				}
 			}
 			$contentUidArray[] = $rowContent['uid'];
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+	}
+
+	/**
+	 * Crops the text at divider's position with respect to the HTML structure.
+	 *
+	 * @param array $row
+	 * @param int $dividerPosition
+	 * @return string
+	 */
+	protected function cropText(array $row, $dividerPosition) {
+		if (method_exists($this->localcObj, 'cropHTML')) {
+			// Algorithm:
+			// - render text correctly
+			// - make sure there is no empty paragraphs for ###MORE###
+			$renderedText = t3blog_div::getSingle($row, 'tt_content', $GLOBALS['TSFE']->tmpl->setup);
+			$textBeforeDivider = $this->localcObj->cropHTML($renderedText,
+				($dividerPosition + 10). '|');
+			$regExp = '/<p(?:\s[^>]*)?>\s*###MORE###\s*<\/p>/';
+			if (preg_match($regExp, $textBeforeDivider)) {
+				$textBeforeDivider = preg_replace($regExp, '', $textBeforeDivider);
+			}
+			else {
+				$textBeforeDivider = str_replace('###MORE###', '', $textBeforeDivider);
+			}
+		}
+		else {
+			$textBeforeDivider = substr($row['bodytext'], 0, $dividerPosition);
+		}
+		return $textBeforeDivider;
 	}
 
 	/**
