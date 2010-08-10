@@ -98,7 +98,8 @@ class listFunctions extends blogList {
 	}
 
 	/**
-	 * Creates where condition for the query.
+	 * Creates where condition for the query. This function may modify a list
+	 * of tables! Call it before $this->getTables()!
 	 *
 	 * @return string
 	 */
@@ -121,10 +122,11 @@ class listFunctions extends blogList {
 	 * @return int
 	 */
 	public function getNumberOfListItems() {
+		$where = $this->getWhere();
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 			'COUNT(tx_t3blog_post.uid) AS t',
 			implode(',', $this->tables),
-			$this->getWhere()
+			$where
 		);
 		$result = is_array($row) ? $row['t'] : 0;
 		return intval($result);
@@ -137,10 +139,11 @@ class listFunctions extends blogList {
 	 * @deprecated There is no need to use this function at all.
 	 */
 	public function getDatabaseRowsForList() {
+		$where = $this->getWhere();
 		return $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 			implode(',', $this->fields),
 			implode(',', $this->tables),
-			$this->getWhere(),
+			$where,
 			$this->getGroupBy(),
 			$this->getOrderBy(),
 			$this->getListItemsLimit()
@@ -186,10 +189,11 @@ class listFunctions extends blogList {
 	 * @return array
 	 */
 	protected function getPostBySorting($operator, $sorting) {
+		$where = $this->getWhere();
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
 			'tx_t3blog_post.uid,tx_t3blog_post.crdate,tx_t3blog_post.title',
 			implode(',', $this->tables),
-			'tx_t3blog_post.crdate' . $operator . $sorting . ' AND ' . $this->getWhere(),
+			'tx_t3blog_post.crdate' . $operator . $sorting . ' AND ' . $where,
 			'tx_t3blog_post.crdate ' . ($operator == '<' ? 'DESC' : 'ASC'),
 			'', '1');
 		return $row;
@@ -219,10 +223,11 @@ class listFunctions extends blogList {
 		$result = $this->getListItemHeader();
 		$entryCount = 0;
 
+		$where = $this->getWhere();
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			implode(',', $this->fields),
 			implode(',', $this->tables),
-			$this->getWhere(),
+			$where,
 			$this->getGroupBy(),
 			$this->getOrderBy(),
 			$this->getListItemsLimit()
