@@ -53,8 +53,13 @@ class tx_t3blog_pi2 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 
+		$mbEncoding = mb_internal_encoding();
+		mb_internal_encoding($GLOBALS['TSFE']->metaCharset);
+
 		$this->init();
 		$content = $this->callWidget();
+
+		mb_internal_encoding($mbEncoding);
 
 		return $this->pi_wrapInBaseClass($content);
 	}

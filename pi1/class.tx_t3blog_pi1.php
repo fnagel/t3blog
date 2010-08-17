@@ -66,6 +66,9 @@ class tx_t3blog_pi1 extends tslib_pibase {
 		$data = array();
 		$js = '';
 
+		$mbEncoding = mb_internal_encoding();
+		mb_internal_encoding($GLOBALS['TSFE']->metaCharset);
+
 		if (is_array($conf['widget.'])) {	// get widgets from TS:
 			foreach ($conf['widget.'] as $widgetname => $widgetconf){
 				if(strpos($widgetname, '.')){
@@ -89,6 +92,8 @@ class tx_t3blog_pi1 extends tslib_pibase {
 
 		$GLOBALS['TSFE']->additionalHeaderData['t3b_pingback'] = '<link rel="pingback" href="' . htmlspecialchars($this->getPingbackUrl()) . '" />';
 		$content = t3blog_div::getSingle($data, 'template', $this->conf);
+
+		mb_internal_encoding($mbEncoding);
 
 		return $content;
 	}
