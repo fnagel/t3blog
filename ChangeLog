@@ -1,3 +1,7 @@
+2010-08-18  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Refactor single post displaying function
+
 2010-08-17  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #8921: set mb_string encoding

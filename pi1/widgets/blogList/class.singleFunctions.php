@@ -66,89 +66,22 @@ class singleFunctions extends blogList {
 	function main($content, array $conf, array $piVars) {
 		$this->init($conf, $piVars);
 
-		$message = $this->unsubscribeFromComments();
 		$this->checkForTrackbacks();
 
-		// inserts a comment (+send notification email to admin)
-		if($this->localPiVars['insert']==1){
-			if ($this->insertComment()) {
-				// Todo: and not spam!
-				if ($this->conf['mailReceivedCommentsToAdmin'] == 1) {
-					$this->adminMailComment();
-				}
-				// if it first has to be approved, contact the writer
-				if($this->conf['approved'] == 0 ){
-					$message = $this->pi_getLL('toBeApproved');
-				}
-
-			}
-		}
+		$message = $this->unsubscribeFromComments();
+		$message = $this->insertCommentIfNecessary($message);
 
 		// shows the blog entry if a "showUid" is set.
 		$content = '';
 		if ($this->uid) {
-			// Rise the number of views
-			if ($this->checkRiseViewNumber() === true) {
-				$this->riseViewNumber($this->uid);
-			}
+			$this->riseViewNumber();
 
+			$row = $this->fetchPostDataFromDatabase();
 
-			$text = '';
-			$row = t3blog_db::getRecFromDbJoinTables(
-				'tx_t3blog_post, be_users',  //  TABLES
-				'tx_t3blog_post.uid as postuid, tx_t3blog_post.title, tx_t3blog_post.tagClouds,tx_t3blog_post.author, tx_t3blog_post.date, tx_t3blog_post.cat, tx_t3blog_post.allow_comments,tx_t3blog_post.number_views, be_users.uid, be_users.username, be_users.email, be_users.admin, be_users.admin, be_users.realName, be_users.uid AS useruid, be_users.lastlogin , be_users.tx_t3blog_avatar',	// SELECT
-				'tx_t3blog_post.uid = '.t3lib_div::intval_positive($this->uid).' AND (be_users.uid = tx_t3blog_post.author)',	// WHERE
-				'',	// ORDER BY
-				'0,1'	// LIMIT
-			);
+			if (is_array($row)) {
 
-
-			if($row) {
-				$row = $row[0];
-				if($this->conf['gravatar']){	// set Gravatar
-					$gravatar = $this->getGravatar($row['useruid'], $row['email'], $row['realName']);
-				}else{
-					$gravatar = '';
-				}
-
-					// set the title of the single view page to the title of the blog post
-				if ($this->conf['substitutePagetitle']) {
-					$GLOBALS['TSFE']->page['title'] = $row['title'];
-					// set pagetitle for indexed search to news title
-					$GLOBALS['TSFE']->indexedDocTitle = $row['title'];
-				}
-
-				// generate TrackbackLink
-				$cObj = t3lib_div::makeInstance('tslib_cObj');
-
-				$dateInfo = getdate($row['date']);
-				$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
-					'trackback' => 1,
-					'blogList' => array(
-						'day' => sprintf('%02d', $dateInfo['mday']),
-						'month' => sprintf('%02d', $dateInfo['mon']),
-						'year' => $dateInfo['year'],
-						'showUid' => $this->uid
-					)
-				));
-				$linkConf = array(
-					'additionalParams'	=> $trackBackParameters,
-					'parameter'	=> t3blog_div::getBlogPid(),
-					'title'	=>	$this->pi_getLL('trackbackLinkDesc'),
-					'useCacheHash' => true
-				);
-				$trackbackLink = $cObj->typoLink($this->pi_getLL('trackbackLink'), $linkConf);
-
-				if (!$this->localPiVars['year']) {
-					$this->localPiVars['year'] = $dateInfo['year'];
-					$this->localPiVars['month'] = $dateInfo['mon'];
-					$this->localPiVars['day'] = $dateInfo['mday'];
-				}
-				if (!$this->localPiVars['showUid'] && $this->localPiVars['showUidPerma']) {
-					// Dmitry: this is dirty :(
-					// FIXME Need to refactor this whole function completely
-					$this->localPiVars['showUid'] = $this->localPiVars['showUidPerma'];
-				}
+				$this->updatePageTitle($row['title']);
+				$this->setSomePiVarValues($row);
 
 				$data = array(
 					'uid'			=>	$row['postuid'],
@@ -158,11 +91,11 @@ class singleFunctions extends blogList {
 					'time'			=>	$this->getTime($row['date']),
 					'author'		=>	$this->getAuthor($row['realName']),
 					'authorId'		=>	$row['author'],
-					'gravatar'		=>	$gravatar,
+					'gravatar'		=>	!$this->conf['gravatar'] ? '' : $this->getGravatar($row['useruid'], $row['email'], $row['realName']),
 					'email' 		=>	$row['email'],
 					'category'		=>	$this->getCategoriesLinked($row['postuid']),
 					'back'			=>	$this->pi_getLL('back'),
-					'trackbackLink'	=>	$trackbackLink,
+					'trackbackLink'	=>	$this->getTrackbackLink($row),
 					'comments'		=>	$this->listComments($row['date']),
 					'message'		=> 	$message,
 					'trackbacks'	=>	$this->listTrackbacks(),
@@ -182,6 +115,102 @@ class singleFunctions extends blogList {
 
 		return $content;
 
+	}
+	/**
+	 * Inseerts the comment to the database if necessary.
+	 *
+	 * @param string $message
+	 * @return string
+	 */
+	protected function insertCommentIfNecessary($message) {
+		if ($this->localPiVars['insert']) {
+			if ($this->insertComment()) {
+				// Todo: and not spam!
+				if ($this->conf['mailReceivedCommentsToAdmin']) {
+					$this->adminMailComment();
+				}
+				// if it first has to be approved, contact the writer
+				if (!$this->conf['approved']) {
+					$message = $this->pi_getLL('toBeApproved');
+				}
+			}
+		}
+		return $message;
+	}
+
+	/**
+	 * Fetches data for the post from the database.
+	 *
+	 * @return mixed Array or null if no data
+	 */
+	protected function fetchPostDataFromDatabase() {
+		list($row) = t3blog_db::getRecFromDbJoinTables(
+			'tx_t3blog_post, be_users',  //  TABLES
+			'tx_t3blog_post.uid as postuid, tx_t3blog_post.title, tx_t3blog_post.tagClouds,tx_t3blog_post.author, tx_t3blog_post.date, tx_t3blog_post.cat, tx_t3blog_post.allow_comments,tx_t3blog_post.number_views, be_users.uid, be_users.username, be_users.email, be_users.admin, be_users.admin, be_users.realName, be_users.uid AS useruid, be_users.lastlogin, be_users.tx_t3blog_avatar',
+			'tx_t3blog_post.uid='.t3lib_div::intval_positive($this->uid).' AND (be_users.uid=tx_t3blog_post.author)'
+		);
+		return $row;
+	}
+
+	/**
+	 * Sets some localPiVars necessary for the Typ[oScript renderer
+	 *
+	 * @param array $postRow
+	 * @return void
+	 */
+	protected function setSomePiVarValues(array $postRow) {
+		$dateInfo = getdate($postRow['date']);
+		if (!$this->localPiVars['year']) {
+			$this->localPiVars['year'] = $dateInfo['year'];
+			$this->localPiVars['month'] = $dateInfo['mon'];
+			$this->localPiVars['day'] = $dateInfo['mday'];
+		}
+		if (!$this->localPiVars['showUid'] && $this->localPiVars['showUidPerma']) {
+			// Legacy code: update showUid if the old showUidPerma is given
+			$this->localPiVars['showUid'] = $this->localPiVars['showUidPerma'];
+		}
+	}
+
+
+	/**
+	 * Creates a trackback link for the post.
+	 *
+	 * @param array $postRow
+	 * @return string
+	 */
+	protected function getTrackbackLink(array $postRow) {
+		$cObj = t3lib_div::makeInstance('tslib_cObj');
+
+		$dateInfo = getdate($postRow['date']);
+		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'trackback' => 1,
+			'blogList' => array(
+				'day' => sprintf('%02d', $dateInfo['mday']),
+				'month' => sprintf('%02d', $dateInfo['mon']),
+				'year' => $dateInfo['year'],
+				'showUid' => $this->uid
+			)
+		));
+		$linkConf = array(
+			'additionalParams'	=> $trackBackParameters,
+			'parameter'	=> t3blog_div::getBlogPid(),
+			'title'	=>	$this->pi_getLL('trackbackLinkDesc'),
+			'useCacheHash' => true
+		);
+		return $cObj->typoLink($this->pi_getLL('trackbackLink'), $linkConf);
+	}
+
+	/**
+	 * Updates page title if necessary
+	 *
+	 * @param string $title
+	 * @return void
+	 */
+	protected function updatePageTitle($title) {
+		if ($this->conf['substitutePagetitle']) {
+			$GLOBALS['TSFE']->page['title'] = $title;
+			$GLOBALS['TSFE']->indexedDocTitle = $title;
+		}
 	}
 
 	/**
@@ -581,19 +610,13 @@ class singleFunctions extends blogList {
 
 		$comments = '';
 		for ($i = 0; false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)); $i++) {
-			if ($this->conf['gravatar']) {
-				$gravatar = $this->getGravatar('', $row['email'], $row['author']);
-			}
-			else {
-				$gravatar = '';
-			}
 
 			$dataCom = array(
 				'uid'                   => $row['uid'],
 				'odd'                   => $i%2==0 ? 'odd' : 'even',
 				'title'                 => $row['title'],
 				'author'                => $this->getAuthor($row['author']),
-				'gravatar'              => $gravatar,
+				'gravatar'              => !$this->conf['gravatar'] ? '' : $this->getGravatar('', $row['email'], $row['author']),
 				'date'                  => $this->getDate($row['date']),
 				'time'                  => $this->getTime($row['date']),
 				'email'                 => $row['email'],
@@ -1081,38 +1104,31 @@ class singleFunctions extends blogList {
 	}
 
 	/**
-	* when shall we rise the number?
-	*
-	*/
-	function checkRiseViewNumber (){
+	 * Checks if view counter should be increased.
+	 *
+	 * @return void
+	 */
+	function checkRiseViewNumber() {
 		$rise = false;
 
-		/*
-		 *
-		 * or different possibilities: insert into table and then find out if user has already seen it?
-		 * Wenn der gleiche User innerhalb einer bestimmten Zeit zugreift, wird der Zugriff nur als ein einzelner Zugriff gewertet.
-		 * Der User wird aufgrund der IP, Browser, System identifiziert. Die Zeitspanne ist zu noch zu definieren.
-		 * Thu, 03 Sep 2009 11:52:43 GMT
-		 *
-		 * Mit USER_INT arbeiten?
-		 */
-
-		// if a BE user is logged and these views should not be count we immediatly can switch back
-		if($_COOKIE['be_typo_user'] and !($this->conf['countBEUsersViews'])){
-			return($rise);
+		if (!$this->conf['countBEUsersViews'] &&
+				($GLOBALS['BE_USER'] instanceof t3lib_beUserAuth) &&
+				($GLOBALS['BE_USER']->user['uid'])) {
+			return $rise;
 		}
 
-		$cookieKey = md5($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'].$this->uid);
-		if($_COOKIE['fe_typo_user'] and ($_COOKIE['T3BLOGvisit'.$cookieKey]!= $this->uid)){
-			setcookie('T3BLOGvisit'.$cookieKey, $this->uid, time()+$this->conf['timePeriodToRecountView']);
+		if (!isset($_COOKIE['t3blog']) || !t3lib_div::inList($_COOKIE['t3blog'], $this->uid)) {
 			$rise = true;
-		}elseif(!$_COOKIE['fe_typo_user']){ // cookies are not accepted by the user...
-			$rise = false;
+		}
+		if ($GLOBALS['TSFE']->fe_user->user['uid']) {
+			// User is logged in
+			$t3blogData = $GLOBALS['TSFE']->fe_user->getKey('user', 't3blog');
+			if (is_array($t3blogData)) {
+				$rise = !isset($t3blogData['visited'][$this->uid]);
+			}
 		}
 
-
-		return($rise);
-
+		return $rise;
 	}
 
 	/**
@@ -1121,10 +1137,35 @@ class singleFunctions extends blogList {
 	 * @param int $postUID
 	 * @return void
 	 */
-	function riseViewNumber($postUID) {
-		$GLOBALS['TYPO3_DB']->sql_query('UPDATE tx_t3blog_post ' .
-			'SET tx_t3blog_post.number_views=tx_t3blog_post.number_views+1 ' .
-			'WHERE tx_t3blog_post.uid=' . $postUID);
+	protected function riseViewNumber() {
+		if ($this->checkRiseViewNumber()) {
+			$GLOBALS['TYPO3_DB']->exec_UPDATEquery('tx_t3blog_post',
+				'tx_t3blog_post.uid=' . $this->uid,
+				array(
+					'number_views' => 'number_views+1'
+				), 'number_views');
+
+			if ($GLOBALS['TSFE']->fe_user->user['uid']) {
+				// User is logged in
+				$t3blogData = $GLOBALS['TSFE']->fe_user->getKey('user', 't3blog');
+				if (!is_array($t3blogData)) {
+					$t3blogData = array(
+						'visited' => array()
+					);
+				}
+				$t3blogData['visited'][$this->uid] = 1;	// '1' instyead of true to save serialized space
+			}
+
+			// Save also for anonymous user
+			$cookie = isset($_COOKIE['t3blog']) ? $_COOKIE['t3blog'] . ',' : '';
+			$cookie .= $this->uid;
+			if (strlen($cookie) > 120) {
+				// Too long. Shorten it.
+				$cookie = substr($cookie, -120);
+				$cookie = substr($cookie, strpos($cookie, ',') + 1);
+			}
+			setcookie('t3blog', $cookie, time() + 60*60*24*30);
+		}
 	}
 
 	/**
@@ -1139,7 +1180,7 @@ class singleFunctions extends blogList {
 		}
 		$refIndex = t3lib_div::makeInstance('t3lib_refindex');
 		/* @var $refIndex t3lib_refindex */
-		$refIndex->updateRefIndexTable($table, $uid);
+		$refIndex->updateRefIndexTable($table, $id);
 	}
 
 	/**
