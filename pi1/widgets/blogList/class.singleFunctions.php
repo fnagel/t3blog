@@ -80,6 +80,12 @@ class singleFunctions extends blogList {
 
 			if (is_array($row)) {
 
+				$showHiddenRecords = $GLOBALS['TSFE']->showHiddenRecords;
+				if ($this->isBEUserLoggedIn()) {
+					// Allow preview for hidden posts
+					$GLOBALS['TSFE']->showHiddenRecords = true;
+				}
+
 				$this->updatePageTitle($row['title']);
 				$this->setSomePiVarValues($row);
 
@@ -110,14 +116,29 @@ class singleFunctions extends blogList {
 
 				$content = t3blog_div::getSingle($data, 'single', $this->conf);
 				$content = str_replace('###MORE###', '', $content);
+
+				$GLOBALS['TSFE']->showHiddenRecords = $showHiddenRecords;
 			}
 		}
 
 		return $content;
 
 	}
+
 	/**
-	 * Inseerts the comment to the database if necessary.
+	 * Checks if BE user is logged in.
+	 *
+	 * @return boolean
+	 */
+	protected function isBEUserLoggedIn() {
+		return isset($GLOBALS['BE_USER']) &&
+				($GLOBALS['BE_USER'] instanceof t3lib_beUserAuth) &&
+				$GLOBALS['BE_USER']->user['uid'];
+	}
+
+
+	/**
+	 * Inserts the comment to the database if necessary.
 	 *
 	 * @param string $message
 	 * @return string
@@ -1111,9 +1132,7 @@ class singleFunctions extends blogList {
 	function checkRiseViewNumber() {
 		$rise = false;
 
-		if (!$this->conf['countBEUsersViews'] &&
-				($GLOBALS['BE_USER'] instanceof t3lib_beUserAuth) &&
-				($GLOBALS['BE_USER']->user['uid'])) {
+		if (!$this->conf['countBEUsersViews'] && $this->isBEUserLoggedIn()) {
 			return $rise;
 		}
 

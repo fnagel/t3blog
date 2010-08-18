@@ -296,7 +296,7 @@ plugin.tx_t3blog_pi1 {
 			}
 		}
 
-		#single wrap
+		# single item
 		single = COA
 		single {
 			1 = TEXT

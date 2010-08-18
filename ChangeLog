@@ -1,6 +1,7 @@
 2010-08-18  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Refactor single post displaying function
+	* Work in progress #9131: show hidden content elements to BE users in single view
 
 2010-08-17  Dmitry Dulepov  <dmitry@typo3.org>
 
