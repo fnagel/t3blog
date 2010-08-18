@@ -125,9 +125,9 @@ class t3blog_div {
 					'pageParameterName' => 'tx_t3blog_post_pointer',
 					'numberOfPages' => $pages,
 				));
-	
+
 				self::setPageBrowserFilters($conf);
-	
+
 				// Get page browser
 				$cObj = t3lib_div::makeInstance('tslib_cObj');
 				/* @var $cObj tslib_cObj */
@@ -137,7 +137,7 @@ class t3blog_div {
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * Adds extra conditions to the page browser link
 	 *
@@ -163,12 +163,17 @@ class t3blog_div {
 	}
 
 	/**
-	 * returns the blog storage folder pid
+	 * Returns the blog storage folder pid
 	 *
 	 * @return integer 	pid of the storage folder
 	 */
 	static public function getBlogPid(){
 		static $cachedPid = 0;
+
+		if (isset($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid']) &&
+				t3lib_div::testInt($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid'])) {
+			return $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid'];
+		}
 
 		// get pid
 		if (isset($GLOBALS['alternativeBlogPid']) && $GLOBALS['alternativeBlogPid'] > 0) {

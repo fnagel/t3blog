@@ -2,6 +2,7 @@
 
 	* Refactor single post displaying function
 	* Work in progress #9131: show hidden content elements to BE users in single view
+	* Fixed bug #7757: provide a TS setting to change blog pid
 
 2010-08-17  Dmitry Dulepov  <dmitry@typo3.org>
 

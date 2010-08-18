@@ -1,4 +1,4 @@
-# global t3blog template handles the inclusion of the setup of each widget 
+# global t3blog template handles the inclusion of the setup of each widget
 # include the widget templates/configurations
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/latestCommentsNav/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/latestPostNav/setup.txt">
@@ -15,6 +15,9 @@
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/views/setup.txt">
 
 plugin.tx_t3blog_pi1 {
+
+	# If set, t3blog will use this pid as a record storage. Currently there can be a little inconsistencies in the usage. Please, report them as bugs.
+	blogPid =
 
 	myblog = USER
 	myblog {
@@ -34,9 +37,9 @@ plugin.tx_t3blog_pi1 {
 		widget.views< plugin.tx_t3blog_pi1.views
 
 		# Load design
-		# Attention! This will only work, when you are 
+		# Attention! This will only work, when you are
 		# using the static template "T3BLOG Layout".
-		# The static template has included the full design of 
+		# The static template has included the full design of
 		# a blog (position of widgets and much more)
 		template =< plugin.tx_t3blog_pi1.layoutBlog
 	}
