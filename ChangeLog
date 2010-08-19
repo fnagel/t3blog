@@ -1,3 +1,7 @@
+2010-08-19  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Refactoring of the comment form -- work in progress!
+
 2010-08-18  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Refactor single post displaying function

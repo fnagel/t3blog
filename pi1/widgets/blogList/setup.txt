@@ -1064,6 +1064,12 @@ plugin.tx_t3blog_pi1 {
 						field = submit_label
 					}
 				}
+
+				100 = TEXT
+				100.value = <input type="hidden" name="tx_t3blog_pi1[blogList][insert]" value="1" />
+
+				110 = TEXT
+				110.dataWrap = <input type="hidden" name="tx_t3blog_pi1[blogList][uid]" value="{field:uid}" />
 			}
 		}
 

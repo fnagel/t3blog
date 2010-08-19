@@ -288,163 +288,198 @@ class singleFunctions extends blogList {
 	 */
 	function showCommentForm($allowComments)	{
 		if ($allowComments == 0 || ($allowComments == 2 && $GLOBALS['TSFE']->fe_user->user['uid'])) {
-
-			// comment comments
-			if ($this->localPiVars['comParentId'] > 0) {
-				$commentFormFields = array('comParentId','commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
-			}
-			else {
-				$commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
-			}
-
-			// captcha image
-			if ($this->conf['useCaptcha'] == 1) {
-				array_push($commentFormFields, 'captcha', 'captchaimage');
-				$captchaHTMLoutput = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
-					'pi1/widgets/blogList/captcha/captcha.php?' .
-					'font=' . htmlspecialchars($this->conf['captchaFont']) .
-					'&amp;fontSize=' . htmlspecialchars($this->conf['captchaFontSize']) .
-					'&amp;fontColor=' . htmlspecialchars($this->conf['captchaFontColor']) .
-					'&amp;fontEreg=' . htmlspecialchars($this->conf['captchaEreg']) .
-					'&amp;image=' . htmlspecialchars($this->conf['captchaBackgroundPNGImage']) .
-					'&amp;showImage=' . htmlspecialchars($this->conf['captchaShowImage']) .
-					'&amp;backgroundColor=' . htmlspecialchars($this->conf['captchaBackgroundColor']) .
-					'&amp;lines=' . htmlspecialchars($this->conf['captchaLines']) .
-					'" alt="" />';
-			}
-
-			// subscribe for comments
-			if ($this->conf['subscribeForComments'] == 1) {
-				array_push($commentFormFields, 'subscribe');
-			}
-
-			//check if i'ts editing a comment
-			$editUid = intval($this->localPiVars['editCommentUid']);
-			if ($editUid) {
-				unset($this->localPiVars['editCommentUid']);
-				unset($this->piVars[$this->prevPrefixId]['editCommentUid']);
-				$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-					'*', 'tx_t3blog_com', 'uid=' . $editUid
-				);
-				$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-				// check if the comment is yours (yes the second time. sure is sure)
-				if ($this->allowedToEditComment($editUid)) {
-					// load the previous comment infos
-					$this->localPiVars['commenttext'] = $row['text'];
-					$this->localPiVars['commenttitle'] = $row['title'];
-					$this->localPiVars['commentauthoremail'] = $row['email'];
-					$this->localPiVars['commentauthorwebsite'] = $row['website'];
-				}
-				else {
-					$editUid = 0;
-				}
-				$GLOBALS['TYPO3_DB']->sql_free_result($res);
-			}
-
-			// load the commentdata from the cookie or fe_user
-			foreach ($commentFormFields as $fieldName) {
-				if (!isset($this->localPiVars[$fieldName])) {
-					//check if there is a cookie value set.
-					switch ($fieldName){
-						case 'commentauthor':
-							if(isset($_COOKIE['currentCommentAuthor'])) {
-								$this->localPiVars[$fieldName] = $_COOKIE['currentCommentAuthor'];
-							}
-							else if ($GLOBALS['TSFE']->loginUser) {
-								$this->localPiVars[$fieldName] = strlen($GLOBALS['TSFE']->fe_user->user['name']) ? $GLOBALS['TSFE']->fe_user->user['name'] : $GLOBALS['TSFE']->fe_user->user['username'];
-							}
-						break;
-						case 'commentauthoremail':
-							if (isset($_COOKIE['currentCommentEmail'])) {
-								$this->localPiVars[$fieldName] = $_COOKIE['currentCommentEmail'];
-							}
-							else if($GLOBALS['TSFE']->loginUser) {
-								$this->localPiVars[$fieldName] = $GLOBALS['TSFE']->fe_user->user['email'];
-							}
-							break;
-						case 'commentauthorwebsite':
-							if(isset($_COOKIE['currentCommentWebsite'])){
-								$this->localPiVars[$fieldName] = $_COOKIE['currentCommentWebsite'];
-							}
-							else if($GLOBALS['TSFE']->loginUser) {
-								$this->localPiVars[$fieldName] = $GLOBALS['TSFE']->fe_user->user['www'];
-							}
-						break;
-					}
-				}
-				//set * if required.
-				$requiredFieldsarr = explode(',',mb_strtolower($this->conf['requiredFields']));
-				$requiredFieldsarr = str_replace(' ','',$requiredFieldsarr);
-				$requiredMarker = '';
-				if(in_array(strtolower($fieldName), $requiredFieldsarr)){
-					$requiredMarker = ' ' . t3blog_div::getSingle(array('marker'=>'*'), 'requiredFieldMarkerWrap', $this->conf);
-				}
-				//set the pi value as default value
-				$data[$fieldName] = $this->localPiVars[$fieldName];
-				$data[$fieldName.'_label'] = $this->pi_getLL($fieldName).$requiredMarker;
-			}
-			// captcha
-			if ($this->conf['useCaptcha'] == 1) {
-				$data['captchaimage']	= $captchaHTMLoutput;
-				$data['captcha']		= 'tx_t3blog_pi1[blogList][captcha]';
-			}
-
-			// subscribe for comments
-			if ($this->conf['subscribeForComments'] == 1) {
-				$postVars = t3lib_div::_POST('tx_t3blog_pi1');
-				if ($postVars['blogList']['subscribe']) {
-					$data['subscribe'] = 'checked="checked"';
-				}
-				else {
-					$data['subscribe'] = ' ';
-				}
-				$data['subscribe_text']	= $this->pi_getLL('subscribe_text');
-			}
-
-			$data['readOnly']		= isset($GLOBALS['TSFE']->fe_user->user['uid']) && $this->conf['readOnly'] == 1 ? 'readonly="readonly"' : '';
-			$data['parentTitle']    = $this->localPiVars['comParentTitle'];
-			$data['commentTitle'] 	= $this->pi_getLL('commentFormTitle');
-			$data['closeicon'] 		= '<img src="'.t3lib_extMgm::extRelPath('t3blog').'icons/window_close.png" alt="" />';
-			$data['closelink'] 		= '';
-			unset($this->piVars[$this->prevPrefixId]['createCommentForm']);
-
-			$data['action'] = htmlspecialchars($this->getCommentFormAction());
-
-			// display error msg
-			if($this->localPiVars['errorMsg']){
-				$data['errorMsg'] = $this->localPiVars['errorMsg'];
-				$data['errorTitle'] = $this->pi_getLL('errorTitle');
-				unset($this->localPiVars['errorMsg']);
-			}
-			// set the comment editUid
-			$data['editUid'] = $editUid;
-			$content = t3blog_div::getSingle($data, 'commentForm', $this->conf);
-
-			return '<div id="commentFormNonAjax" class="commentFormStyle">' .
-				$content .
-				'</div>';
+			$result = $this->doShowCommentsForm();
 		}
 		else {
-			// return login status message
-			if ($allowComments == 1) {
-				// no comments allowed at all
-				return t3blog_div::getSingle(array(
-					'text' => $this->pi_getLL('notAllowedToComment')),
-						'noCommentAllowedWrap', $this->conf);
+			$result = $this->commentsNotAllowed($allowComments);
+		}
+		return $result;
+	}
+
+	/**
+	 * Generates the comment form
+	 *
+	 * @return string
+	 */
+	protected function doShowCommentsForm() {
+		$data = array();
+		$this->checkForCommentEditing($data);
+		$this->setCaptchaFields($data);
+		$this->setCommentFormFields($data);
+
+		// captcha
+
+		// subscribe for comments
+		if ($this->conf['subscribeForComments'] == 1) {
+			$postVars = t3lib_div::_POST('tx_t3blog_pi1');
+			if ($postVars['blogList']['subscribe']) {
+				$data['subscribe'] = 'checked="checked"';
 			}
 			else {
-				// not logged in message
-				$returnLink = $this->pi_linkTP_keepPIvars_url(array(),1,0,$GLOBALS['TSFE']->id);
-				return t3blog_div::getSingle(
-					array(
-						'text'=>$this->pi_getLL('notAllowedToComment'),
-						'loginPid'=>$this->conf['loginPid'],
-						'loginLinkText'=>$this->pi_getLL('loginLinkText'),
-						'redirect_url'=> t3lib_div::locationHeaderUrl($returnLink)
-					), 'noCommentAllowedWrap', $this->conf);
+				$data['subscribe'] = ' ';
+			}
+			$data['subscribe_text']	= $this->pi_getLL('subscribe_text');
+		}
+
+		$data['readOnly']		= isset($GLOBALS['TSFE']->fe_user->user['uid']) && $this->conf['readOnly'] == 1 ? 'readonly="readonly"' : '';
+		$data['parentTitle']    = $this->localPiVars['comParentTitle'];
+		$data['commentTitle'] 	= $this->pi_getLL('commentFormTitle');
+		$data['closeicon'] 		= '<img src="'.t3lib_extMgm::extRelPath('t3blog').'icons/window_close.png" alt="" />';
+		$data['closelink'] 		= '';
+		unset($this->piVars[$this->prevPrefixId]['createCommentForm']);
+		$data['insert'] = 1;
+		$data['uid'] = $this->uid;
+
+		$data['action'] = htmlspecialchars($this->getCommentFormAction());
+
+		// display error msg
+		if($this->localPiVars['errorMsg']){
+			$data['errorMsg'] = $this->localPiVars['errorMsg'];
+			$data['errorTitle'] = $this->pi_getLL('errorTitle');
+			unset($this->localPiVars['errorMsg']);
+		}
+		$content = t3blog_div::getSingle($data, 'commentForm', $this->conf);
+
+		return '<div id="commentFormNonAjax" class="commentFormStyle">' .
+			$content .
+			'</div>';
+	}
+	/**
+	 * Sets fields according to the commenter's previous data
+	 *
+	 * @param array data
+	 * @return void
+	 */
+	protected function setCommentFormFields(array &$data) {
+		$map = array(
+			'commentauthor' => array(
+				'cookie' => 'currentCommentAuthor',
+				'userField' => 'name'
+			),
+			'commentauthoremail' => array(
+				'cookie' => 'currentCommentEmail',
+				'userField' => 'email',
+			),
+			'commentauthorwebsite' => array(
+				'cookie' => 'currentCommentWebsite',
+				'userField' => 'www'
+			)
+		);
+		$requiredFields = strtolower($this->conf['requiredFields']);
+		$requiredFieldsArray = t3lib_div::trimExplode(',', $requiredFields, true);
+		foreach ($this->getCommentFormFields() as $fieldName) {
+			if (isset($this->localPiVars[$fieldName])) {
+				$data[$fieldName] = $this->localPiVars[$fieldName];
+			}
+			else if (isset($map[$fieldName])) {
+				if (isset($_COOKIE[$map[$fieldName]['cookie']])) {
+					$data[$fieldName] = $_COOKIE[$map[$fieldName]['cookie']];
+				}
+				else if ($GLOBALS['TSFE']->fe_user->user['uid']) {
+					$data[$fieldName] = $GLOBALS['TSFE']->fe_user->user[$map[$fieldName]['userField']];
+				}
+			}
+			$data[$fieldName.'_label'] = $this->pi_getLL($fieldName);
+
+			if (in_array(strtolower($fieldName), $requiredFieldsArray)) {
+				$data[$fieldName.'_label'] .= ' ' . t3blog_div::getSingle(array(
+					'marker' => '*'
+				), 'requiredFieldMarkerWrap', $this->conf);
 			}
 		}
 	}
+
+	/**
+	 * Checks if we are in the comment edit mode and adjusts local variables
+	 * accordingly.
+	 *
+	 * @param array $data
+	 * @return void
+	 */
+	protected function checkForCommentEditing(array &$data) {
+		$editUid = intval($this->localPiVars['editCommentUid']);
+		if ($editUid) {
+			unset($this->localPiVars['editCommentUid']);
+			unset($this->piVars[$this->prevPrefixId]['editCommentUid']);
+			if ($this->allowedToEditComment($editUid)) {
+				list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+					'*', 'tx_t3blog_com', 'uid=' . $editUid
+				);
+				// load the previous comment info
+				$this->localPiVars['commenttext'] = $row['text'];
+				$this->localPiVars['commenttitle'] = $row['title'];
+				$this->localPiVars['commentauthoremail'] = $row['email'];
+				$this->localPiVars['commentauthorwebsite'] = $row['website'];
+				$data['editUid'] = $editUid;
+			}
+		}
+		return $editUid;
+	}
+
+
+	protected function commentsNotAllowed($allowComments) {
+		if ($allowComments == 1) {
+			// no comments allowed at all
+			$result = t3blog_div::getSingle(array(
+				'text' => $this->pi_getLL('notAllowedToComment')),
+					'noCommentAllowedWrap', $this->conf);
+		}
+		else {
+			// not logged in message
+			$returnLink = $this->pi_linkTP_keepPIvars_url(array(),1,0,$GLOBALS['TSFE']->id);
+			$result = t3blog_div::getSingle(
+				array(
+					'text'=>$this->pi_getLL('notAllowedToComment'),
+					'loginPid'=>$this->conf['loginPid'],
+					'loginLinkText'=>$this->pi_getLL('loginLinkText'),
+					'redirect_url'=> t3lib_div::locationHeaderUrl($returnLink)
+				), 'noCommentAllowedWrap', $this->conf);
+		}
+		return $result;
+	}
+
+	/**
+	 * Adds captcha fields if necessary.
+	 *
+	 * @param array $data
+	 * @return void
+	 */
+	protected function setCaptchaFields(array &$data) {
+		if ($this->conf['useCaptcha'] == 1) {
+			$data['captcha'] = 'tx_t3blog_pi1[blogList][captcha]';
+			$data['captchaimage'] = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
+				'pi1/widgets/blogList/captcha/captcha.php?' .
+				'font=' . htmlspecialchars($this->conf['captchaFont']) .
+				'&amp;fontSize=' . htmlspecialchars($this->conf['captchaFontSize']) .
+				'&amp;fontColor=' . htmlspecialchars($this->conf['captchaFontColor']) .
+				'&amp;fontEreg=' . htmlspecialchars($this->conf['captchaEreg']) .
+				'&amp;image=' . htmlspecialchars($this->conf['captchaBackgroundPNGImage']) .
+				'&amp;showImage=' . htmlspecialchars($this->conf['captchaShowImage']) .
+				'&amp;backgroundColor=' . htmlspecialchars($this->conf['captchaBackgroundColor']) .
+				'&amp;lines=' . htmlspecialchars($this->conf['captchaLines']) .
+				'" alt="" />';
+		}
+	}
+
+	/**
+	 * Creates a list of fields to fetch from the database for the comment form.
+	 *
+	 * @return array
+	 */
+	protected function getCommentFormFields() {
+		$commentFormFields = array('commentauthor', 'commenttext','commentauthoremail', 'commentauthorwebsite', 'commenttitle', 'submit');
+		if ($this->localPiVars['comParentId'] > 0) {
+			$commentFormFields[] = 'comParentId';
+		}
+		if ($this->conf['useCaptcha'] == 1) {
+			array_push($commentFormFields, 'captcha', 'captchaimage');
+		}
+		if ($this->conf['subscribeForComments'] == 1) {
+			array_push($commentFormFields, 'subscribe');
+		}
+		return $commentFormFields;
+	}
+
 
 	/**
 	 * Creates a comment form action URL.
@@ -452,23 +487,7 @@ class singleFunctions extends blogList {
 	 * @return string
 	 */
 	protected function getCommentFormAction() {
-		$actionParameters = t3lib_div::array_merge_recursive_overrule(
-			$this->localPiVars,
-			array(
-				'insert' => 1,
-				'uid' => $this->uid
-			)
-		);
-		foreach ($actionParameters as $parameterName => $parameterValue) {
-			if (substr($parameterName, 0, 7) == 'comment') {
-				unset($actionParameters[$parameterName]);
-			}
-		}
-		return $this->pi_linkTP_keepPIvars_url(
-			array (
-				$this->prevPrefixId => $actionParameters
-			)
-		);
+		return t3lib_div::getIndpEnv('TYPO3_REQUEST_URL');
 	}
 
 
@@ -747,7 +766,7 @@ class singleFunctions extends blogList {
 		}
 
 		if ($error) {
-			$this->localPiVars['errorMsg']=$errorMsg;
+			$this->localPiVars['errorMsg'] = $errorMsg;
 		}
 		else {
 			// unset the comment form values
@@ -758,6 +777,9 @@ class singleFunctions extends blogList {
 			unset($this->localPiVars['commenttext']);
 			unset($this->localPiVars['commenttitle']);
 			unset($this->localPiVars['editUid']);
+			unset($this->localPiVars['uid']);
+			unset($this->localPiVars['errorMsg']);
+			unset($this->localPiVars['insert']);
 			unset($this->localPiVars['uid']);
 
 			$time = time();
@@ -808,17 +830,17 @@ class singleFunctions extends blogList {
 				$this->updateRefIndex($table, $GLOBALS['TYPO3_DB']->sql_insert_id());
 
 				//Hook after comment insertion
-			if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
-				foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'] as $userFunc) {
-				  $params = array(
-						'data' => &$data,
-						'table' => $table,
-						'postUid' => $uid,
-						'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
-					);
-					t3lib_div::callUserFunction($userFunc, $params, $this);
+				if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
+					foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'] as $userFunc) {
+					  $params = array(
+							'data' => &$data,
+							'table' => $table,
+							'postUid' => $uid,
+							'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
+						);
+						t3lib_div::callUserFunction($userFunc, $params, $this);
+					}
 				}
-			}
 			}
 
 			// send emails if comments must not be approved
