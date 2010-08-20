@@ -870,7 +870,7 @@ class singleFunctions extends blogList {
 					if (count($comments) > 0) {
 						// assemble email
 						$unsubscribe	= '<' . $this->getUnsubscribeLink($uid, $value['code']) . '>' ."\n";
-						$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']).'"'. "\n";
+						$text			= '"'.trim($comments['0']['title']). ': '. str_replace(array('<br>', '<br />'), '\\n', trim($comments['0']['text'])) .'"'. "\n";
 						$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
 						$receiver   	= $address;
 						$subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;

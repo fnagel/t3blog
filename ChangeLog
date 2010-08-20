@@ -1,3 +1,7 @@
+2010-08-20  Thomas Imboden  <timboden@snowflake.ch>
+
+	* Replaced line break tags to newlines in comment notification email text
+
 2010-08-19  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Refactoring of the comment form -- work in progress!
