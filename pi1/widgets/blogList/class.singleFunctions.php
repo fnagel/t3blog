@@ -37,6 +37,9 @@ class singleFunctions extends blogList {
 	var $prevPrefixId = 'blogList';
 	protected $uid = 0;
 
+	/** Error message for the comment form processing */
+	protected $errorMessage = '';
+
 	/**
 	 * Initializes the widget.
 	 *
@@ -304,8 +307,8 @@ class singleFunctions extends blogList {
 	protected function doShowCommentsForm() {
 		$data = array();
 		$this->checkForCommentEditing($data);
-		$this->setCaptchaFields($data);
 		$this->setCommentFormFields($data);
+		$this->setCaptchaFields($data);
 
 		// captcha
 
@@ -333,8 +336,8 @@ class singleFunctions extends blogList {
 		$data['action'] = htmlspecialchars($this->getCommentFormAction());
 
 		// display error msg
-		if($this->localPiVars['errorMsg']){
-			$data['errorMsg'] = $this->localPiVars['errorMsg'];
+		if ($this->errorMessage){
+			$data['errorMsg'] = $this->errorMessage;
 			$data['errorTitle'] = $this->pi_getLL('errorTitle');
 			unset($this->localPiVars['errorMsg']);
 		}
@@ -674,18 +677,20 @@ class singleFunctions extends blogList {
 
 
 	/**
-	 * checks if the field is required
+	 * Checks if the field is required.
 	 *
-	 * @param 	string	$value: 	fieldvalue
-	 * @param 	string	$fieldname: fieldname
-	 *
-	 * @return true if it is all okay. false if the field value needs content
+	 * @param string $value
+	 * @param string $fieldName
+	 * @return boolean
 	 */
-	function checkRequired($value,$fieldname){
-		$requiredFieldsarr = explode(',', strtolower($this->conf['requiredFields']));
-		$requiredFieldsarr = str_replace(' ', '', $requiredFieldsarr);
-		if (in_array(strtolower($fieldname), $requiredFieldsarr)) {
-			return ($value) ? true : false;
+	protected function checkRequiredFieldValue($value, $fieldName) {
+		static $requiredFields = null;
+
+		if (!is_array($requiredFields)) {
+			$requiredFields = t3lib_div::trimExplode(',', strtolower($this->conf['requiredFields']), true);
+		}
+		if (in_array(strtolower($fieldName), $requiredFields)) {
+			return trim($value) != '';
 		}
 
 		return true;
@@ -699,58 +704,204 @@ class singleFunctions extends blogList {
 	 *
 	 * @return bool true on success
 	 */
-	function insertComment(){
-		$table ='tx_t3blog_com';
+	function insertComment() {
+		$postUid = intval($this->localPiVars['uid']);
+		$editUid = intval($this->localPiVars['editUid']);
+		$commentAuthor = strip_tags($this->localPiVars['commentauthor']);
+		$commentTitle = strip_tags($this->localPiVars['commenttitle']);
+		$authorEmail = $this->localPiVars['commentauthoremail'];
+		$authorWebsite = $this->localPiVars['commentauthorwebsite'];
+		$commentText = $this->localPiVars['commenttext'];
 
-		// get allowed fe_group of the post
-		$rowpost = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			'fe_group', 'tx_t3blog_post', 'uid=' . intval($this->localPiVars['uid'])
+		$this->errorMessage = $this->validateCommentSubmission(
+			$commentAuthor, $commentTitle, $authorEmail, $authorWebsite, $commentText
 		);
 
-		//get all parameters
-		$uid 		= intval($this->localPiVars['uid']);
-		$author 	= strip_tags($this->localPiVars['commentauthor']);
-		$title 		= strip_tags($this->localPiVars['commenttitle']);
-		$email 		= $this->localPiVars['commentauthoremail'];
-		$website 	= htmlspecialchars($this->localPiVars['commentauthorwebsite']);
+		$result = false;
 
-		// keep the text as it is for spam checking. stripping will be done later on
-		$text 		= $this->localPiVars['commenttext'];
-		$editUid 	= intval($this->localPiVars['editUid']);
-		$fe_group	= $rowpost['fe_group'];
+		if ($this->errorMessage == '') {
+			$result = true;
 
-		if (isset($author)) {	// set cookie
-			setcookie('currentCommentAuthor', $author, time()+36000, '/');
-			setcookie('currentCommentEmail', $email, time()+36000, '/');
-			setcookie('currentCommentWebsite', $website, time()+36000, '/');
+			$this->setCommentAuthorCookies($commentAuthor, $authorEmail, $authorWebsite);
+			$this->unsetLocalPiVarsBeforeAddingComment();
+
+			$data = $this->prepareCommentData($postUid, $commentAuthor, $commentTitle, $commentText, $authorEmail, $authorWebsite);
+
+			if ($this->allowedToEditComment($editUid)) {
+				$this->updateCommentData($editUid, $data);
+			}
+			else {
+				$this->insertNewComment($data);
+			}
+
+			if ($this->conf['approved']) {
+				$this->sendEmailAboutNewComments($postUid);
+			}
+
+			if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
+				$this->subscribeToPostNotifications($postUid, $commentAuthor, $authorEmail);
+			}
 		}
 
-		list($error, $errorMsg) = array(false, '');	//check entry
-		if (!$this->checkRequired($author, 'commentauthor')) {	//check author
-			$error = true;
-			$errorMsg .= t3blog_div::getSingle(array('value' => $this->pi_getLL('error_commentauthor')), 'errorWrap', $this->conf);
-		}
+		return $result;
+	}
 
-		if (!$this->checkRequired($title,'commenttitle')) {	//check title
-			$error = true;
-			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttitle')), 'errorWrap', $this->conf);
-		}
+	/**
+	 * Prepares comment data for insertion/update.
+	 *
+	 * @param int $postUid
+	 * @param string $commentAuthor
+	 * @param string $commentTitle
+	 * @param string $authorEmail
+	 * @param string $authorWebsite
+	 * @return array
+	 */
+	protected function prepareCommentData($postUid, $commentAuthor, $commentTitle, $commentText, $authorEmail, $authorWebsite) {
+		$data = array(
+			'tstamp'	=> $GLOBALS['EXEC_TIME'],
+			'title'		=> $commentTitle,
+			'author'	=> $commentAuthor,
+			'fe_group'	=> $this->getPostFeGroup($postUid),
+			'email'		=> $authorEmail,
+			'website'	=> $authorWebsite,
+			'text'		=> $this->splitLongWordsInText(strip_tags($commentText)),
+			'approved'	=> intval($this->conf['approved']),
+			'parent_id' => intval($this->localPiVars['comParentId']),
+			'fk_post' => $postUid,
+			'spam' => $this->isSpam(array($commentAuthor, $commentTitle, $authorWebsite, $authorEmail, $commentText))
+		);
+		return $data;
+	}
 
-		if (!$this->checkRequired($text,'commenttext')) {	//check text
-			$error = true;
-			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commenttext')), 'errorWrap', $this->conf);
-		}
+	/**
+	 * Inserts a comment to the database and calls hooks.
+	 *
+	 * @param int $postUid
+	 * @param array $data
+	 * @return void
+	 */
+	protected function insertNewComment(array $data) {
+		$data['pid'] = t3blog_div::getBlogPid();
+		$data['date'] = $data['crdate'] = $GLOBALS['EXEC_TIME'];
+		$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_t3blog_com', $data);
+		$this->updateRefIndex('tx_t3blog_com', $GLOBALS['TYPO3_DB']->sql_insert_id());
 
-		if (!$this->checkRequired($email,'commentauthoremail') 	//check email
-				|| ($email && t3blog_div::checkEmail($email))) {
-			$error = true;
-			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthoremail')), 'errorWrap', $this->conf);
+		// Hook after comment insertion
+		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
+			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'] as $userFunc) {
+			  $params = array(
+					'data' => &$data,
+					'table' => 'tx_t3blog_com',
+					'postUid' => $data['fk_post'],
+					'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
+				);
+				t3lib_div::callUserFunction($userFunc, $params, $this);
+			}
 		}
+	}
 
-		if (!$this->checkRequired($website,'commentauthorwebsite') 	//check website
-				|| ($website && t3blog_div::checkExternalUrl($website))) {
-			$error = true;
-			$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_commentauthorwebsite')), 'errorWrap', $this->conf);
+
+	/**
+	 * Unsets some local variables before creating/editing a comment.
+	 *
+	 * FIXME Dmitry: it is unclean. Why do we need to do this?
+	 *
+	 * @return void
+	 */
+	protected function unsetLocalPiVarsBeforeAddingComment() {
+		unset($this->piVars[$this->prevPrefixId]['commenttitle']);
+		unset($this->piVars[$this->prevPrefixId]['commenttext']);
+		unset($this->piVars[$this->prevPrefixId]['uid']);
+		unset($this->piVars[$this->prevPrefixId]['editUid']);
+		unset($this->localPiVars['commenttext']);
+		unset($this->localPiVars['commenttitle']);
+		unset($this->localPiVars['editUid']);
+		unset($this->localPiVars['uid']);
+		unset($this->localPiVars['insert']);
+		unset($this->localPiVars['uid']);
+	}
+
+
+	/**
+	 * Updates data for the existing comment (comment edit function).
+	 *
+	 * @param int $editUid
+	 * @param array $data
+	 * @return void
+	 */
+	protected function updateCommentData($editUid, $data) {
+		$GLOBALS['TYPO3_DB']->exec_UPDATEquery('tx_t3blog_com', 'uid=' . $editUid, $data);
+		$this->updateRefIndex('tx_t3blog_com', $editUid);
+
+		// Hook after comment update
+		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'])) {
+			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'] as $userFunc) {
+			  $params = array(
+					'data' => &$data,
+					'table' => 'tx_t3blog_com',
+					'postUid' => $data['fk_post'],
+					'commentUid' => $editUid,
+				);
+				t3lib_div::callUserFunction($userFunc, $params, $this);
+			}
+		}
+	}
+
+	/**
+	 * Checks if passed fields contain spam.
+	 *
+	 * @param array $textFields
+	 * @return boolean
+	 */
+	protected function isSpam(array $textFields) {
+		$sfpantispam = t3lib_div::makeInstance('tx_sfpantispam_tslibfepreproc');
+		/* @var tx_sfpantispam_tslibfepreproc $sfantispam */
+		return !$sfpantispam->sendFormmail_preProcessVariables($textFields, $this);
+	}
+
+	/**
+	 * Validates comment submission.
+	 *
+	 * @param string $commentAuthor
+	 * @param string $commentTitle
+	 * @param string $authorEmail
+	 * @param string $authorWebsite
+	 * @param string $commentText
+	 * @return string Error message (if any)
+	 */
+	protected function validateCommentSubmission($commentAuthor, $commentTitle, $authorEmail, $authorWebsite, $commentText) {
+		$errorMessage = '';
+
+		$testData = array(
+			'commentauthor' => array(
+				'value' => $commentAuthor,
+			),
+			'commenttitle' => array(
+				'value' => $commentTitle,
+			),
+			'commentauthoremail' => array(
+				'value' => $authorEmail,
+				'validator' => 't3lib_div::validEmail'
+			),
+			'commentauthorwebsite' => array(
+				'value' => $authorWebsite,
+				'validator' => 't3lib_div::isValidUrl'
+			),
+			'commenttext' => array(
+				'value' => $commentText
+			),
+		);
+
+		foreach ($testData as $field => $data) {
+			$isValid = $this->checkRequiredFieldValue($data['value'], $field);
+			if ($isValid && isset($data['validator'])) {
+				$isValid = call_user_func($data['validator'], $data['value']);
+			}
+			if (!$isValid) {
+				$errorMessage .= t3blog_div::getSingle(array(
+						'value' => $this->pi_getLL('error_' . $field)
+					), 'errorWrap', $this->conf);
+			}
 		}
 
 		// captcha
@@ -760,200 +911,212 @@ class singleFunctions extends blogList {
 			$_SESSION['tx_captcha_string'] = '';
 
 			if (!strlen($captchaStr) || $this->localPiVars['captcha'] != $captchaStr) {
-				$error = true;
-				$errorMsg .= t3blog_div::getSingle(array('value'=>$this->pi_getLL('error_captcha')), 'errorWrap', $this->conf);
+				$errorMessage .= t3blog_div::getSingle(array(
+					'value' => $this->pi_getLL('error_captcha')
+				), 'errorWrap', $this->conf);
 			}
 		}
 
-		if ($error) {
-			$this->localPiVars['errorMsg'] = $errorMsg;
+		return $errorMessage;
+	}
+
+	/**
+	 * Sets cookies for the comments author.
+	 *
+	 * @param string $commentAuthor
+	 * @param string $authorEmail
+	 * @param string $authorWebsite
+	 * @return void
+	 */
+	protected function setCommentAuthorCookies($commentAuthor, $authorEmail, $authorWebsite) {
+		if ($commentAuthor) {
+			setcookie('currentCommentAuthor', $commentAuthor, time()+36000, '/');
+			setcookie('currentCommentEmail', $authorEmail, time()+36000, '/');
+			setcookie('currentCommentWebsite', $authorWebsite, time()+36000, '/');
 		}
-		else {
-			// unset the comment form values
-			unset($this->piVars[$this->prevPrefixId]['commenttitle']);
-			unset($this->piVars[$this->prevPrefixId]['commenttext']);
-			unset($this->piVars[$this->prevPrefixId]['uid']);
-			unset($this->piVars[$this->prevPrefixId]['editUid']);
-			unset($this->localPiVars['commenttext']);
-			unset($this->localPiVars['commenttitle']);
-			unset($this->localPiVars['editUid']);
-			unset($this->localPiVars['uid']);
-			unset($this->localPiVars['errorMsg']);
-			unset($this->localPiVars['insert']);
-			unset($this->localPiVars['uid']);
+	}
 
-			$time = time();
-			$data = array(
-				'tstamp'	=> $time,
-				'title'		=> $title,
-				'author'	=> $author,
-				'fe_group'	=> $fe_group,
-				'email'		=> $email,
-				'website'	=> $website,
-				'text'		=> $this->splitLongWordsInText(strip_tags($text)),
-				'approved'	=> ($this->conf['approved'] == 0 ? 0:1),
-				'parent_id' => intval($this->localPiVars['comParentId']),
-			);
+	/**
+	 * Obtains FE user group ID for the post.
+	 *
+	 * @param int $postUid
+	 * @return int
+	 */
+	protected function getPostFeGroup($postUid) {
+		// get allowed fe_group of the post
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'fe_group', 'tx_t3blog_post', 'uid=' . $postUid);
+		return is_array($row) ? intval($row['fe_group']) : 0;
+	}
 
-			//spamprotection
-			$sfpantispam = t3lib_div::makeInstance('tx_sfpantispam_tslibfepreproc');
+	/**
+	 * Checks if a user with given e-mail is already subscribed to receive
+	 * notifications about new comments.
+	 *
+	 * @param int $postUid
+	 * @param string $email
+	 * @return boolean
+	 */
+	protected function isSubscribedToPost($postUid, $email) {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('COUNT(*) AS t',
+			'tx_t3blog_com_nl',
+			'post_uid=' . $postUid .' AND email=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($email, 'tx_t3blog_com_nl') .
+			$this->cObj->enableFields('tx_t3blog_com_nl'));
+		return ($row['t'] > 0);
+	}
 
-			if (!$sfpantispam->sendFormmail_preProcessVariables(array($author, $title, $website, $email, $text), $this)) {
-				$data['spam'] = 1;
-			}
+	/**
+	 * Subscribes the user to notifications about the post if he is not
+	 * subscribed yet.
+	 *
+	 * @param int $uid
+	 * @param string $author
+	 * @param string $email
+	 * @return void
+	 */
+	protected function subscribeToPostNotifications($uid, $author, $email) {
+		if (!$this->isSubscribedToPost($uid, $email)) {
+			$code = $this->insertNewSubscriber($uid, $author, $email);
+			$this->sendSubscribsionConfigrmationEmail($uid, $email, $code);
 
-			// Update or insert the comment
-			if ($this->allowedToEditComment($editUid)) {
-				$GLOBALS['TYPO3_DB']->exec_UPDATEquery($table, 'uid=' . $editUid, $data);
-				$this->updateRefIndex($table, $editUid);
+		}
+	}
 
-				//Hook after comment update
-			if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'])) {
-				foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentupdate'] as $userFunc) {
-				  $params = array(
-						'data' => &$data,
-						'table' => $table,
-						'postUid' => $uid,
-						'commentUid' => $editUid,
-					);
-					t3lib_div::callUserFunction($userFunc, $params, $this);
-				}
-			}
-			}
-			else {
-				// Insert comment
-				$data['pid'] = t3blog_div::getBlogPid();
-				$data['crdate'] = $time;
-				$data['fk_post'] = $uid;
-				$data['date'] = $time;
-				$GLOBALS['TYPO3_DB']->exec_INSERTquery($table, $data);
-				$this->updateRefIndex($table, $GLOBALS['TYPO3_DB']->sql_insert_id());
+	/**
+	 * Sends a subscription confirmation email to a new subscriber.
+	 *
+	 * @param int $postUid
+	 * @param string $email
+	 * @param string $unsubscribeCode
+	 */
+	protected function sendSubscribsionConfigrmationEmail($postUid, $email, $unsubscribeCode) {
+		$receiver = str_replace(array('\n', '\r'), '', $email);
+		$postTitle = $this->getPostTitle($postUid);
+		$subject = $this->pi_getLL('subscribe.confirmation') . ': ' . $postTitle;
+		$unsubscribeLink = $this->getUnsubscribeLink($postUid, $unsubscribeCode);
+		$headers = 'From: <' . $this->conf['senderEmail'] . '>' . chr(10) .
+			'List-Unsubscribe: ' . $unsubscribeLink;
 
-				//Hook after comment insertion
-				if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
-					foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'] as $userFunc) {
-					  $params = array(
-							'data' => &$data,
-							'table' => $table,
-							'postUid' => $uid,
-							'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
-						);
-						t3lib_div::callUserFunction($userFunc, $params, $this);
-					}
-				}
-			}
+		$message = $this->pi_getLL('subscribe.confirmationHello') . chr(10) .
+			$this->pi_getLL('subscribe.confirmationtext') . chr(10);
+			'<' . $unsubscribeLink . '>' . chr(10);
 
-			// send emails if comments must not be approved
-			if ($this->conf['approved'] == 1) {
+		t3lib_div::plainMailEncoded($receiver, $subject, $message, $headers);
+	}
 
-				// get users that subscribed to this post
-				$table_send	= 'tx_t3blog_com_nl';
-				$field_send	= '*';
-				$where_send	= 'post_uid = '.$uid .' AND hidden = 0 AND deleted = 0';
-				$subscriber	= $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($field_send, $table_send, $where_send);
+	/**
+	 * Inserts a new post subscriber to the database.
+	 *
+	 * @param int $postUid
+	 * @param string $author
+	 * @param string $email
+	 * @return void
+	 */
+	protected function insertNewSubscriber($postUid, $author, $email) {
+		$code = md5($email . $GLOBALS['EXEC_TIME']);
 
-				// get name of the post
-				$table_post	= 'tx_t3blog_post';
-				$field_post	= 'title';
-				$where_post = 'uid ='.$uid.' AND hidden = 0 AND deleted = 0';
-				$post		= $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($field_post, $table_post, $where_post);
-				$posttitle	= $post['0']['title'];
+		$data = array(
+			'pid'		=> t3blog_div::getBlogPid(),
+			'tstamp'	=> $GLOBALS['EXEC_TIME'],
+			'crdate'	=> $GLOBALS['EXEC_TIME'],
+			'email'		=> $email,
+			'name'		=> $author,
+			'post_uid'	=> $postUid,
+			'lastsent'	=> $GLOBALS['EXEC_TIME'],
+			'code'		=> $code,
+		);
 
-				foreach ($subscriber as $key => $value) {
-					$table_com	= 'tx_t3blog_com';
-					$field_com	= '*';
-					$where_com	= 'date>' . $GLOBALS['TYPO3_DB']->fullQuoteStr($value['lastsent'], $table_com) .
-						' AND hidden=0 AND deleted=0 AND spam=0 AND approved=1';
-					$comments = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($field_com, $table_com, $where_com);
-					$message = '';
+		$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_t3blog_com_nl', $data);
 
-					if (count($comments) > 0) {
-						// assemble email
-						$unsubscribe	= '<' . $this->getUnsubscribeLink($uid, $value['code']) . '>' ."\n";
-						$text			= '"'.trim($comments['0']['title']). ': '. trim($comments['0']['text']) .'"'. "\n";
-						$address		= str_replace(array('\\n', '\\r'), '', $value['email']);
-						$receiver   	= $address;
-						$subject		= $this->pi_getLL('subscribe.newComment').': '.$posttitle;
-						$from       	= $this->conf['senderEmail'];
-						$headers    	= 'From: ' . $from;
+		return $code;
+	}
 
-						$message       .= $this->pi_getLL('subscribe.salutation') .' '.$value['name'].','. "\n";
-						$message       .= $this->pi_getLL('subscribe.notification') . "\n\n";
-						$message       .= $text . "\n";
+	/**
+	 * Sends e-mails about new comments to the post subscribers.
+	 *
+	 * @param int $postUid
+	 * @return void
+	 */
+	protected function sendEmailAboutNewComments($postUid) {
+		$subscribers = $this->getPostSubscribers($postUid);
+		$postTitle = $this->getPostTitle($postUid);
+		$whereFormat = 'date>%d AND spam=0 AND approved=1' . str_replace('%', '%%', $this->cObj->enableFields('tx_t3blog_com'));
 
-						// unsubscribe
-						$message       .= $this->pi_getLL('subscribe.unsubscribe') ."\n";
-						$message	   .= $unsubscribe;
+		foreach ($subscribers as $subscriber) {
+			list($comment) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title,text', 'tx_t3blog_com',
+				sprintf($whereFormat, intval($subscriber['lastsent'])), 'tstamp DESC', '', 1);
 
-						// send
-						t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
-					}
-
-					// update lastsent to the last comment time
-					$where_lastsent = 'uid=' . intval($value['uid']);
-					$fields_lastsent = array('lastsent' => $time);
-					$GLOBALS['TYPO3_DB']->exec_UPDATEquery($table_send, $where_lastsent, $fields_lastsent);
-				}
-			}
-
-			// insert if subscribe was marked
-			if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
-
-				$table_nl 	= 'tx_t3blog_com_nl';
-
-				// check if subscriber is already listed for this post
-				$fields_nl = 'uid';
-				$where_nl = 'post_uid = '.$uid .' AND email LIKE "'.$email.'" AND hidden = 0 AND deleted = 0';
-				$check = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($fields_nl, $table_nl, $where_nl);
-
-				// if email is inexistent
-				if (count($check) == 0) {
-					$code = $email.time();
-					$code = md5($code);
-
-					$data_nl = array(
-						'pid'		=> t3blog_div::getBlogPid(),
-						'tstamp'	=> time(),
-						'crdate'	=> time(),
-						'email'		=> $email,
-						'name'		=> $author,
-						'post_uid'	=> $uid,
-						'lastsent'	=> time(),
-						'code'		=> $code,
-					);
-
-					$GLOBALS['TYPO3_DB']->exec_INSERTquery($table_nl, $data_nl);
-
-					// assemble confirmation email
-
-					// get name of the post
-					$table_post	= 'tx_t3blog_post';
-					$field_post	= 'title';
-					$where_post = 'uid=' . $uid . ' AND hidden = 0 AND deleted = 0';
-					$post = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($field_post, $table_post, $where_post);
-					$posttitle = $post['0']['title'];
-
-					$message = '';
-					$unsubscribe = '<' . $this->getUnsubscribeLink($uid, $code) . '>'."\n";
-					$address = str_replace(array('\\n', '\\r'), '', $email);
-					$receiver = $address;
-					$subject = $this->pi_getLL('subscribe.confirmation').': '.$posttitle;
-					$from = $this->conf['senderEmail'];
-					$headers = 'From: ' . $from;
-
-					$message .= $this->pi_getLL('subscribe.confirmationHello') .
-						"\n" . $this->pi_getLL('subscribe.confirmationtext') . "\n";
-
-					// unsubscribe
-					$message .= $unsubscribe;
-
-					// send
-					t3lib_div::plainMailEncoded($receiver,$subject,$message,$headers);
-				}
+			if (is_array($comment)) {
+				// assemble email
+				$this->sendUnsubscribeEmail($postUid, $postTitle, $subscriber, $comment);
+				$this->updateLastSentTimeForSubscriber($subscriber['uid']);
 			}
 		}
+	}
 
-		return !$error;
+	/**
+	 * Obtains the title of the post
+	 *
+	 * @param int $postUid
+	 * @return string
+	 */
+	protected function getPostTitle($postUid) {
+		list($post)	= $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title', 'tx_t3blog_post',
+			'uid=' . $postUid . $this->cObj->enableFields('tx_t3blog_post'));
+		return (is_array($post) ? $post['title'] : '');
+	}
+
+	/**
+	 * Obtains post subscribers.
+	 *
+	 * @param int $postUid
+	 * @return array
+	 */
+	protected function getPostSubscribers($postUid) {
+		return $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
+			'tx_t3blog_com_nl',
+			'post_uid = ' . $postUid . $this->cObj->enableFields('tx_t3blog_com_nl'));
+	}
+
+	/**
+	 * Creates an e-mail to unsubscribe from the comment.
+	 *
+	 * @param int $postUid
+	 * @param string $postTitle
+	 * @param array $subscriber
+	 * @param array $comment 'title' and 'text' fields are required
+	 * @return void
+	 */
+	protected function sendUnsubscribeEmail($postUid, $postTitle, $subscriber, $comment) {
+		$unsubscribeLink = '<' . $this->getUnsubscribeLink($postUid, $subscriber['code']) . '>' . chr(10);
+		$text = '"' . trim($comment['title']) . ': ' . str_replace(array('<br>', '<br />'), chr(10), trim($comment['text'])) .'"' . chr(10);
+		$receiver = str_replace(array('\n', '\r'), '', $subscriber['email']);
+		$subject = $this->pi_getLL('subscribe.newComment') . ': ' . $postTitle;
+		$from = $this->conf['senderEmail'];
+		$headers = 'From: <' . $from . '>' . chr(10) .
+			'List-Unsubscribe: ' . $unsubscribeLink;
+
+		$message = $this->pi_getLL('subscribe.salutation') . ' ' . $subscriber['name'] . ',' . chr(10);
+		$message .= $this->pi_getLL('subscribe.notification') . chr(10) . chr(10);
+		$message .= $text . chr(10);
+
+		// unsubscribe
+		$message .= $this->pi_getLL('subscribe.unsubscribe') . chr(10);
+		$message .= $unsubscribeLink;
+
+		// send
+		t3lib_div::plainMailEncoded($receiver, $subject, $message, $headers);
+	}
+
+	/**
+	 * Updates time stamp for the last sent message for the subscriber.
+	 *
+	 * @param int $subscribeUid
+	 * @return void
+	 */
+	protected function updateLastSentTimeForSubscriber($subscriberUid) {
+		$GLOBALS['TYPO3_DB']->exec_UPDATEquery('tx_t3blog_com_nl',
+			 'uid=' . $subscriberUid, array('lastsent' => time()), 'lastsent');
 	}
 
 	/**

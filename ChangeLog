@@ -1,6 +1,7 @@
 2010-08-19  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug: captcha check worked every second time
+	* Mark t3lob_div::isValidUrl() as deprecated
 
 2010-08-20  Thomas Imboden  <timboden@snowflake.ch>
 
