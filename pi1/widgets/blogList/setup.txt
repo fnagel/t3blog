@@ -1028,9 +1028,8 @@ plugin.tx_t3blog_pi1 {
 
 					10 = TEXT
 					10 {
-						wrap = <div class="formField"><input type="text" id="captcha" class="text" name="|" value = "" /></div>
-						field = captcha
-						required = 1
+						wrap = <div class="formField"><input type="text" id="captcha" class="text" name="tx_t3blog_pi1[blogList][captcha]" value="" /></div>
+						if.isTrue.field = captcha
 					}
 				}
 
