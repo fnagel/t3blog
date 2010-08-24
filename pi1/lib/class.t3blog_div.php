@@ -55,15 +55,10 @@ class t3blog_div {
 	 *
 	 * @param 	string 	$url: url-address
 	 * @return 	boolean	true if error
+	 * @deprecated Use t3lib_div::isValidUrl()
 	 */
-	static public function checkExternalUrl($url){
-		$error = false;
-		$regExp = '/((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?)/';
-		if (!preg_match($regExp, $url)){
-			$url = 'http://' . $url;
-			$error = !preg_match($regExp, $url);
- 		}
-		return $error;
+	static public function checkExternalUrl($url) {
+		return t3lib_div::isValidUrl($url);
 	}
 
 	/**
