@@ -2,6 +2,8 @@
 
 	* Fixed bug: captcha check worked every second time
 	* Mark t3lob_div::isValidUrl() as deprecated
+	* Refactored comment insertion function
+	* Partial fix for #9071: improve comment subscriber emails
 
 2010-08-20  Thomas Imboden  <timboden@snowflake.ch>
 

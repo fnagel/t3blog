@@ -977,7 +977,7 @@ class singleFunctions extends blogList {
 	protected function subscribeToPostNotifications($uid, $author, $email) {
 		if (!$this->isSubscribedToPost($uid, $email)) {
 			$code = $this->insertNewSubscriber($uid, $author, $email);
-			$this->sendSubscribsionConfigrmationEmail($uid, $email, $code);
+			$this->sendSubscribtionConfirmationEmail($uid, $email, $code);
 
 		}
 	}
@@ -989,7 +989,7 @@ class singleFunctions extends blogList {
 	 * @param string $email
 	 * @param string $unsubscribeCode
 	 */
-	protected function sendSubscribsionConfigrmationEmail($postUid, $email, $unsubscribeCode) {
+	protected function sendSubscribtionConfirmationEmail($postUid, $email, $unsubscribeCode) {
 		$receiver = str_replace(array('\n', '\r'), '', $email);
 		$postTitle = $this->getPostTitle($postUid);
 		$subject = $this->pi_getLL('subscribe.confirmation') . ': ' . $postTitle;
@@ -1067,6 +1067,17 @@ class singleFunctions extends blogList {
 	}
 
 	/**
+	 * Obtains post's date.
+	 *
+	 * @param $postUid
+	 */
+	protected function getPostDate($postUid) {
+		list($post)	= $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('date', 'tx_t3blog_post',
+			'uid=' . $postUid . $this->cObj->enableFields('tx_t3blog_post'));
+		return (is_array($post) ? intval($post['date']) : 0);
+	}
+
+	/**
 	 * Obtains post subscribers.
 	 *
 	 * @param int $postUid
@@ -1097,8 +1108,9 @@ class singleFunctions extends blogList {
 			'List-Unsubscribe: ' . $unsubscribeLink;
 
 		$message = $this->pi_getLL('subscribe.salutation') . ' ' . $subscriber['name'] . ',' . chr(10);
-		$message .= $this->pi_getLL('subscribe.notification') . chr(10) . chr(10);
+		$message .= $this->pi_getLL('subscribe.notification') . chr(10);
 		$message .= $text . chr(10);
+		$message .= '<' . t3lib_div::locationHeaderUrl($this->getPermalink($postUid, $this->getPostDate($postUid), true)) . '>' . chr(10) . chr(10);
 
 		// unsubscribe
 		$message .= $this->pi_getLL('subscribe.unsubscribe') . chr(10);
