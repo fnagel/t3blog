@@ -881,11 +881,11 @@ class singleFunctions extends blogList {
 			),
 			'commentauthoremail' => array(
 				'value' => $authorEmail,
-				'validator' => 't3lib_div::validEmail'
+				'validator' => array('t3lib_div', 'validEmail')
 			),
 			'commentauthorwebsite' => array(
 				'value' => $authorWebsite,
-				'validator' => 't3lib_div::isValidUrl'
+				'validator' => array('t3lib_div', 'isValidUrl')
 			),
 			'commenttext' => array(
 				'value' => $commentText

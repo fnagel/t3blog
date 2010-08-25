@@ -1,4 +1,8 @@
-2010-08-19  Dmitry Dulepov  <dmitry@typo3.org>
+2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed a warning in PHP<5.3.0 about call_user_func parameters
+
+2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug: captcha check worked every second time
 	* Mark t3lob_div::isValidUrl() as deprecated
