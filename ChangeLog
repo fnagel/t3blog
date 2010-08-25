@@ -1,6 +1,7 @@
 2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed a warning in PHP<5.3.0 about call_user_func parameters
+	* Added an index on the 'date' column for comments to improve SQL query speed and get rid of 'using filesort'
 
 2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 

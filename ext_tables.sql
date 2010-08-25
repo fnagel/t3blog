@@ -169,7 +169,8 @@ CREATE TABLE tx_t3blog_com (
 	parent_id int(11) DEFAULT '0' NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY sel01 (pid,deleted,hidden,crdate)
+	KEY sel01 (pid,deleted,hidden,crdate),
+	KEY sel02 (`date`)
 );
 
 
