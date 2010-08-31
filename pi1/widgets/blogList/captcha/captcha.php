@@ -62,6 +62,7 @@
 		if ($validDirectory == '') {
 			$validDirectory = dirname(__FILE__) . '/';
 		}
+		$validDirectory = realpath($validDirectory);
 		$fileName = realpath($fileName);
 		if (substr($fileName, 0, strlen($validDirectory)) != $validDirectory) {
 			// Remote file inclusion attempt -> block!

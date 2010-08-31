@@ -1,3 +1,7 @@
+2010-08-31  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed bug #8922: validateFileName fails in captcha module
+
 2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed a warning in PHP<5.3.0 about call_user_func parameters
