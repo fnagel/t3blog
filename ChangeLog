@@ -1,6 +1,7 @@
 2010-08-31  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #8922: validateFileName fails in captcha module
+	* Added TYPO3 and PHP version restrictions into ext_emconf.php
 
 2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 

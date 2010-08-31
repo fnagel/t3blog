@@ -36,6 +36,8 @@ $EM_CONF[$_EXTKEY] = array(
 			'typoscripttools' => '',
 			'sfpantispam' => '',
 			'pagebrowse' => '',
+			'typo3' => '4.2.0-4.99.999',
+			'php' => '5.2.1-5.3.999'
 		),
 		'suggests' => array(
 		),
