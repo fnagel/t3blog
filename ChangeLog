@@ -2,6 +2,7 @@
 
 	* Fixed bug #8922: validateFileName fails in captcha module
 	* Added TYPO3 and PHP version restrictions into ext_emconf.php
+	* Fixed bug #9018: add link to post in function adminMailComment
 
 2010-08-24  Dmitry Dulepov  <dmitry@typo3.org>
 

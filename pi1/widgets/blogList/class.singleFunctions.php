@@ -1172,7 +1172,8 @@ class singleFunctions extends blogList {
 			'###EMAIL###'		=> $this->localPiVars['commentauthoremail'],
 			'###WEBSITE###'		=> $this->localPiVars['commentauthorwebsite'],
 			'###IP###'			=> t3lib_div::getIndpEnv('REMOTE_ADDR'),
-			'###TSFE###'		=> t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST')
+			'###TSFE###'		=> t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
+			'###LINK###'		=> $this->getPermalink($this->uid, $this->getPostDate($this->uid), true)
 		);
 		foreach ($markerArray as $key => $val) {
 			if (strlen(trim($val)) < 1) {
