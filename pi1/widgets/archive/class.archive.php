@@ -35,10 +35,21 @@ class archive extends tslib_pibase {
 	var $prefixId      = 'archive';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/archive/class.archive.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
+
+	/** Internal: contains a collection of posts by year */
+	protected $years = array();
+
+	/** Internal: contains the start of the period for fetching posts */
+	protected $periodStart;
+
+	/** Internal: contains the end of the period for fetching posts */
+	protected $periodEnd;
+
+	/** Internal: contains the current month number for fetching posts */
+	protected $currentMonth;
+
+	/** Internal: contains the current year for fetching posts */
+	protected $currentYear;
 
 	/**
 	 * The main method of the PlugIn
@@ -49,195 +60,291 @@ class archive extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content, $conf, $piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
 		$this->init();
 
-		/*******************************************************/
-		// example pivar for communication interface
-		// $this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
-
-		$content = '';
-		$list = t3blog_db::getPostByWhere('deleted = 0 AND hidden = 0 ', 'date DESC', '0,1');
-		if ($list) {
-			$firstYear = null;
-			if(!$firstYear){
-				$firstdate = $list[0];
-				$firstYear = date('Y', $firstdate['date']);
-			}
-
-			$listlast = t3blog_db::getPostByWhere('deleted = 0 AND hidden = 0 ', 'date ASC', '0,1');
-			if($listlast){
-				$lastdate = $listlast[0];
-				$lastYear = date('Y',$lastdate['date']);
-			}else{
-				$lastYear = $firstYear;
-			}
-
-			$years = array();
-			for($actYear = $firstYear; $actYear >= $lastYear; $actYear--){
-				$monthsInYear = '';
-				$entriesInMonth = 0;
-				for ($month = 12; $month > 0; $month--) {
-
-					$table = 'tx_t3blog_post';
-					$from = mktime(0, 0, 0, $month, 1, $actYear);
-					$to = mktime(0, 0, -1, $month + 1, 1, $actYear);
-					$where = 'pid = '. t3blog_div::getBlogPid(). ' AND date <= '. $GLOBALS['TYPO3_DB']->fullQuoteStr($to, $table). ' AND date >= '. $GLOBALS['TYPO3_DB']->fullQuoteStr($from, $table);
-					$list = t3blog_db::getPostByWhere($where, 'date ASC');
-
-					$blogInMonth = '';
-					//go throu posts from this month
-					if ($list) {
-						foreach ($list as $row) {
-							//post link
-							$dataTitle = array(
-								'uid'		=> $row['uid'],
-								'date'		=> $row['date'],
-								'title'		=> $row['title'],
-								'blogUid'	=> t3blog_div::getBlogPid(),
-							);
-							//post <li>
-							$dataLi = array(
-								'class'	=> 'blogentry',
-								'text'	=> t3blog_div::getSingle($dataTitle,'titleLink', $this->conf)
-							);
-							$blogInMonth .= t3blog_div::getSingle($dataLi, 'itemWrap', $this->conf);
-							$entriesInMonth++;
-						}
-						//wrap ul for the entries in this month
-						$id = $actYear. $month;
-						$js = '/*<![CDATA[*/
-								var mySlide'. $id. ' = new Fx.Slide($(\'archive_'. $id. '\'));
-								if(Cookie.get("mySlide'. $id. '")==1){
-									mySlide'. $id. '.toggle();
-									if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
-										$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
-									} else {
-										$(\'toggle'.$id.'\').firstChild.nodeValue = "[+]";
-									}
-								}
-
-								$(\'toggle'. $id. '\').addEvent(\'click\', function(e) {
-									e = new Event(e);
-									mySlide'. $id. '.toggle();
-									if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
-										Cookie.remove("mySlide'. $id. '");
-										Cookie.set("mySlide'. $id. '","0",{path:"/"});
-										$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
-									} else {
-										Cookie.set("mySlide'. $id. '","1",{path:"/"});
-										$(\'toggle'. $id. '\').firstChild.nodeValue = "[+]";
-									}
-									e.stop();
-								}
-
-								);
-							/*]]>*/';
-
-						$dataUlEntries = array(
-							'class'		=> 'entries',
-							'text'		=> $blogInMonth,
-							'id'		=> $id,
-							'js'		=> $js
-
-						);
-						$ulEntries = t3blog_div::getSingle($dataUlEntries, 'listWrap', $this->conf);
-
-						$dataCatLinkMonth = array(	//wrap month link
-							'text'		=> $this->pi_getLL('month_'.$month),
-							'datefrom'	=> $from,
-							'dateto'	=> $to,
-							'entries'	=> count($list),
-							'id'		=> ($actYear).($month),
-							'blogUid'	=> t3blog_div::getBlogPid(),
-						);
-						$dataMonthLi = array(
-							'class'	=> 'month',
-							'text'	=> t3blog_div::getSingle($dataCatLinkMonth, 'catLink', $this->conf) . $ulEntries
-						);
-						$monthsInYear = $monthsInYear.t3blog_div::getSingle($dataMonthLi, 'itemWrap', $this->conf);
-					}
-				}
-				//wrap months in this year <ul>
-				$id = $actYear;
-				$js = 'var mySlide'. $id. ' = new Fx.Slide($(\'archive_'. $id. '\'));
-						if(Cookie.get("mySlide'. $id. '")==1){
-							mySlide'. $id. '.toggle();
-							if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
-								$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
-							} else {
-								$(\'toggle'. $id. '\').firstChild.nodeValue = "[+]";
-							}
-						}
-
-						$(\'toggle'. $id. '\').addEvent(\'click\', function(e) {
-							e = new Event(e);
-							mySlide'. $id. '.toggle();
-							if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
-								Cookie.remove("mySlide'. $id. '");
-								Cookie.set("mySlide'. $id. '","0",{path:"/"});
-								$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
-							} else {
-								Cookie.set("mySlide'. $id. '","1",{path:"/"});
-								$(\'toggle'. $id. '\').firstChild.nodeValue = "[+]";
-							}
-							e.stop();
-						}
-					);
-					';
-
-				$dataUlMonths = array(
-					'class'	=> 'months',
-					'text'	=> $monthsInYear,
-					'id'	=> $actYear,
-					'js'	=> $js
-				);
-				$years[$actYear]['data'] = t3blog_div::getSingle($dataUlMonths, 'listWrap', $this->conf);
-				$years[$actYear]['entries'] = $entriesInMonth;
-			}
-
-			if($years){	//go through years
-				foreach ($years as $year => $row) {	//wrap year li
-					$dataCatLinkYear = array(
-						'text'		=> $year,
-						'datefrom'	=> mktime(0, 0, 0, 1, 1, $year),
-						'dateto'	=> mktime(23, 59, 59, 12, 31, $year),
-						'entries'	=> $row['entries'],
-						'id'		=> $year
-					);
-					$dataYearLi = array(
-						'class'	=> 'year',
-						'text'	=> t3blog_div::getSingle($dataCatLinkYear, 'catLink', $this->conf) . $row['data']
-					);
-					$yearsInArchive .= t3blog_div::getSingle($dataYearLi, 'itemWrap', $this->conf);
-				}
-
-				$dataYearUl = array(	//wrap global ul
-					'class'	=> 'archive',
-					'text'	=> $yearsInArchive
-				);
-				$content = t3blog_div::getSingle($dataYearUl, 'listWrap', $this->conf);
-				$content = t3blog_div::getSingle(
-					array(
-						'categoryTree'	=> $content,
-						'title'	=> $this->pi_getLL('title')
-					), 'globalWrap', $this->conf
-				);
-			}
+		list($firstYear, $lastYear) = $this->getFirstAndLastYear();
+		for ($this->currentYear = $firstYear; $this->currentYear >= $lastYear; $this->currentYear--) {
+			$this->processOneYear();
 		}
+
+		$content = $this->assembleContent();
 
 		return $content;
 	}
 
+	/**
+	 * Processes posts for a given year.
+	 *
+	 * @return void
+	 */
+	protected function processOneYear() {
+		$this->years[$this->currentYear] = array(
+			'entries' => 0
+		);
+		$allYearPosts = '';
+		for ($this->currentMonth = 12; $this->currentMonth > 0; $this->currentMonth--) {
+			$allYearPosts .= $this->createPostListForMonth();
+		}
+
+		$dataUlMonths = array(
+			'class'	=> 'months',
+			'text'	=> $allYearPosts,
+			'id'	=> $this->currentYear,
+			'js'	=> $this->getYearToggleJS($this->currentYear)
+		);
+		$this->years[$this->currentYear]['data'] = t3blog_div::getSingle($dataUlMonths, 'listWrap', $this->conf);
+	}
 
 	/**
-	 * Initial Method
+	 * Creates a unix time stamp for the start of the month.
+	 *
+	 * @param int $month
+	 * @param int $year
+	 * @return int
 	 */
-	function init(){
+	protected function getMonthStart($month, $year) {
+		return mktime(0, 0, 0, $month, 1, $year);
+	}
+
+
+	/**
+	 * Creates a unix time stamp for the end of the month.
+	 *
+	 * @param int $month
+	 * @param int $year
+	 * @return int
+	 */
+	protected function getMonthEnd($month, $year) {
+		return mktime(0, 0, -1, $month + 1, 1, $year);
+	}
+
+	/**
+	 * Processes posts for a current month and year.
+	 *
+	 * @param int $currentMonth
+	 * @param int $currentYear
+	 * @return string
+	 */
+	protected function createPostListForMonth() {
+		$content = '';
+
+		$this->periodStart = $this->getMonthStart($this->currentMonth, $this->currentYear);
+		$this->periodEnd = $this->getMonthEnd($this->currentMonth, $this->currentYear);
+
+		$postListForMonth = $this->getPostListForThePeriod();
+		$entriesInTheMonth = count($postListForMonth);
+
+		if ($entriesInTheMonth > 0) {
+			$this->years[$this->currentYear]['entries'] += $entriesInTheMonth;
+			$content .= $this->outerWrapPostListForMonth($postListForMonth);
+		}
+		return $content;
+	}
+
+	/**
+	 * Applies a secondary warap (toggle) for month entries.
+	 *
+	 * @param string $postListForMonth
+	 * @return string
+	 */
+	protected function outerWrapPostListForMonth(array $postListForMonth) {
+		$monthHtmlId = $this->currentYear . $this->currentMonth;
+
+		$dataCatLinkMonth = array(
+			'text'		=> $this->pi_getLL('month_' . $this->currentMonth),
+			'datefrom'	=> $this->periodStart,
+			'dateto'	=> $this->periodEnd,
+			'entries'	=> count($postListForMonth),
+			'id'		=> $monthHtmlId,
+			'blogUid'	=> t3blog_div::getBlogPid(),
+		);
+		$dataMonthLi = array(
+			'class'	=> 'month',
+			'text'	=> t3blog_div::getSingle($dataCatLinkMonth, 'catLink', $this->conf) .
+					$this->wrapPostListForMonth($postListForMonth)
+		);
+		return t3blog_div::getSingle($dataMonthLi, 'itemWrap', $this->conf);
+	}
+
+	/**
+	 * Wraps the list of entries.
+	 *
+	 * @param int $currentMonth
+	 * @param int $currentYear
+	 * @param array $postListForMonth
+	 * @return string
+	 */
+	protected function wrapPostListForMonth(array $postListForMonth) {
+		$monthHtmlId = $this->currentYear . $this->currentMonth;
+		$dataUlEntries = array(
+			'class'		=> 'entries',
+			'text'		=> implode('', $postListForMonth),
+			'id'		=> $monthHtmlId,
+			'js'		=> $this->getMonthToggleJS($monthHtmlId)
+
+		);
+		return t3blog_div::getSingle($dataUlEntries, 'listWrap', $this->conf);
+	}
+
+	/**
+	 * Creates a list of entries for the given period.
+	 *
+	 * @return array
+	 */
+	protected function getPostListForThePeriod() {
+		$postList = array();
+
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*', 'tx_t3blog_post',
+			'pid='. t3blog_div::getBlogPid() . ' AND date<=' . $this->periodEnd .
+				' AND date>=' . $this->periodStart . $this->cObj->enableFields('tx_t3blog_post'),
+			'', 'date ASC');
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$postList[] = $this->getBlogPostLink($row);
+		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		return $postList;
+	}
+
+	/**
+	 * Obtains a link to the post (HTML representation).
+	 *
+	 * TODO Extract all ways to generate a link to the post to a single place
+	 * in order to produce all links in the same way and avoid duplicate content in Google.
+	 *
+	 * @param array $postRow
+	 * @return string
+	 */
+	protected function getBlogPostLink(array $postRow) {
+		$data = array(
+			'uid'		=> $postRow['uid'],
+			'date'		=> $postRow['date'],
+			'title'		=> $postRow['title'],
+			'blogUid'	=> t3blog_div::getBlogPid(),
+		);
+		$dataLi = array(
+			'class'	=> 'blogentry',
+			'text'	=> t3blog_div::getSingle($data, 'titleLink', $this->conf)
+		);
+		return t3blog_div::getSingle($dataLi, 'itemWrap', $this->conf);
+	}
+
+	/**
+	 * Obtains the first and the last years in the post list.
+	 *
+	 * @return array
+	 */
+	protected function getFirstAndLastYear() {
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'year(from_unixtime(max(date))) AS first_year, year(from_unixtime(min(date))) AS last_year',
+			'tx_t3blog_post', '1=1' . $this->cObj->enableFields('tx_t3blog_post'));
+		return array(intval($row['first_year']), intval($row['last_year']));
+	}
+
+	/**
+	 * Creates a common javascript for toggling nodes.
+	 *
+	 * @param  string $id
+	 * @return string
+	 */
+	protected function getToggleJS($id) {
+		$js = '/*<![CDATA[*/
+				var mySlide'. $id. ' = new Fx.Slide($(\'archive_'. $id. '\'));
+				if(Cookie.get("mySlide'. $id. '")==1){
+					mySlide'. $id. '.toggle();
+					if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
+						$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
+					} else {
+						$(\'toggle'.$id.'\').firstChild.nodeValue = "[+]";
+					}
+				}
+
+				$(\'toggle'. $id. '\').addEvent(\'click\', function(e) {
+					e = new Event(e);
+					mySlide'. $id. '.toggle();
+					if($(\'toggle'. $id. '\').firstChild.nodeValue == "[+]")	{
+						Cookie.remove("mySlide'. $id. '");
+						Cookie.set("mySlide'. $id. '","0",{path:"/"});
+						$(\'toggle'. $id. '\').firstChild.nodeValue = "[-]";
+					} else {
+						Cookie.set("mySlide'. $id. '","1",{path:"/"});
+						$(\'toggle'. $id. '\').firstChild.nodeValue = "[+]";
+					}
+					e.stop();
+				}
+
+				);
+			/*]]>*/';
+		return $js;
+	}
+
+	/**
+	 * Creates a javascript to toggle visibility of the the month node.
+	 *
+	 * @param  string $id
+	 * @return string
+	 */
+	protected function getMonthToggleJS($id) {
+		return $this->getToggleJS($id);
+	}
+
+	/**
+	 * Creates a javascript to toggle visibility of the the year node.
+	 *
+	 * @param  string $id
+	 * @return string
+	 */
+	protected function getYearToggleJS($id) {
+		return $this->getToggleJS($id);
+	}
+
+	/**
+	 * Creates the content from collected post information through years.
+	 *
+	 * @return string
+	 */
+	protected function assembleContent() {
+		$content = '';
+		if (count($this->years) > 0) {
+			foreach ($this->years as $year => $row) {	//wrap year li
+				$dataCatLinkYear = array(
+					'text'		=> $year,
+					'datefrom'	=> $this->getMonthStart(1, $year),
+					'dateto'	=> $this->getMonthEnd(12, $year),
+					'entries'	=> $row['entries'],
+					'id'		=> $year
+				);
+				$dataYearLi = array(
+					'class'	=> 'year',
+					'text'	=> t3blog_div::getSingle($dataCatLinkYear, 'catLink', $this->conf) . $row['data']
+				);
+				$yearsInArchive .= t3blog_div::getSingle($dataYearLi, 'itemWrap', $this->conf);
+			}
+
+			$dataYearUl = array(
+				'class'	=> 'archive',
+				'text'	=> $yearsInArchive
+			);
+			$content = t3blog_div::getSingle($dataYearUl, 'listWrap', $this->conf);
+			$content = t3blog_div::getSingle(
+				array(
+					'categoryTree'	=> $content,
+					'title'	=> $this->pi_getLL('title')
+				), 'globalWrap', $this->conf
+			);
+		}
+		return $content;
+	}
+
+	/**
+	 * Initializes the widget.
+	 *
+	 * @return void
+	 */
+	function init() {
 		$this->pi_loadLL();
+		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
 	}
 
 }
@@ -245,4 +352,5 @@ class archive extends tslib_pibase {
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/archive/class.archive.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/archive/class.archive.php']);
 }
+
 ?>

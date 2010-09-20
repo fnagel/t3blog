@@ -1,6 +1,7 @@
 2010-09-20  Dmitry Dulepov  <dmitry@typo3,org>
 
 	* Clean up in the blogRoll widget
+	* Refactor blog archive widget
 
 2010-08-31  Dmitry Dulepov  <dmitry@typo3.org>
 
