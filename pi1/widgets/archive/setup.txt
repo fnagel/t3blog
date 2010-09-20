@@ -1,5 +1,11 @@
 plugin.tx_t3blog_pi1 {
 	archive {
+
+		toggle {
+			open = [+]
+			close = [-]
+		}
+
 		catLink = COA
 		catLink {
 			1 = LOAD_REGISTER
@@ -31,9 +37,8 @@ plugin.tx_t3blog_pi1 {
 			}
 			10 = TEXT
 			10 {
-				wrap =  <a class="toggle" id="toggle|" href="#">[-]</a>
-				field = id
-				htmlSpecialChars = 1
+				dataWrap = <a class="toggle" id="toggle{field:id}" href="#">|</a>
+				value < plugin.tx_t3blog_pi1.archive.toggle.close
 			}
 			20 = TEXT
 			20 {

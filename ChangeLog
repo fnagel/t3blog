@@ -2,6 +2,7 @@
 
 	* Clean up in the blogRoll widget
 	* Refactor blog archive widget
+	* Fixed bug #7493 for archive only: make [-]/[+] toggle configurable
 
 2010-08-31  Dmitry Dulepov  <dmitry@typo3.org>
 
