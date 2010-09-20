@@ -35,10 +35,6 @@ class blogrollList extends tslib_pibase {
 	var $prefixId      = 'blogrollList';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/blogrollList/class.blogrollList.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 
 
 	/**
@@ -51,16 +47,8 @@ class blogrollList extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
 		$this->init();
-		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
-
-		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
 
 		$content = '';
 
@@ -70,33 +58,44 @@ class blogrollList extends tslib_pibase {
 			'', 'sorting'
 		);
 
-		if ($res) {
-			$listElements = '';
-			for ($i = 0; $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res); $i++) {
-				$image = '';
-				if ($row['image']) {
-					$this->localcObj->data['uid'] = $row['uid'];
-					$image = $this->localcObj->cObjGetSingle($this->conf['imgFieldList'], $this->conf['imgFieldList.']);
-				}
-				$xfn = $this->getXfnNames($row['xfn']);
-
-				$data = array(
-					'odd'			=> $i%2 == 0 ? 'odd' : 'even',
-					'title'			=> $row['title'],
-					'url'			=>  $row['url'],
-					'image'			=> $image,
-					'description'	=> $row['description'],
-					'xfn'			=> $xfn
-				);
-				$listElements .= t3blog_div::getSingle($data, 'listItem', $this->conf);
-			}
-			$GLOBALS['TYPO3_DB']->sql_free_result($res);
-
-			$content = t3blog_div::getSingle(array('title'=>$this->pi_getLL('latestPostsTitle'),'listItems'=>$listElements), 'list', $this->conf);
+		$listElements = '';
+		for ($i = 0; $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res); $i++) {
+			$data = array(
+				'odd'			=> $i%2 == 0 ? 'odd' : 'even',
+				'title'			=> $row['title'],
+				'url'			=> $row['url'],
+				'image'			=> $this->getImage($row),
+				'description'	=> $row['description'],
+				'xfn'			=> $this->getXfnNames($row['xfn'])
+			);
+			$listElements .= t3blog_div::getSingle($data, 'listItem', $this->conf);
 		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		$content = t3blog_div::getSingle(array(
+				'title' => $this->pi_getLL('latestPostsTitle'),
+				'listItems' => $listElements
+			), 'list', $this->conf);
 
 		return $content;
 	}
+
+	/**
+	 * Obtrains the image for the blog if set.
+	 *
+	 * @param  array $row
+	 * @return string
+	 */
+	protected function getImage(array $row) {
+		$image = '';
+		if ($row['image']) {
+			$cObj = t3lib_div::makeInstance('tslib_cObj');
+			$cObj->start($row, 'tx_t3blog_blogroll');
+			$image = $cObj->cObjGetSingle($this->conf['imgFieldList'], $this->conf['imgFieldList.']);
+		}
+		return $image;
+	}
+
 
 
 	/**
@@ -104,7 +103,7 @@ class blogrollList extends tslib_pibase {
 	 */
 	function init(){
 		$this->pi_loadLL();
-		$this->localcObj = t3lib_div::makeInstance('tslib_cObj');
+		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
 	}
 
 
@@ -114,13 +113,12 @@ class blogrollList extends tslib_pibase {
 	 * @param 	int	$xfnIds
 	 * @return 	string
 	 */
-	function getXfnNames($xfnIds){
+	function getXfnNames($xfnIds) {
 		$return = '';
-		if($xfnIds){
-			$arrIds = explode(',',$xfnIds);
+		if ($xfnIds) {
+			$arrIds = explode(',', $xfnIds);
 			foreach ($arrIds as $id) {
-				$return .= $this->pi_getLL('xfn.I.'.$id);
-				$return .= ' ';
+				$return .= $this->pi_getLL('xfn.I.' . $id) . ' ';
 			}
 		}
 
