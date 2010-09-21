@@ -1,5 +1,7 @@
 plugin.tx_t3blog_pi1 {
 	categories {
+		toggle < plugin.tx_t3blog_pi1.toggle
+
 		categories = COA
 		categories {
 			wrap = <div id="categories">|</div>
@@ -19,11 +21,11 @@ plugin.tx_t3blog_pi1 {
 		list = COA
 		list {
 			10 = TEXT
-			10.dataWrap (
-				<ul class="level{field:level}" id="{field:id}">
-					{field:content}
-				</ul>
-			)
+			10 {
+				field = content
+				required = 1
+				dataWrap = <ul class="level{field:level}" id="{field:id}">|</ul>
+			}
 			20 = TEXT
 			20 {
 				field = javascript

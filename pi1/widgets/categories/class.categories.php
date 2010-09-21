@@ -57,9 +57,10 @@ class categories extends tslib_pibase {
 
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj	= 0;
-		$categories 			= $this->listCategories();
-
-		$categories['header'] 	= $this->pi_getLL('title');
+		$categories = array(
+			'content' => $this->listCategories(),
+			'header' => $this->pi_getLL('title')
+		);
 
 		$content = t3blog_div::getSingle($categories, 'categories', $this->conf);
 
@@ -80,90 +81,36 @@ class categories extends tslib_pibase {
 	 *
 	 * @return array
 	 */
-	function listCategories($parent = 0, $level = 1)	{
-		$table = 'tx_t3blog_cat';
-		$field = '*';
-		$where = 'pid = '.t3lib_div::intval_positive(t3blog_div::getBlogPid()).' AND parent_id = '.t3lib_div::intval_positive($parent);
-		$where.= $this->cObj->enableFields('tx_t3blog_cat');
-		$orderBy = 'catname';
-		$set = false;
+	protected function listCategories($parent = 0, $level = 1) {
 		$javascript = '';
 
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($field, $table, $where, '', $orderBy);
-		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-			$catArr = array();
-			//get the subcategories
-			if ($row['uid'])	{
-				$catArr[] = $this->listCategories($row['uid'], $level+1);
-			}
+		$data = array(
+			'content' => '',
+			'id' => 'togglecat' . $parent,
+			'level' => $level,
+		);
 
-			//which level
-			$data['level'] = $level;
-			//which element do we have to toggle?
-			$data['toggleid'] = 'togglecat'.$row['uid'];
-			//id of the ul-element (is the parent uid so we can act with the 'original' id to open- and close it.
-			$data['id'] = 'togglecat'.$parent;
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*', 'tx_t3blog_cat',
+			'pid=' . t3blog_div::getBlogPid() . ' AND parent_id=' . $parent .
+				$this->cObj->enableFields('tx_t3blog_cat'), '', 'catname');
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$subcategories = $this->listCategories($row['uid'], $level + 1);
+			$toggleId = 'togglecat' . $row['uid'];
 
-			//set the category informations
-			//$row['catname'] = $this->pi_linkTP_keepPIvars($row['catname'],array('blogList' => array('category' => $row['uid'])), 0, 1,t3blog_div::getBlogPid());
-			$dataLink = array(
-				'catname'	=>	$row['catname'],
-				'uid'		=>	$row['uid'],
-				'blogPid'	=>	t3blog_div::getBlogPid()
-			);
-			$row['catname'] = t3blog_div::getSingle($dataLink, 'catLink', $this->conf);
-			$row['postnum'] = $this->getEntriesFromCategory($row['uid']);
+			$row['postnum'] = $this->getNumberOfEntriesForCategory($row['uid']);
 
-			// if the category has any subcategories, we put an +/- image in front. Else we use a clear-image
-			// Don ot hsc category names here because they can be links! This is HTML, do not HSC it!
-			if ($catArr[0]['content']) {
-				$row['catname'] = '<a href="#" id="img'.$data['toggleid'].'" class="iconbeforetext">[-]</a>' . $row['catname'];
+			if ($subcategories) {
+				$row['catname'] = '<a href="#" id="img' . $toggleId . '" class="iconbeforetext">' .
+					$this->conf['toggle.']['close'] . '</a>' .
+					$this->getCategoryLink($row);
+				$row['subcategories'] = $subcategories;
+				$javascript .= $this->getToggleJavaScript($toggleId);
 			}
 			else {
-				$row['catname'] = $row['catname'];
+				$row['catname'] = $this->getCategoryLink($row);
 			}
 
-			// add subcategories
-			foreach($catArr as $subCat)	{
-				$row['subcategories'] .= $subCat['content'];
-			}
-
-			//render the list-items
-			$data['content'].= t3blog_div::getSingle($row, 'listItem', $this->conf);
-
-			//Slide Subcategories part.
-			if($catArr[0]['content'])	{
-				$javascript .= '
-							var mySlide'.$data['toggleid'].' = new Fx.Slide($(\''.$data['toggleid'].'\'));
-							if(Cookie.get("mySlide'.$data['toggleid'].'")==1){
-								mySlide'.$data['toggleid'].'.toggle();
-								if($(\'img'.$data['toggleid'].'\').firstChild.nodeValue == "[+]")	{
-									$(\'img'.$data['toggleid'].'\').firstChild.nodeValue = "[-]";
-								} else {
-									$(\'img'.$data['toggleid'].'\').firstChild.nodeValue = "[+]";
-								}
-							}
-
-							$(\'img'.$data['toggleid'].'\').addEvent(\'click\', function(e) {
-								e = new Event(e);
-								mySlide'.$data['toggleid'].'.toggle();
-								if($(\'img'.$data['toggleid'].'\').firstChild.nodeValue == "[+]")	{
-									Cookie.remove("mySlide'.$data['toggleid'].'");
-									Cookie.set("mySlide'.$data['toggleid'].'","0",{path:"/"});
-									$(\'img'.$data['toggleid'].'\').firstChild.nodeValue = "[-]";
-								} else {
-									Cookie.set("mySlide'.$data['toggleid'].'","1",{path:"/"});
-									$(\'img'.$data['toggleid'].'\').firstChild.nodeValue = "[+]";
-								}
-								e.stop();
-							}
-
-							);
-
-					';
-			}
-
-			$set = true;	//does it have any content. (to avoid from empty ul's
+			$data['content'] .= t3blog_div::getSingle($row, 'listItem', $this->conf);
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
@@ -171,9 +118,61 @@ class categories extends tslib_pibase {
 			$javascript = t3lib_div::minifyJavaScript($javascript);
 		}
 		$data['javascript'] = $javascript;
-		$data['content'] = ($set)?t3blog_div::getSingle($data, 'list', $this->conf) : ''; //if there are any entries wrap them in ul-tag
 
-		return $data;
+		$result = t3blog_div::getSingle($data, 'list', $this->conf);
+
+		return $result;
+	}
+
+	/**
+	 * Creates a script to toggle categories using JavaScript.
+	 *
+	 * @param int $toggleId
+	 * @return string
+	 */
+	protected function getToggleJavaScript($toggleId) {
+		$closeMarkup = $this->conf['toggle.']['close'];
+		$openMarkup = $this->conf['toggle.']['open'];
+		return 'var mySlide' . $toggleId . ' = new Fx.Slide($(\'' . $toggleId . '\'));
+				if(Cookie.get("mySlide' . $toggleId . '")==1){
+					mySlide' . $toggleId . '.toggle();
+					if($(\'img' . $toggleId . '\').innerHTML == "' . $openMarkup . '")	{
+						$(\'img' . $toggleId . '\').innerHTML = "' . $closeMarkup . '";
+					} else {
+						$(\'img' . $toggleId . '\').innerHTML = "' . $openMarkup . '";
+					}
+				}
+
+				$(\'img' . $toggleId . '\').addEvent(\'click\', function(e) {
+					e = new Event(e);
+					mySlide' . $toggleId . '.toggle();
+					if($(\'img' . $toggleId . '\').innerHTML == "' . $openMarkup . '")	{
+						Cookie.remove("mySlide' . $toggleId . '");
+						Cookie.set("mySlide' . $toggleId . '","0",{path:"/"});
+						$(\'img' . $toggleId . '\').innerHTML = "' . $closeMarkup . '";
+					} else {
+						Cookie.set("mySlide' . $toggleId . '","1",{path:"/"});
+						$(\'img' . $toggleId . '\').innerHTML = "' . $openMarkup . '";
+					}
+					e.stop();
+				}
+			);
+		';
+	}
+
+	/**
+	 * Creates a category link.
+	 *
+	 * @param array $row
+	 * @return string
+	 */
+	protected function getCategoryLink(array $row) {
+		$dataLink = array(
+			'catname'	=>	$row['catname'],
+			'uid'		=>	$row['uid'],
+			'blogPid'	=>	t3blog_div::getBlogPid()
+		);
+		return t3blog_div::getSingle($dataLink, 'catLink', $this->conf);
 	}
 
 
@@ -182,45 +181,40 @@ class categories extends tslib_pibase {
 	 *
 	 * @author	Nicolas Karrer <nkarrer@snowflake.ch>
 	 *
-	 * @param 	int 	$category
+	 * @param 	int 	$categoryId
 	 * @return 	int
 	 */
-	function getEntriesFromCategory($category)	{
-		$uidList = $category;
-		$this->getCommaSeparatedCategories($category, $uidList);
+	protected function getNumberOfEntriesForCategory($categoryId)	{
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('COUNT(*) AS counter',
+			'tx_t3blog_post, tx_t3blog_post_cat_mm as mm',
+			'tx_t3blog_post.uid = mm.uid_local AND uid_foreign IN (' .
+				implode(',', $this->getCommaSeparatedCategories($categoryId)) .
+				')' . $this->cObj->enableFields('tx_t3blog_post'));
 
-		$fields = 'COUNT(*) AS count';
-		$table = 'tx_t3blog_post, tx_t3blog_post_cat_mm as mm';
-		$where = 'tx_t3blog_post.uid = mm.uid_local AND uid_foreign IN (' .
-			$GLOBALS['TYPO3_DB']->cleanIntList($uidList) . ')' .
-			$this->cObj->enableFields('tx_t3blog_post');
-		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($fields, $table, $where);
-
-		return $row['count'];
+		return $row['counter'];
 	}
 
 
 	/**
-	 * gets the hirarchic categories and put it in the commaseparated list
+	 * Gets the hirarchy of categories and puts it into the comma-separated list.
 	 *
-	 * FIXME This is an exact duplicate of ../blogList/class.listFunctions.php
+	 * FIXME See also similar function in ../blogList/class.listFunctions.php
 	 *
 	 * @author 	Nicolas Karrer <nkarrer@snowflake.ch>
 	 *
-	 * @param 	int 	$parent
-	 * @param 	string 	$uidList
+	 * @param int $parent
+	 * @param array
 	 */
-	protected function getCommaSeparatedCategories($parent, &$uidList)	{
-		$table = 'tx_t3blog_cat';
-		$fields = 'uid';
-		$where = 'parent_id=' . intval($parent);
-
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where);
-		while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))	{
-			$uidList .= ','.$row['uid'];
-			$this->getCommaSeparatedCategories($row['uid'], $uidList);
+	protected function getCommaSeparatedCategories($parent, array $uidList = array()) {
+		$uidList[] = $parent;
+		// Note: no intval because the function gets only integers!
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'tx_t3blog_cat', 'parent_id=' . $parent);
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+			$uidList = array_merge($uidList, $this->getCommaSeparatedCategories($row['uid'], $uidList));
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+		return $uidList;
 	}
 }
 

@@ -1,3 +1,11 @@
+# Make sure that the toggle part is above widgets!
+plugin.tx_t3blog_pi1 {
+	toggle {
+		open = [+]
+		close = [-]
+	}
+}
+
 # global t3blog template handles the inclusion of the setup of each widget
 # include the widget templates/configurations
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/latestCommentsNav/setup.txt">
@@ -14,8 +22,8 @@
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/searchBox/setup.txt">
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:t3blog/pi1/widgets/views/setup.txt">
 
-plugin.tx_t3blog_pi1 {
 
+plugin.tx_t3blog_pi1 {
 	# If set, t3blog will use this pid as a record storage. Currently there can be a little inconsistencies in the usage. Please, report them as bugs.
 	blogPid =
 

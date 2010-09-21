@@ -1,10 +1,7 @@
 plugin.tx_t3blog_pi1 {
 	archive {
 
-		toggle {
-			open = [+]
-			close = [-]
-		}
+		toggle < plugin.tx_t3blog_pi1.toggle
 
 		catLink = COA
 		catLink {

@@ -172,7 +172,7 @@ class t3blog_div {
 
 		// get pid
 		if (isset($GLOBALS['alternativeBlogPid']) && $GLOBALS['alternativeBlogPid'] > 0) {
-			return $GLOBALS['alternativeBlogPid'];
+			return intval($GLOBALS['alternativeBlogPid']);
 		}
 
 		if ($cachedPid != 0) {
@@ -200,7 +200,7 @@ class t3blog_div {
 			}
 			$cachedPid = $pid;
 		}
-		return $pid;
+		return intval($pid);
 	}
 }
 
