@@ -12,24 +12,62 @@
 require_once(PATH_tslib.'class.tslib_pibase.php');
 
 class calendar extends tslib_pibase {
-	var $prefixId      = 'calendar';		// Same as class name
+	var $prefixId	  = 'calendar';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/calendar/class.calendar.php';	// Path to this script relative to the extension dir.
-	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
-	var $day;
-	var $month;
-	var $year;
-
+	var $extKey		= 't3blog';	// The extension key.
+	protected $globalPiVars;
+	protected $day;
 
 	/**
-	* 	Constructor for the Calendar class
-	*/
-	function main($content,$conf,$piVars){
+	 * The start day of the week. This is the day that appears in the first column
+	 * of the calendar. Sunday = 0.
+	 *
+	 * @var int
+	 */
+	protected $startDay;
+
+	/**
+	 * The start month of the year. This is the month that appears in the first slot
+	 * of the calendar in the year view. January = 1.
+	 *
+	 * @var int
+	 */
+	protected $startMonth;
+
+	/**
+	 * The labels to display for the days of the week. The first entry in this array
+	 * represents Sunday.
+	 *
+	 * @var array
+	 */
+	protected $dayNames = array();
+
+	/**
+	 * The labels to display for the months of the year. The first entry in this array
+	 * represents January.
+	 *
+	 * @var array
+	 */
+	protected $monthNames = array();
+
+	/*
+	 * The number of days in each month. You're unlikely to want to change this...
+	 * The first entry in this array represents January.
+	 *
+	 * @var array
+	 */
+	protected $daysInMonth = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+	/**
+	 * Main processing method of the class.
+	 *
+	 * @param string $content Unused
+	 * @param array $conf Widget configuration
+	 * @param array $piVars
+	 * @return string
+	 */
+	public function main($content, array $conf, array $piVars){
 		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
 		$this->init();
 
@@ -45,22 +83,23 @@ class calendar extends tslib_pibase {
 
 			//If there is a show uid, but no specific date, take the date from the blog entry.
 
-			$where = 'uid = '.(int)$this->globalPiVars['blogList']['showUid'];
-			$where.= ' AND pid = '. t3blog_div::getBlogPid();
-			$blogentry = t3blog_db::getRecordsFromDB($uid ,$where,'*');
-			if($blogentry){
-				$this->day = date('j', $blogentry[0]['date']);
-				$month = date('n', $blogentry[0]['date']);
-				$year = date('Y', $blogentry[0]['date']);
+			$where = 'uid='.(int)$this->globalPiVars['blogList']['showUid'];
+			list($blogentry) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
+				'tx_t3blog_post', $where);
+			if (is_array($blogentry)) {
+				$this->day = date('j', $blogentry['date']);
+				$month = date('n', $blogentry['date']);
+				$year = date('Y', $blogentry['date']);
 			}
 		} else {
-			$d = getdate(time());
-			$this->day = $d['mday'];
-			$month = $d['mon'];
-			$year = $d['year'];
+			$today = getdate(time());
+			$this->day = $today['mday'];
+			$month = $today['mon'];
+			$year = $today['year'];
 		}
+		$this->day = intval($this->day);
 
-		$data['calendar'] = $this->getMonthView($month, $year);
+		$data['calendar'] = $this->getMonthView(intval($month), intval($year));
 
 		return t3blog_div::getSingle($data, 'calendaroutput', $this->conf);
 	}
@@ -68,7 +107,7 @@ class calendar extends tslib_pibase {
 	/**
 	 * Initial Method
 	 */
-	function init(){
+	protected function init() {
 		$this->localCobj = t3lib_div::makeInstance('tslib_cObj');
 		$this->cObj = $this->localCobj;
 		$this->pi_loadLL();
@@ -76,100 +115,15 @@ class calendar extends tslib_pibase {
 		// Initialize localized data
 		$this->startDay = min(6, max(0, intval($this->conf['startDay'])));
 		$this->startMonth = min(12, max(1, intval($this->conf['startMonth'])));
-		$this->dayNames = array();
+
 		for ($day = 0; $day < 7; $day++) {
 			$this->dayNames[] = $this->pi_getLL('day_' . $day);
 		}
-		$this->monthNames = array();
+
 		for ($month = 1; $month <= 12; $month++) {
 			$this->monthNames[] = $this->pi_getLL('month_' . $month);
 		}
 	}
-
-
-
-	/**
-	 * Get the array of strings used to label the days of the week. This array contains seven
-	 * elements, one for each day of the week. The first entry in this array represents Sunday.
-	 *
-	 * @return string
-	 */
-	function getDayNames(){
-		return $this->dayNames;
-	}
-
-
-	/**
-	 * Set the array of strings used to label the days of the week. This array must contain seven
-	 * elements, one for each day of the week. The first entry in this array represents Sunday.
-	 *
-	 * @param 	array 	$names: number of the days
-	 * @return	name of the day
-	 */
-	function setDayNames($names){
-		$this->dayNames = $names;
-	}
-
-	/**
-	 * Get the array of strings used to label the months of the year. This array contains twelve
-	 * elements, one for each month of the year. The first entry in this array represents January.
-	 *
-	 * @return name of the month
-	 */
-	function getMonthNames(){
-		return $this->monthNames;
-	}
-
-	/**
-	 * Set the array of strings used to label the months of the year. This array must contain twelve
-	 * elements, one for each month of the year. The first entry in this array represents January.
-	 *
-	 * @param array		$names: name of the mounts
-	 */
-	function setMonthNames($names){
-		$this->monthNames = $names;
-	}
-
-
-	/**
-	 * Gets the start day of the week. This is the day that appears in the first column
-	 * of the calendar. Sunday = 0.
-	 *
-	 * @return daynumber
-	 */
-	function getStartDay(){
-		return $this->startDay;
-	}
-
-	/**
-	* Sets the start day of the week. This is the day that appears in the first column
-	* of the calendar. Sunday = 0.
-	*
-	* @param	int	$day: number of the day
-	*/
-	function setStartDay($day){
-		$this->startDay = $day;
-	}
-
-
-	/**
-	* Gets the start month of the year. This is the month that appears first in the year
-	* view. January = 1.
-	*
-	* @return	monthnumber
-	*/
-	function getStartMonth(){
-		return $this->startMonth;
-	}
-
-	/**
-	* Sets the start month of the year. This is the month that appears first in the year
-	* view. January = 1.
-	*/
-	function setStartMonth($month){
-		$this->startMonth = $month;
-	}
-
 
 	/**
 	* Return the URL to link to in order to display a calendar for a given month/year.
@@ -186,10 +140,18 @@ class calendar extends tslib_pibase {
 	*
 	* @return	returns the url
 	*/
-	function getCalendarLink($month, $year) {
-		$data =  array('month' => $month, 'year' => $year);
-		$returnVar = t3blog_div::getSingle($data, 'navLink', $this->conf);
-		return $returnVar;
+	public function getCalendarLink($month, $year) {
+		static $cache = array();
+
+		$cacheKey = $month . '.' . $year;
+		if (!isset($cache[$cacheKey])) {
+			$data =  array(
+				'month' => $month,
+				'year' => $year
+			);
+			$cache[$cacheKey] = t3blog_div::getSingle($data, 'navLink', $this->conf);
+		}
+		return $cache[$cacheKey];
 	}
 
 	/**
@@ -204,13 +166,13 @@ class calendar extends tslib_pibase {
 	 *
 	 * @return	String	Url to the dayview
 	 */
-	function getDateLink($day, $month, $year){
+	public function getDateLink($day, $month, $year){
 		$datefrom = $year.'-'.$month.'-'.$day;
 		return t3blog_div::getSingle(
 			array(
 				'day' => $day,
 				'date'=> $datefrom,
-				'blogUid'=>t3blog_div::getBlogPid()
+				'blogUid' => t3blog_div::getBlogPid()
 			), 'dateLink', $this->conf);
 	}
 
@@ -220,9 +182,9 @@ class calendar extends tslib_pibase {
 	*
 	* @return 	returns html for the current month
 	*/
-	function getCurrentMonthView(){
-		$d = getdate(time());
-		return $this->getMonthView($d["mon"], $d["year"]);
+	public function getCurrentMonthView(){
+		$today = getdate(time());
+		return $this->getMonthView($today['mon'], $today['year']);
 	}
 
 
@@ -231,7 +193,7 @@ class calendar extends tslib_pibase {
 	*
 	* @param	returns html for the current year
 	*/
-	function getCurrentYearView(){
+	public function getCurrentYearView(){
 		$d = getdate(time());
 		return $this->getYearView($d["year"]);
 	}
@@ -245,8 +207,8 @@ class calendar extends tslib_pibase {
 	*
 	* @return	the html for a specific month
 	*/
-	function getMonthView($month, $year){
-		return $this->getMonthHTML($month, $year);
+	public function getMonthView($month, $year){
+		return $this->getMonthHTML($month, $year, true);
 	}
 
 
@@ -257,19 +219,9 @@ class calendar extends tslib_pibase {
 	*
 	* @return	the html for a specific year
 	*/
-	function getYearView($year){
+	public function getYearView($year){
 		return $this->getYearHTML($year);
 	}
-
-
-
-	/********************************************************************************
-
-	The rest are private methods. No user-servicable parts inside.
-	You shouldn't need to call any of these functions directly.
-
-	*********************************************************************************/
-
 
 	/**
 	* Calculate the number of days in a month, taking into account leap years.
@@ -279,29 +231,18 @@ class calendar extends tslib_pibase {
 	*
 	* @return	calculated number of days in a month
 	*/
-	function getDaysInMonth($month, $year){
-		if ($month < 1 || $month > 12){
-			return 0;
-		}
-
-		$d = $this->daysInMonth[$month - 1];
-
-		if ($month == 2){
-			// Check for leap year
-			// Forget the 4000 rule, I doubt I'll be around then...
-
-			if ($year%4 == 0){
-				if ($year%100 == 0){
-					if ($year%400 == 0){
-						$d = 29;
-					}
-				}else{
-					$d = 29;
-				}
+	protected function getDaysInMonth($month, $year){
+		$daysInMonth = 0;
+		if ($month >= 1 && $month <= 12) {
+			if ($month == 2) {
+				$daysInMonth = intval(date('d', mktime(0, 0, 0, 3, 0, $year)));
+			}
+			else {
+				$daysInMonth = $this->daysInMonth[$month - 1];
 			}
 		}
 
-		return $d;
+		return $daysInMonth;
 	}
 
 	/**
@@ -312,139 +253,149 @@ class calendar extends tslib_pibase {
 	 * @return 	month as string
 	 */
 
-	function getMonthName($monthNr){
-		$monthNr = intval($monthNr);
-		return $this->pi_getLL('month_'.$monthNr);
+	protected function getMonthName($monthNr){
+		return $this->pi_getLL('month_' . intval($monthNr));
 	}
 
 	/**
 	* Generate the HTML for a given month
 	*
-	* @param	int		$m: month
-	* @param	int		$y: year
+	* @param	int		$month: month
+	* @param	int		$year: year
 	* @param	int		$showYear: show or no show
 	*
 	* @return	html
 	*/
-	function getMonthHTML($m, $y, $showYear = 1){
-		$s = "";
+	protected function getMonthHTML($month, $year, $showYear = false){
+		$result = '';
 
-		$a = $this->adjustDate($m, $y);
-		$month = $a[0];
-		$year = $a[1];
+		list($month, $year) = $this->adjustDate($month, $year);
 
-		$daysInMonth = $this->getDaysInMonth($month, $year);
-		$date = getdate(mktime(12, 0, 0, $month, 1, $year));
-
-		$first = $date["wday"];
-		$monthName = $this->getMonthName($month);
+		$header = $this->getMonthName($month);
 
 		$prev = $this->adjustDate($month - 1, $year);
 		$next = $this->adjustDate($month + 1, $year);
 
-		if ($showYear == 1){
+		if ($showYear) {
 			$prevMonth = $this->getCalendarLink($prev[0], $prev[1]);
 			$nextMonth = $this->getCalendarLink($next[0], $next[1]);
+			$header .= ' ' . $year;
 		}
-		else{
-			$prevMonth = "";
-			$nextMonth = "";
+		else {
+			$prevMonth = $nextMonth = '';
 		}
 
-		$header = $monthName . (($showYear > 0) ? " " . $year : "");
-
-		$s .= "<table class=\"calendar\" summary=\"Calendar\">\n";
-		$s .= "<tr>\n";
-		$s .= "<th class=\"previous navigation\">" . (($prevMonth == "") ? "&nbsp;" : '<a href="'.htmlspecialchars($prevMonth).'">'.$this->conf['prevString'].'</a> </th>');
-		$s .= "<th colspan=\"5\">$header</th>\n";
-		$s .= "<th class=\"next navigation\">" . (($nextMonth == "") ? "&nbsp;" : '<a href="'.htmlspecialchars($nextMonth).'">'.$this->conf['nextString'].'</a> </th>');
-		$s .= "</tr>\n";
-		$s .= "<tr class=\"month\">\n";
-		$s .= "<td class=\" first \">" . htmlspecialchars($this->dayNames[($this->startDay)%7]). "</td>\n";
-		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+1)%7]) . "</td>\n";
-		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+2)%7]) . "</td>\n";
-		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+3)%7]) . "</td>\n";
-		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+4)%7]) . "</td>\n";
-		$s .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+5)%7]) . "</td>\n";
-		$s .= "<td class=\"last\">" . htmlspecialchars($this->dayNames[($this->startDay+6)%7]) . "</td>\n";
-		$s .= "</tr>\n";
+		$result .= "<table class=\"calendar\">\n";
+		$result .= "<tr>\n";
+		$result .= "<th class=\"previous navigation\">" . (($prevMonth == '') ? '&nbsp;' : '<a href="'.htmlspecialchars($prevMonth).'">'.$this->conf['prevString'].'</a> </th>');
+		$result .= '<th colspan="5">' . htmlspecialchars($header) . '</th>';
+		$result .= "<th class=\"next navigation\">" . (($nextMonth == '') ? '&nbsp;' : '<a href="'.htmlspecialchars($nextMonth).'">'.$this->conf['nextString'].'</a> </th>');
+		$result .= "</tr>\n";
+		$result .= "<tr class=\"month\">\n";
+		$result .= "<td class=\" first \">" . htmlspecialchars($this->dayNames[($this->startDay)%7]). "</td>\n";
+		$result .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+1)%7]) . "</td>\n";
+		$result .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+2)%7]) . "</td>\n";
+		$result .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+3)%7]) . "</td>\n";
+		$result .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+4)%7]) . "</td>\n";
+		$result .= "<td>" . htmlspecialchars($this->dayNames[($this->startDay+5)%7]) . "</td>\n";
+		$result .= "<td class=\"last\">" . htmlspecialchars($this->dayNames[($this->startDay+6)%7]) . "</td>\n";
+		$result .= "</tr>\n";
 
 		// We need to work out what date to start at so that the first appears in the correct column
-		$d = $this->startDay + 1 - $first;
-		while ($d > 1){
-			$d -= 7;
+		$currentDay = $this->startDay + 1 - $this->getFirstWeekDayOfTheMonth($month, $year);
+		while ($currentDay > 1) {
+			$currentDay -= 7;
 		}
-
-		if ($this->globalPiVars['blogList']['showUid']){
-			$where = 'uid = '.(int)$this->globalPiVars['blogList']['showUid'];
-		} else {
-			$where = "1 = 1";
-		}
-		$where.= ' AND pid = '. t3blog_div::getBlogPid();
-
-
-		$resultFromDB = t3blog_db::getRecordsFromDB($uid ,$where,'*');
 
 		$today = getdate(time());
 
-		while ($d <= $daysInMonth){
-			$s .= "<tr>\n";
-			$tempD = $d;
+		$postStatistics = $this->getPostStatisticsForCurrentMonth($month, $year);
+		$daysInMonth = $this->getDaysInMonth($month, $year);
+		while ($currentDay <= $daysInMonth) {
+			$result .= '<tr>';
 
+			for ($weekDayNumber = 0; $weekDayNumber < 7; $weekDayNumber++) {
+				$hasBlogEntries = isset($postStatistics[(string)$currentDay]);
 
-			for ($i = 0; $i < 7; $i++) {
-				if($daysInMonth - $tempD < 7)	{
-					$class = 'lastrow';
+				$classes = array();
+
+				if ($daysInMonth - $currentDay < 7) {
+					$classes[] = 'lastrow';
+				}
+
+				if ($weekDayNumber == 0) {
+					$classes[] = 'first';
+				} else if ($weekDayNumber == 6)	{
+					$classes[] = 'last';
+				}
+
+				if ($year == $today['year'] && $month == $today['mon'] && $currentDay == $today['mday']) {
+					$classes[] = 'calendarToday';
 				} else {
-					$class = '';
+					$classes[] = 'calendar';
 				}
 
-				if($i == 0)	{
-					$class.=' first';
-				} else if ($i == 6)	{
-					$class.=' last';
+				if ($hasBlogEntries) {
+					$classes[] = 'isBlogDay';
+				}
+
+				if ($this->day == $currentDay) {
+					$classes[] = 'selectedBlogDay';
+				}
+
+				$result .= '<td ';
+				if (count($classes) > 0) {
+					$result .= 'class="' . htmlspecialchars(implode(' ', $classes)) . '" ';
+				}
+				$result .= 'align="right" valign="top">';
+
+				if ($currentDay > 0 && $currentDay <= $daysInMonth) {
+					$result .= $hasBlogEntries ? $this->getDateLink($currentDay, $month, $year) : $currentDay;
 				} else {
-					$class.='';
+					$result .= '&nbsp;';
 				}
-
-				$startTimestamp = mktime(0, 0, 0, $month, $d, $year);
-				$endTimestamp = mktime(23, 59, 59, $month, $d, $year);
-				$hasBlogEntry = false;
-				if ($year == $today["year"] && $month == $today["mon"] && $d == $today["mday"]){
-					$class .= " calendarToday";
-				} else {
-					$class .= " calendar";
-				}
-				if($resultFromDB){
-					foreach ($resultFromDB as $blog) {
-						if ($blog['date'] <= $endTimestamp && $blog['date'] >= $startTimestamp && $d > 0) {
-							$hasBlogEntry = true;
-							$class.= " isBlogDay";
-							break;
-						}
-					}
-				}
-
-				if ($this->day == $d) {
-					$class.= " selectedBlogDay";
-				}
-
-				$s .= "<td class=\"$class\" align=\"right\" valign=\"top\">";
-				if ($d > 0 && $d <= $daysInMonth){
-					$s .= ($hasBlogEntry) ? $this->getDateLink($d, $month, $year) : $d;
-				}else{
-					$s .= "&nbsp;";
-				}
-				$s .= "</td>\n";
-				$d++;
+				$result .= "</td>\n";
+				$currentDay++;
 			}
 
-			$s .= "</tr>\n";
+			$result .= '</tr>';
 		}
-		$s .= "</table>\n";
-		return $s;
+		$result .= '</table>';
+		return $result;
 	}
 
+	/**
+	 * Obtains the number of the first day of the month (0 == Sunday).
+	 *
+	 * @param int $month
+	 * @param int $year
+	 * @return int
+	 */
+	protected function getFirstWeekDayOfTheMonth($month, $year) {
+		$date = getdate(mktime(12, 0, 0, $month, 1, $year));
+		return $date['wday'];
+	}
+
+	/**
+	 * Obtains staticstics about amount of posts in the current month.
+	 *
+	 * @param int $month
+	 * @param int $year
+	 * @return array
+	 */
+	protected function getPostStatisticsForCurrentMonth($month, $year) {
+		$startTime = mktime(0, 0, 0, $month, 1, $year);
+		$endTime = mktime(0, 0, -1, $month + 1, 1, $year);
+		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'count(*) AS counter,DAY(FROM_UNIXTIME(date)) as day',
+			'tx_t3blog_post',
+			'pid=' . t3blog_div::getBlogPid() . ' AND ' .
+				'date>=' . $startTime . ' AND date<=' . $endTime .
+				$this->cObj->enableFields('tx_t3blog_post'),
+			'day', '', '', 'day'
+		);
+		return $rows;
+	}
 
 	/**
 	* Generate the HTML for a given year
@@ -453,7 +404,7 @@ class calendar extends tslib_pibase {
 	*
 	* @return	html for a given year
 	*/
-	function getYearHTML($year){
+	protected function getYearHTML($year) {
 		$s = "";
 		$prev = $this->getCalendarLink(0, $year - 1);
 		$next = $this->getCalendarLink(0, $year + 1);
@@ -465,24 +416,24 @@ class calendar extends tslib_pibase {
 		$s .= "<td align=\"center\" valign=\"top\" align=\"right\">" . (($next == "") ? "&nbsp;" : "<a href=\"".$next."\">&gt;&gt;</a>")  . "</td>\n";
 		$s .= "</tr>\n";
 		$s .= "<tr>";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(0 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(1 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(2 + $this->startMonth, $year, 0) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(0 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(1 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(2 + $this->startMonth, $year) ."</td>\n";
 		$s .= "</tr>\n";
 		$s .= "<tr>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(3 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(4 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(5 + $this->startMonth, $year, 0) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(3 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(4 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(5 + $this->startMonth, $year) ."</td>\n";
 		$s .= "</tr>\n";
 		$s .= "<tr>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(6 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(7 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(8 + $this->startMonth, $year, 0) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(6 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(7 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(8 + $this->startMonth, $year) ."</td>\n";
 		$s .= "</tr>\n";
 		$s .= "<tr>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(9 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(10 + $this->startMonth, $year, 0) ."</td>\n";
-		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(11 + $this->startMonth, $year, 0) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(9 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(10 + $this->startMonth, $year) ."</td>\n";
+		$s .= "<td class=\"calendar\" valign=\"top\">" . $this->getMonthHTML(11 + $this->startMonth, $year) ."</td>\n";
 		$s .= "</tr>\n";
 		$s .= "</table>\n";
 
@@ -501,55 +452,14 @@ class calendar extends tslib_pibase {
 	 *
 	 * @return 	int		First element is the month, second the year
 	 */
-	function adjustDate($month, $year){
-		$a = array();
-		$a[0] = $month;
-		$a[1] = $year;
-
-		while ($a[0] > 12) {
-			$a[0] -= 12;
-			$a[1]++;
+	protected function adjustDate($month, $year) {
+		if ($month < 1 || $month > 12) {
+			list($month, $year) = explode('.', date('m.Y', mktime(0, 0, 0, $month, 1, $year)));
 		}
-
-		while ($a[0] <= 0) {
-			$a[0] += 12;
-			$a[1]--;
-		}
-
-		return $a;
+		return array(intval($month), intval($year));
 	}
-
-	/*
-	The start day of the week. This is the day that appears in the first column
-	of the calendar. Sunday = 0.
-	*/
-	var $startDay;
-
-	/*
-	The start month of the year. This is the month that appears in the first slot
-	of the calendar in the year view. January = 1.
-	*/
-	var $startMonth;
-
-	/*
-	The labels to display for the days of the week. The first entry in this array
-	represents Sunday.
-	*/
-	var $dayNames;
-
-	/*
-	The labels to display for the months of the year. The first entry in this array
-	represents January.
-	*/
-	var $monthNames;
-
-
-	/*
-	The number of days in each month. You're unlikely to want to change this...
-	The first entry in this array represents January.
-	*/
-	var $daysInMonth = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 }
+
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/calendar/class.calendar.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/calendar/class.calendar.php']);
 }

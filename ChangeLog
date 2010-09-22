@@ -1,9 +1,13 @@
-2010-09-21  Dmitry Dulepov  <dmitry@typo3,org>
+2010-09-22  Dmitry Dulepov  <dmitry@typo3.org>
 
-    * Refactored categories widget
+	* Refactored calendar widget for better speed and less memory
+
+2010-09-21  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Refactored categories widget
 	* Fixed bug #7493: make [-]/[+] toggle configurable
 
-2010-09-20  Dmitry Dulepov  <dmitry@typo3,org>
+2010-09-20  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Clean up in the blogRoll widget
 	* Refactor blog archive widget

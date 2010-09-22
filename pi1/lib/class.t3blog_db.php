@@ -41,24 +41,6 @@ class t3blog_db {
 	}
 
 	/**
-	 * Select and fetch associate query from tx_t3blog_post
-	 *
-	 * FIXME used from a single class: pi1/widgets/calendar/class.calendar.php
-	 *
-	 * @param 	int		$uid: uid of the post
-	 * @param	string	$where: sql-where clause
-	 * @param	string	$fields: fields to be selected
-	 * @return 	array	if has, db records from the db, else return false boolean
-	 */
-	static public function getRecordsFromDB($uid, $where = '1=1', $fields = '*') {
-		$table = 'tx_t3blog_post';
-		$where .= self::$cObj->enableFields($table);
-
-		$result = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($fields, $table, $where);
-		return (count($result) > 0 ? $result : false);
-	}
-
-	/**
 	 * Select and fetch associate query to db.
 	 *
 	 * FIXME Single use function! Move to pi1/widgets/blogList/class.singleFunctions.php
