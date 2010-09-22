@@ -36,10 +36,6 @@ class searchBox extends tslib_pibase {
 	var $prefixId      = 'searchBox';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/searchBox/class.searchBox.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 
 	/**
 	 * The main method of the PlugIn
@@ -50,16 +46,13 @@ class searchBox extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
 		$this->init();
 
-		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
-		$button = t3blog_div::getSingle(array('buttonTitle'=>$this->pi_getLL('buttonTitle')), 'searchButton', $this->conf);
+		$button = t3blog_div::getSingle(array(
+			'buttonTitle' => $this->pi_getLL('buttonTitle')),
+			'searchButton', $this->conf
+		);
 
 		$data = array(
 			'searchBoxLabel'		=>	$this->pi_getLL('searchBoxLabel'),
@@ -68,6 +61,7 @@ class searchBox extends tslib_pibase {
 			'searchButton'			=>	$button
 		);
 		$content = t3blog_div::getSingle($data, 'form', $this->conf);
+
 		return $content;
 	}
 
