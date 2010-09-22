@@ -36,10 +36,6 @@ class socialBookmarks extends tslib_pibase {
 	var $prefixId      = 'socialBookmarks';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/socialBookmarks/class.socialBookmarks.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 
 
 	/**
@@ -51,16 +47,9 @@ class socialBookmarks extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
-		$this->init();
+		$this->pi_loadLL();
 
-		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
-		$title = $this->pi_getLL('socialbookmarkingTitle');
 		$content = '
 		<!--
 		* Social Bookmark Script
@@ -92,20 +81,13 @@ class socialBookmarks extends tslib_pibase {
 					  }
 				//-->
 			</script>
-		'.$this->conf['bookmarks'];
+		' . $this->conf['bookmarks'];
 
-		return t3blog_div::getSingle(array('data'=>$content,'title'=>$title), 'globalWrap', $this->conf);
+		return t3blog_div::getSingle(array(
+			'data' => $content,
+			'title'=> $this->pi_getLL('socialbookmarkingTitle')
+		), 'globalWrap', $this->conf);
 	}
-
-
-	/**
-	 * Initial Method
-	 */
-	function init(){
-		$this->pi_loadLL();
-
-	}
-
 }
 
 
