@@ -3,6 +3,7 @@
 	* Refactored calendar widget for better speed and less memory
 	* Cleaned up search box widget
 	* Cleaned up social bookmarks module
+	* Some work on clean up of tag cloud (not finished yet)
 
 2010-09-21  Dmitry Dulepov  <dmitry@typo3.org>
 

@@ -33,14 +33,10 @@ require_once(PATH_tslib.'class.tslib_pibase.php');
  * @subpackage	tx_t3blog
  */
 class tagCloud extends tslib_pibase {
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 	var $prefixId = 'tagCloud';
 	var $scriptRelPath = 'pi1/widgets/tagCloud/class.tagCloud.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $_tags; 			// array([tag]=>(string)NAME, [count]=>(int)COUNT)
+	var $tagArray; 			// array([tag]=>(string)NAME, [count]=>(int)COUNT)
 	var $link; 				// string
 	var $minsize; 			// float
 	var $maxsize; 			// float
@@ -51,8 +47,8 @@ class tagCloud extends tslib_pibase {
 	var $maxcolor; 			// string
 	var $count; 			// int
 	var $sort; 				// string
-	var $descasc; 			// string
-	var $link_title; 		// string
+	var $sortingMode; 			// string
+	var $linkTitle; 		// string
 	var $distribution; 		// string
 	var $string; 			// boolean
 	var $tag_array = array();
@@ -69,10 +65,7 @@ class tagCloud extends tslib_pibase {
 	 */
 	function main($content,$conf,$piVars) {
 		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
-		$this->init();
 		$this->link = '/%tag%';
 		$this->minsize = $conf['minFontSize'];
 		$this->maxsize = $conf['maxFontSize'];
@@ -81,80 +74,60 @@ class tagCloud extends tslib_pibase {
 		$this->thresholds = 8;
 		$this->mincolor = $conf['minColor'];
 		$this->maxcolor = $conf['maxColor'];
-		$this->count = 0;
-		$this->sort = 'tag';
-		$this->descasc = 'asc';
-		$this->link_title = '%count% items';
+		$this->sort = 'count';	// FIXME Always to to this value, never changed!
+		$this->sortingMode = 'asc';
+		$this->linkTitle = '%count% items';
 		$this->distribution = $conf['renderingAlgorithm'];
-		$this->string = FALSE;
 
 		mb_internal_encoding($GLOBALS['TSFE']->renderCharset);
 
-		$this->pi_setPiVarDefaults();
-
-		$this->_tags  = $this->getTags_array();
+		$this->extractAndCountTags();
 		$content = $this->calculateTagCloud();
 
+		$this->pi_loadLL();
 		$title = $this->pi_getLL('tagCloudTitle');
+
 		return t3blog_div::getSingle(array('data'=>$content,'title'=>$title), 'globalWrap', $this->conf);
 	}
 
 	/**
-	 * Initial Method
+	 * Generates a tag clound array.
+	 *
+	 * @return void
 	 */
-	function init() {
-		$this->pi_loadLL();
+	function extractAndCountTags() {
+		$this->tagArray = array();
+
+		$posts = $GLOBALS['TYPO3_DB']->exec_SELECTquery('TRIM(tagClouds) AS tags', 'tx_t3blog_post',
+            'pid='.t3blog_div::getBlogPid() . ' AND TRIM(tagClouds)<>\'\'' . $this->cObj->enableFields('tx_t3blog_post'));
+		while (false !== ($resPost = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($posts))) {
+			$tags = explode(',' , mb_strtolower($resPost['tags']));
+			foreach ($tags as $tag) {
+				$this->collectTag($tag);
+			}
+		}
+		$GLOBALS['TYPO3_DB']->sql_free_result($posts);
 	}
 
 	/**
-	 * Generate a tag clound array. It looks like this:
-	 * array(
-	 * 	array(
-	 * 		'tag'=>"snowflake",
-	 * 		'count'=>60,
-	 * 	),
-	 * 	array(
-	 * 		'tag'=>"Typo3",
-	 * 		'count'=>45,
-	 * 	),
-	 * 	array(
-	 * 		'tag'=>"Opensource",
-	 * 		'count'=>25 ,
-	 * 	),
-	 *);
+	 * Adds the tag top the tag array and updates the count as appropriate.
 	 *
-	 * @return Array[]	Which tag occures how much times.
+	 * @param string $tag
+	 * @return void
 	 */
-	function getTags_array() {
-		$table = 'tx_t3blog_post';
-		$where = 'pid='.t3blog_div::getBlogPid() . ' AND TRIM(tagClouds)<>\'\'';
-		$where .= $this->cObj->enableFields($table);
-		$posts = $GLOBALS['TYPO3_DB']->exec_SELECTquery('*', $table, $where);
-		$tags = array();
-		while ($resPost = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($posts)) {
-			$tags = array_merge($tags, explode(',' , mb_strtolower($resPost['tagClouds'])));
+	protected function collectTag($tag) {
+		$tag = trim($tag);
+		$key = strtolower($tag);
+		if (isset($this->tagArray[$key])) {
+			$this->tagArray[$key]['count']++;
 		}
-		$GLOBALS['TYPO3_DB']->sql_free_result($posts);
-		$tagArray = array();
-		foreach ($tags as $tag) {
-			// makes lowercase tags
-			$tag = mb_strtolower(trim($tag));
-
-			if (isset($tagArray[$tag])) {
-				// count to display the quantity of tags
-				$tagArray[$tag]['count']++;
-			}
-			else {
-				$tagArray[$tag] = array(
-					'tag' => $tag,
-					'count' => 1,
-				);
-			}
+		else {
+			$this->tagArray[$tag] = array(
+				'tag' => $tag,
+				'count' => 1,
+			);
 		}
-
-		return array_values($tagArray);
 	}
-
 
 	/**
 	 * main function to calculate tags size and color
@@ -162,37 +135,29 @@ class tagCloud extends tslib_pibase {
 	 * @return string cloud
 	 */
 	function calculateTagCloud() {
-		if (!is_array($this->_tags)|| empty($this->_tags[0]['tag'])|| empty($this->_tags[0]['count'])|| empty($this->minsize)|| empty($this->maxsize)|| empty($this->unit)|| !is_string($this->unit)) {
-			return FALSE;
-		}
+		$tags = $this->tagArray;
 
-		$_tags = $this->_tags;
-
-		if ($this->count>0 && count($_tags) > $this->count) {
-			usort($_tags, array($this, 'countCompare'));
-			array_splice($_tags, $this->count);
+		if (strcasecmp($this->sort, 'tag') == 0) {
+			$tags = $this->arraySort2D($tags, 'tag', $this->sortingMode);
 		}
-
-		if (mb_strtolower($this->sort) == 'tag') {
-			$_tags = $this->arraySort2D($_tags, 'tag', $this->descasc);
-		}
-		elseif (mb_strtolower($this->sort) == 'count') {
-			usort($_tags, array($this, 'countCompare'));
+		elseif (strcasecmp($this->sort, 'count') == 0) {
+			usort($tags, array($this, 'countCompare'));
 		}
 		else {
-			shuffle($_tags);
+			shuffle($tags);
 		}
 
-		foreach ($_tags as $k=>$_v) {
-			if (empty($maxcount) || $_v['count']>$maxcount) {
-				$maxcount=$_v['count'];
+		$maxcount = -PHP_INT_MAX; $mincount = PHP_INT_MAX;
+		foreach ($tags as $k => $_v) {
+			if ($_v['count'] > $maxcount) {
+				$maxcount = $_v['count'];
 			}
-			if (empty($mincount) || $_v['count']<$mincount) {
-				$mincount=$_v['count'];
+			if ($_v['count'] < $mincount) {
+				$mincount = $_v['count'];
 			}
 		}
 
-		if (in_array(mb_strtolower($this->unit), array('em','ex','cm','in'))) {
+		if (t3lib_div::inList('em,ex,cm,in', $this->unit)) {
 			$this->maxsize *= 100;
 			$this->minsize *= 100;
 		}
@@ -201,7 +166,7 @@ class tagCloud extends tslib_pibase {
 			$this->thresholds = $this->maxsize - $this->minsize + 1;
 		}
 
-		if (!in_array(mb_strtolower($this->unit), array('em','ex','cm','in','pt','px','mm','pc','%'))) {
+		if (!t3lib_div::inList('em,ex,cm,in,pt,px,mm,pc,%', $this->unit)) {
 			$this->maxsize = $this->minsize + $this->thresholds - 1;
 		}
 		elseif (!empty($this->mincolor) && !empty($this->maxcolor)) {
@@ -213,15 +178,15 @@ class tagCloud extends tslib_pibase {
 		$cloud = '';
 
 		if ($this->conf['sortBy'] == 'tag') {
-			uasort($_tags, array($this, 'sortByTag'));
+			uasort($tags, array($this, 'sortByTag'));
 		}
 		else {
-			uasort($_tags, array($this, 'sortByCountValue'));
-			array_splice($_tags, $this->maxTagsToShow);
+			uasort($tags, array($this, 'sortByCountValue'));
+			array_splice($tags, $this->maxTagsToShow);
 		}
 		// End
 
-		foreach ($_tags as $k => $v) {
+		foreach ($tags as $k => $v) {
 			$count = $v['count'];
 			if (empty($_s[$count])) {
 				$func = ($this->distribution == 'lin' ? 'getTagSizeLinear' : 'getTagSizeLogarithmic');
@@ -232,7 +197,7 @@ class tagCloud extends tslib_pibase {
 			}
 
 			$l 	= str_replace('%tag%', $v['tag'], $this->link);
-			$lt = str_replace('%tag%', $v['tag'], $this->link_title);
+			$lt = str_replace('%tag%', $v['tag'], $this->linkTitle);
 			$lt = str_replace('%count%', $count, $lt);
 			if (in_array(mb_strtolower($this->unit), array('pt','px','mm','pc','%'))) {
 				$s 	= "style=\"font-size:".$_s[$count].strtolower($this->unit).";".($_colors?"color:".$_colors[$_c[$count]-1].";":"")."\"";
@@ -300,12 +265,12 @@ class tagCloud extends tslib_pibase {
 	 *
 	 * @param 	array		$_array: array to be sorted
 	 * @param	string		$key
-	 * @param	string		$descasc
+	 * @param	string		$sorting
 	 *
 	 * @return	sorted array
 	 *
 	 */
-	function arraySort2D($array, $key, $descasc='asc') {
+	function arraySort2D($array, $key, $sorting='asc') {
 		if (!is_array($array) || empty($array)) {
 			return FALSE;
 		}
@@ -314,7 +279,7 @@ class tagCloud extends tslib_pibase {
 			$a[$k] = $v[$key];
 		}
 		natcasesort($a);
-		if (mb_strtolower($descasc) == 'desc') {
+		if ($sorting == 'desc') {
 			$a = array_reverse($a, TRUE);
 		}
 		$arr = array();
@@ -337,7 +302,7 @@ class tagCloud extends tslib_pibase {
 		if ($_a['count'] == $_b['count']) {
 			return strnatcasecmp($_a['tag'], $_b['tag']);
 		} else {
-			$da = ($this->descasc == 'asc') ? 1 : -1;
+			$da = ($this->sortingMode == 'asc') ? 1 : -1;
 			return ($_a['count'] < $_b['count']) ? -1*$da : 1*$da;
 		}
 	}
