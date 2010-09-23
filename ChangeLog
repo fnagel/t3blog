@@ -1,3 +1,7 @@
+2010-09-23  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Minor clean up in views widget
+
 2010-09-22  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Refactored calendar widget for better speed and less memory

@@ -25,7 +25,7 @@
 require_once(PATH_tslib.'class.tslib_pibase.php');
 
 /**
- * Plugin 'T3BLOG' for the 't3blog' extension.
+ * This widget shows posts sorted by amount of views.
  *
  * @author	snowflake <typo3@snowflake.ch>
  * @package	TYPO3
@@ -35,10 +35,6 @@ class views extends tslib_pibase {
 	var $prefixId      = 'views';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/views/class.views.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 
 	/**
 	 * The main method of the PlugIn
@@ -50,16 +46,10 @@ class views extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
-		$this->init();
+		$this->pi_loadLL();
 		$numberOfItems = $this->conf['numberOfItems']?$this->conf['numberOfItems']:5;
 
-		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
 		$content = '';
 		$list = t3blog_db::getPostByWhere('pid = '.t3blog_div::getBlogPid(),'number_views DESC', '0,'.$numberOfItems );
 		if ($list) {
@@ -86,16 +76,10 @@ class views extends tslib_pibase {
 
 		return $content;
 	}
-
-	/**
-	 * Initial Method
-	 */
-	function init(){
-		$this->pi_loadLL();
-	}
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/views/class.views.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/views/class.views.php']);
 }
+
 ?>
