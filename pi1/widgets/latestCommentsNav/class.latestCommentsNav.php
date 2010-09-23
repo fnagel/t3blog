@@ -25,7 +25,7 @@
 require_once(PATH_tslib.'class.tslib_pibase.php');
 
 /**
- * Plugin 'T3BLOG' for the 't3blog' extension.
+ * Latest comments widget for t3blog extension.
  *
  * @author	snowflake <typo3@snowflake.ch>
  * @package	TYPO3
@@ -35,13 +35,9 @@ class latestCommentsNav extends tslib_pibase {
 	var $prefixId      = 'latestCommentsNav';		// Same as class name
 	var $scriptRelPath = 'pi1/widgets/latestCommentsNav/class.latestCommentsNav.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 't3blog';	// The extension key.
-	var $pi_checkCHash = false;
-	var $localPiVars;
-	var $globalPiVars;
-	var $conf;
 
 	/**
-	 * The main method of the PlugIn
+	 * The main method of the widget
 	 * @author 	Meile Simon <smeile@snowflake.ch>
 	 *
 	 * @param	string		$content: The PlugIn content
@@ -50,19 +46,13 @@ class latestCommentsNav extends tslib_pibase {
 	 * @return	The content that is displayed on the website
 	 */
 	function main($content,$conf,$piVars){
-		$this->globalPiVars = $piVars;
-		$this->localPiVars = $piVars[$this->prefixId];
 		$this->conf = $conf;
-		$this->init();
+		$this->pi_loadLL();
 		$numberOfItems = $this->conf['numberOfItems']?$this->conf['numberOfItems']:5;
 
-		/*******************************************************/
-		//example pivar for communication interface
-		//$this->piVars['widgetname']['action'] = "value";
-		/*******************************************************/
 		$content = '';
 		$list = t3blog_db::getCommentsByWhere('pid = '.t3blog_div::getBlogPid().' AND deleted = 0 AND spam = 0 AND approved = 1','date DESC', '0,'.$numberOfItems );
-		if ($list) {
+		if (is_array($list)) {
 			$listElements = '';
 			foreach ($list as $row){
 				$data = array(
@@ -90,17 +80,10 @@ class latestCommentsNav extends tslib_pibase {
 
 		return $content;
 	}
-
-	/**
-	 * Initial Method
-	 */
-	function init(){
-		$this->pi_loadLL();
-
-	}
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/latestCommentsNav/class.latestCommentsNav.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/latestCommentsNav/class.latestCommentsNav.php']);
 }
+
 ?>
