@@ -42,11 +42,11 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	var $widgetFolder;
 
 	/**
-	 * The cObj
+	 * The content object for use in widgets.
 	 *
 	 * @var tslib_cObj
 	 */
-	var $localcObj = '';
+	var $localcObj;
 
 
 	/**
@@ -61,8 +61,6 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	function main($content, $conf)	{
 		$this->conf = $conf;
 		$this->init();
-		$this->pi_setPiVarDefaults();
-		$this->pi_loadLL();
 		$data = array();
 		$js = '';
 
@@ -73,12 +71,11 @@ class tx_t3blog_pi1 extends tslib_pibase {
 			foreach ($conf['widget.'] as $widgetname => $widgetconf){
 				if(strpos($widgetname, '.')){
 					$widgetname = trim($widgetname, '.');
-					$content = '';
 					$content = $this->callWidget($widgetname, $widgetconf);
-					if($content){
-						$data = array_merge($data, $this->addPlaceHolder($widgetname, $content));
+					if ($content) {
+						$data[$widgetname] = $content;
 					}
-					if($widgetconf['jsFiles.']){	//get js files
+					if ($widgetconf['jsFiles.']) {	//get js files
 						foreach ($widgetconf['jsFiles.'] as $file){
 							$js .= $this->includeJavaScript($this->widgetFolder . $widgetname. '/', $file);
 						}
@@ -106,6 +103,8 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	function init(){
 		$this->widgetFolder = t3lib_extMgm::siteRelPath('t3blog') . 'pi1/widgets/';
 		$this->localcObj = t3lib_div::makeInstance('tslib_cObj');
+		$this->pi_setPiVarDefaults();
+		$this->pi_loadLL();
 	}
 
 	/**
@@ -145,18 +144,6 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	}
 
 	/**
-	 * add placeholder
-	 *
-	 * @param string $widgetname
-	 * @param string $content
-	 * @return array
-	 */
-	function addPlaceHolder($widgetname, $content) {
-
-		return array($widgetname=>$content);
-	}
-
-	/**
 	 * render js include tag to embed an external js file via src-param.
 	 *
 	 * @param string $path
@@ -164,9 +151,7 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 * @return string
 	 */
 	function includeJavaScript($path, $file)	{
-		$rc =
-			'<script src="'.	/*t3lib_extMgm::siteRelPath($this->extKey).dirname($this->scriptRelPath).*/
-			$path.$file. '" type="text/javascript"></script>';
+		$rc = '<script src="' .	htmlspecialchars($path . $file) . '" type="application/javascript"></script>';
 
 		return $rc;
 	}
@@ -175,20 +160,11 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 * Parses data through typoscript.
 	 *
 	 * @param	String[]	$data: Data which will be passed to the typoscript.
-	 * @param	String		$ts: The typoscript which will be called.
+	 * @param	String		$typoScriptProperty: The typoscript which will be called.
 	 */
-	function getSingle($data, $ts) {
-		//If debug is enabled ($this->debug) and the debug param is set (t3lib_div::_GP('debug')),
-		// display the data array and which ts will be invoked.
-		if ($this->debug && t3lib_div::_GP('debug')) {
-			t3lib_div::debug($data, $ts.' '. __FILE__. '@'. __LINE__);
-		}
-
-		//Set the data array in the local cObj. This data will be available in the ts. E.G. {field:[fieldName]} or field = [fieldName]
+	function getSingle(array $data, $typoScriptProperty) {
 		$this->localCobj->data = $data;
-
-		//Parse and return the result.
-		return $this->localCobj->cObjGetSingle($this->conf[$ts], $this->conf[$ts.'.']);
+		return $this->localCobj->cObjGetSingle($this->conf[$typoScriptProperty], $this->conf[$typoScriptProperty . '.']);
 	}
 
 	/**
@@ -197,14 +173,14 @@ class tx_t3blog_pi1 extends tslib_pibase {
 	 * @return string
 	 */
 	protected function getPingbackUrl() {
-		return t3lib_div::locationHeaderUrl($this->cObj->typoLink_URL(array(
-			'parameter' => $GLOBALS['TSFE']->id,
-			'additionalParams' => '&eID=t3b_pingback'
-		)));
+		// Note typoLink does not work on eID links! It is better to avoid that.
+		return t3lib_div::locationHeaderUrl('index.php?id=' . $GLOBALS['TSFE']->id .
+			'&eID=t3b_pingback');
 	}
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/class.tx_t3blog_pi1.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/class.tx_t3blog_pi1.php']);
 }
+
 ?>
