@@ -233,7 +233,7 @@ class listFunctions extends blogList {
 			$this->getListItemsLimit()
 		);
 		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			$result .= $this->renderSingleListPos($row, $entryCount);
+			$result .= $this->renderSingleListPost($row, $entryCount);
 			$entryCount++;
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -253,7 +253,7 @@ class listFunctions extends blogList {
 	 * @param int $entryCount
 	 * @return string
 	 */
-	protected function renderSingleListPos(array $row, $entryCount) {
+	protected function renderSingleListPost(array $row, $entryCount) {
 		$contentUidArray = array(); $hasDivider = false; $textBeforeDivider = '';
 		$this->fetchContentData($row['uid'], $contentUidArray, $hasDivider, $textBeforeDivider);
 
