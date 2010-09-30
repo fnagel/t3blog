@@ -290,21 +290,21 @@ class blogList extends tslib_pibase {
 	* @param	boolean	$icon: whether icon is set or not
 	* @return   string	An image string.
 	*/
-function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
+	function getImage($imagePath, $title = '', $conf = array(), $icon = false)    {
 		$image = $conf;
 
 		if ($icon) {
-		$image['file'] = $this->extensionPath. $imagePath;
+			$image['file'] = $this->extensionPath . $imagePath;
 		} else {
-		$image['file'] = $this->uploadPath. $imagePath;
+			$image['file'] = $this->uploadPath . $imagePath;
 		}
 
 		$image['titleText'] = $title;
 		$image['altText'] = $title;
 		$imagestring = $this->cObj->IMAGE($image);
 
-	return $imagestring;
-}
+		return $imagestring;
+	}
 
 
 /**
