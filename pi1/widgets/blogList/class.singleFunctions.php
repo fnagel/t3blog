@@ -106,6 +106,7 @@ class singleFunctions extends blogList {
 					'back'			=>	$this->pi_getLL('back'),
 					'trackbackLink'	=>	$this->getTrackbackLink($row),
 					'comments'		=>	$this->listComments($row['date']),
+					'comment_count' => t3blog_db::getNumberOfCommentsByPostUid($row['postuid']),
 					'message'		=> 	$message,
 					'trackbacks'	=>	$this->listTrackbacks(),
 					'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),

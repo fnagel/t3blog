@@ -1,3 +1,7 @@
+2010-09-30  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* (Snowflake) Added comments counter to the single post view
+
 2010-09-24  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Released version 1.0.0

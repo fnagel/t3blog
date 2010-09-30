@@ -299,6 +299,9 @@ plugin.tx_t3blog_pi1 {
 		# single item
 		single = COA
 		single {
+
+			# To add a number of comments, use 'comment_count' field
+
 			1 = TEXT
 			1 {
 				field = navigation
