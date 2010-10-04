@@ -1,6 +1,7 @@
 2010-10-04  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* (Snowflake) Add possiblity to have trackback links in the List view
+	* (Snowflake) Add content extract to the latest posts widget
 
 2010-09-30  Dmitry Dulepov  <dmitry@typo3.org>
 

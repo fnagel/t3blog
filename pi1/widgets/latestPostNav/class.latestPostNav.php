@@ -55,6 +55,9 @@ class latestPostNav extends tslib_pibase {
 			$listElements = '';
 			foreach ($list as $row){
 
+				$contentUidArray = array(); $hasDivider = false; $textBeforeDivider = '';
+				t3blog_div::fetchContentData($row['uid'], $contentUidArray, $hasDivider, $textBeforeDivider);
+
 				$data = array(
 					'title'=>t3blog_div::getSingle(array(
 							'text'		=> $row['title'],
@@ -66,6 +69,7 @@ class latestPostNav extends tslib_pibase {
 							'comments'	=> $this->pi_getLL('comments').t3blog_db::getNumberOfCommentsByPostUid($row['uid'])
 						),'link', $this->conf
 					),
+					'contentUids' => implode(',', $contentUidArray),
 					'date'=> $row['date'],
 					'text'=> $row['text'],
 					'uid'=> $row['uid'],

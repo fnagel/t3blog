@@ -24,6 +24,87 @@
 
 class t3blog_div {
 
+
+	/**
+	 * Crops the text at divider's position with respect to the HTML structure.
+	 *
+	 * @param array $row
+	 * @param int $dividerPosition
+	 * @return string
+	 */
+	static public function cropText(array $row, $dividerPosition) {
+		$cObj = t3lib_div::makeInstance('tslib_cObj');
+		if (method_exists($cObj, 'cropHTML')) {
+			// Algorithm:
+			// - render text correctly
+			// - make sure there is no empty paragraphs for ###MORE###
+			$renderedText = t3blog_div::getSingle($row, 'tt_content', $GLOBALS['TSFE']->tmpl->setup);
+			$textBeforeDivider = $cObj->cropHTML($renderedText,
+				($dividerPosition + 10). '|');
+			$regExp = '/<p(?:\s[^>]*)?>\s*###MORE###\s*<\/p>/';
+			if (preg_match($regExp, $textBeforeDivider)) {
+				$textBeforeDivider = preg_replace($regExp, '', $textBeforeDivider);
+			}
+			else {
+				$textBeforeDivider = str_replace('###MORE###', '', $textBeforeDivider);
+			}
+		}
+		else {
+			$textBeforeDivider = substr($row['bodytext'], 0, $dividerPosition);
+		}
+		return $textBeforeDivider;
+	}
+
+	/**
+	 * Fetches content data for the current post.
+	 *
+	 * @param int $postId
+	 * @param array $contentUidArray
+	 * @param boolean $hasDivider
+	 * @param string $textBeforeDivider
+	 */
+	static public function fetchContentData($postId, array &$contentUidArray, &$hasDivider, &$textBeforeDivider) {
+		static $cache = array();
+
+		if (isset($cache[$postId])) {
+			$contentUidArray = $cache[$postId]['contentUidArray'];
+			$hasDivider = $cache[$postId]['hasDivider'];
+			$textBeforeDivider = $cache[$postId]['textBeforeDivider'];
+		}
+		else {
+			$cObj = t3lib_div::makeInstance('tslib_cObj');
+			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+				'uid,bodytext,CType', 'tt_content',
+				'irre_parentid=' . $postId .
+					' AND irre_parenttable=\'tx_t3blog_post\'' .
+					$cObj->enableFields('tt_content'),
+				'', 'sorting'
+			);
+			$contentUidArray = array();
+			$hasDivider = false;
+			$textBeforeDivider = '';
+			while (false !== ($rowContent = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
+				if ($rowContent['CType'] == 'text' || $rowContent['CType'] == 'textpic') {
+					$dividerPosition = strpos($rowContent['bodytext'], '###MORE###');
+					if ($dividerPosition !== false) {
+						$textBeforeDivider = self::cropText($rowContent, $dividerPosition);
+						$hasDivider = true;
+						break;
+					}
+				}
+				$contentUidArray[] = $rowContent['uid'];
+			}
+			$GLOBALS['TYPO3_DB']->sql_free_result($res);
+
+			$cache[$postId] = array(
+				'contentUidArray' => $contentUidArray,
+				'hasDivider' => $hasDivider,
+				'textBeforeDivider' => $textBeforeDivider
+			);
+		}
+	}
+
+
 	/**
 	 * Parses data through typoscript.
 	 *
