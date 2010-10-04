@@ -275,9 +275,10 @@ class listFunctions extends blogList {
 			'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
 			'blogUrl'		=> $this->getPermalink($row['uid'], $row['date'], true),
 			'permalink'		=> $this->getPermalink($row['uid'], $row['date']),
+			'trackbackLink' => $this->getTrackbackLink($row['uid'], $row['date']),
 			'back'			=> $this->back,
 			'tagClouds'		=> $row['tagClouds'],
-			'number_views'	=> $this->getNumberOfViews($row['number_views']),
+			'number_views'	=> $row['number_views'],
 			'entryCounter'  => $entryCount
 		);
 		$result = t3blog_div::getSingle($data, 'listItem', $this->conf);

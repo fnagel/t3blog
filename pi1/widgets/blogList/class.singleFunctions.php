@@ -104,7 +104,7 @@ class singleFunctions extends blogList {
 					'email' 		=>	$row['email'],
 					'category'		=>	$this->getCategoriesLinked($row['postuid']),
 					'back'			=>	$this->pi_getLL('back'),
-					'trackbackLink'	=>	$this->getTrackbackLink($row),
+					'trackbackLink'	=>	$this->getTrackbackLink($row['postuid'], $row['date']),
 					'comments'		=>	$this->listComments($row['date']),
 					'comment_count' => t3blog_db::getNumberOfCommentsByPostUid($row['postuid']),
 					'message'		=> 	$message,
@@ -114,7 +114,7 @@ class singleFunctions extends blogList {
 					'permalink'		=> 	$this->getPermalink($this->uid,$row['date']),
 					'addcomment'	=> $this->showCommentForm($row['allow_comments']),
 					'tagClouds'		=>	$row['tagClouds'],
-					'number_views'	=>	$this->getNumberOfViews($row['number_views']),
+					'number_views'	=>	$row['number_views'],
 					'navigation'    => $this->getSingleNavigation($this->uid)
 				);
 
@@ -194,35 +194,6 @@ class singleFunctions extends blogList {
 			// Legacy code: update showUid if the old showUidPerma is given
 			$this->localPiVars['showUid'] = $this->localPiVars['showUidPerma'];
 		}
-	}
-
-
-	/**
-	 * Creates a trackback link for the post.
-	 *
-	 * @param array $postRow
-	 * @return string
-	 */
-	protected function getTrackbackLink(array $postRow) {
-		$cObj = t3lib_div::makeInstance('tslib_cObj');
-
-		$dateInfo = getdate($postRow['date']);
-		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
-			'trackback' => 1,
-			'blogList' => array(
-				'day' => sprintf('%02d', $dateInfo['mday']),
-				'month' => sprintf('%02d', $dateInfo['mon']),
-				'year' => $dateInfo['year'],
-				'showUid' => $this->uid
-			)
-		));
-		$linkConf = array(
-			'additionalParams'	=> $trackBackParameters,
-			'parameter'	=> t3blog_div::getBlogPid(),
-			'title'	=>	$this->pi_getLL('trackbackLinkDesc'),
-			'useCacheHash' => true
-		);
-		return $cObj->typoLink($this->pi_getLL('trackbackLink'), $linkConf);
 	}
 
 	/**

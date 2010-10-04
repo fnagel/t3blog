@@ -202,6 +202,16 @@ plugin.tx_t3blog_pi1 {
 					field = comments
 				}
 
+#
+# Trackback example -- commented for backwards compatibility
+#
+#				17 = TEXT
+#				17 {
+#					wrap = <span class="trackback">|</span>
+#					field = trackbackLink
+#				}
+#
+
 				#show gravatar if email is set
 				20 = TEXT
 				20 {

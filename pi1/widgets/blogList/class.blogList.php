@@ -307,15 +307,15 @@ class blogList extends tslib_pibase {
 	}
 
 
-/**
-	* returns a link to the blog entry. or only the url.
-	*
-	* @param 	int		$uid: blogEntryUid
-	* @param 	date	$date: date of the blog entry
-	* @param 	boolean	$onlyUrl: whether to display only the url or with a link
-	* @return 	string	permalink
-	*/
-	function getPermalink($uid, $date, $onlyUrl = false) {
+	/**
+	 * returns a link to the blog entry. or only the url.
+	 *
+	 * @param 	int		$uid: blogEntryUid
+	 * @param 	int	$date: date of the blog entry
+	 * @param 	boolean	$onlyUrl: whether to display only the url or with a link
+	 * @return 	string	permalink
+	 */
+	protected function getPermalink($uid, $date, $onlyUrl = false) {
 		$dateInfo = getdate($date);
 		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
 			'blogList' => array(
@@ -339,16 +339,40 @@ class blogList extends tslib_pibase {
 		$permaLink = $cObj->typoLink($this->pi_getLL('permalinkTitle'), $typolinkConf);
 
 		return $permaLink;
-}
+	}
 
-/**
-	* returns the number of views by each post
-	*
-	*/
-	function getNumberOfViews($numberOfViews) {
+	/**
+	 * Obtains a trackback link for the post (currently the same as permalink).
+	 *
+	 * @param int $uid
+	 * @param int $date
+	 * @param bool $urlOnly
+	 * @return string
+	 */
+	protected function getTrackbackLink($uid, $date, $urlOnly = false) {
+		$dateInfo = getdate($date);
+		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'blogList' => array(
+				'day' => sprintf('%02d', $dateInfo['mday']),
+				'month' => sprintf('%02d', $dateInfo['mon']),
+				'year' => $dateInfo['year'],
+				'showUid' => $uid
+			)
+		));
+		$typolinkConf = array(
+			'additionalParams' => $trackBackParameters,
+			'parameter' => t3blog_div::getBlogPid(),
+			'title' => $this->pi_getLL('trackbackLinkDesc'),
+			'useCacheHash' => true
+		);
+		if ($onlyUrl) {
+			$typolinkConf['returnLast'] = 'url';
+		}
 
-		return($numberOfViews);
+		$cObj = t3lib_div::makeInstance('tslib_cObj');
+		$permaLink = $cObj->typoLink($this->pi_getLL('trackbackLink'), $typolinkConf);
 
+		return $permaLink;
 	}
 
 	protected function fixLL() {
