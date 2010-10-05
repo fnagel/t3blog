@@ -756,7 +756,8 @@ class singleFunctions extends blogList {
 		$data['pid'] = t3blog_div::getBlogPid();
 		$data['date'] = $data['crdate'] = $GLOBALS['EXEC_TIME'];
 		$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_t3blog_com', $data);
-		$this->updateRefIndex('tx_t3blog_com', $GLOBALS['TYPO3_DB']->sql_insert_id());
+		$commendId = $GLOBALS['TYPO3_DB']->sql_insert_id();
+		$this->updateRefIndex('tx_t3blog_com', $commentId);
 
 		// Hook after comment insertion
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
@@ -765,7 +766,7 @@ class singleFunctions extends blogList {
 					'data' => &$data,
 					'table' => 'tx_t3blog_com',
 					'postUid' => $data['fk_post'],
-					'commentUid' => $GLOBALS['TYPO3_DB']->sql_insert_id(),
+					'commentUid' => $commendId,
 				);
 				t3lib_div::callUserFunction($userFunc, $params, $this);
 			}
