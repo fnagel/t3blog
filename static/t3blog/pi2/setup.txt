@@ -34,3 +34,8 @@ plugin.tx_t3blog_pi2 {
 	searchBox		 < plugin.tx_t3blog_pi1.searchBox
 	views			< plugin.tx_t3blog_pi1.views
 }
+
+# Note that it must be _pi1 in the condition below, not _pi2. Links are created with _pi1 in them!
+[globalVar = GP:tx_t3blog_pi1|trackback = 1]
+plugin.tx_t3blog_pi2 = USER_INT
+[global]

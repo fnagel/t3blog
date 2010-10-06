@@ -317,7 +317,7 @@ class blogList extends tslib_pibase {
 	 */
 	protected function getPermalink($uid, $date, $onlyUrl = false) {
 		$dateInfo = getdate($date);
-		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+		$permalinkParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
 			'blogList' => array(
 				'day' => sprintf('%02d', $dateInfo['mday']),
 				'month' => sprintf('%02d', $dateInfo['mon']),
@@ -326,7 +326,7 @@ class blogList extends tslib_pibase {
 			)
 		));
 		$typolinkConf = array(
-			'additionalParams' => $trackBackParameters,
+			'additionalParams' => $permalinkParameters,
 			'parameter' => t3blog_div::getBlogPid(),
 			'title' => $this->pi_getLL('permalinkDesc'),
 			'useCacheHash' => true
@@ -356,23 +356,25 @@ class blogList extends tslib_pibase {
 				'day' => sprintf('%02d', $dateInfo['mday']),
 				'month' => sprintf('%02d', $dateInfo['mon']),
 				'year' => $dateInfo['year'],
-				'showUid' => $uid
+				'showUid' => $uid,
+				'trackback' => 1
 			)
 		));
 		$typolinkConf = array(
+			'ATagParams' => 'rel="trackback nofollow"',
 			'additionalParams' => $trackBackParameters,
 			'parameter' => t3blog_div::getBlogPid(),
 			'title' => $this->pi_getLL('trackbackLinkDesc'),
-			'useCacheHash' => true
+			'useCacheHash' => false // Because of TS condition that makes the plugin USER_INT if there tx_t3blog_pi1[trackback]=1
 		);
-		if ($onlyUrl) {
+		if ($urlOnly) {
 			$typolinkConf['returnLast'] = 'url';
 		}
 
 		$cObj = t3lib_div::makeInstance('tslib_cObj');
-		$permaLink = $cObj->typoLink($this->pi_getLL('trackbackLink'), $typolinkConf);
+		$trackbackLink = $cObj->typoLink($this->pi_getLL('trackbackLink'), $typolinkConf);
 
-		return $permaLink;
+		return $trackbackLink;
 	}
 
 	protected function fixLL() {

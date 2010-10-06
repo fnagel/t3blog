@@ -1,3 +1,7 @@
+2010-10-06  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed bug #10089: Trackbacks do not work
+
 2010-10-05  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #9020: Comment UID is overwritten (thanks to Sebastiaan de Jonge)
