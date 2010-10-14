@@ -69,6 +69,7 @@ class latestPostNav extends tslib_pibase {
 							'comments'	=> $this->pi_getLL('comments').t3blog_db::getNumberOfCommentsByPostUid($row['uid'])
 						),'link', $this->conf
 					),
+					'blogUid'	=> t3blog_div::getBlogPid(),
 					'contentUids' => implode(',', $contentUidArray),
 					'date'=> $row['date'],
 					'text'=> $row['text'],

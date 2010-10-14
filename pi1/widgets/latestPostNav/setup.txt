@@ -50,7 +50,7 @@ plugin.tx_t3blog_pi1 {
 #			30 {
 #				if.isTrue.field = contentUids
 #				10 < styles.content.get
-#				10.select.pidInList.field=blogPid
+#				10.select.pidInList.field=blogUid
 #				10.select.andWhere.dataWrap = irre_parenttable = 'tx_t3blog_post' AND irre_parentid = {field:uid} AND uid in ( {field:contentUids} )
 #			}
 		}
