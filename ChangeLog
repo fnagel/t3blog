@@ -2,6 +2,7 @@
 
 	* Fixed bug: category widget may loop forever
 	* Fixed bug: content was not displayed in the latest posts widget outside of the blog page
+	* Fixed bug #10227: unable to add new comments
 
 2010-10-06  Dmitry Dulepov  <dmitry@typo3.org>
 

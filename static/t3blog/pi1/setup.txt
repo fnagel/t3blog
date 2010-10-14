@@ -53,7 +53,7 @@ plugin.tx_t3blog_pi1 {
 	}
 }
 
-[globalVar = GP:tx_t3blog_pi1|trackback = 1]
+[globalVar = GP:tx_t3blog_pi1|trackback = 1][globalVar = GP:tx_t3blog_pi1|blogList|insert = 1]
 plugin.tx_t3blog_pi1 = USER_INT
 plugin.tx_t3blog_pi1.myblog = USER_INT
 [global]
