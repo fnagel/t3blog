@@ -40,6 +40,8 @@ class singleFunctions extends blogList {
 	/** Error message for the comment form processing */
 	protected $errorMessage = '';
 
+	protected $requiredFields = null;
+
 	/**
 	 * Initializes the widget.
 	 *
@@ -56,6 +58,8 @@ class singleFunctions extends blogList {
 
 		$this->setPostUid();
 		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
+
+		$this->requiredFields = t3lib_div::trimExplode(',', strtolower($this->conf['requiredFields']), true);
 	}
 
 	/**
@@ -340,8 +344,6 @@ class singleFunctions extends blogList {
 				'userField' => 'www'
 			)
 		);
-		$requiredFields = strtolower($this->conf['requiredFields']);
-		$requiredFieldsArray = t3lib_div::trimExplode(',', $requiredFields, true);
 		foreach ($this->getCommentFormFields() as $fieldName) {
 			if (isset($this->localPiVars[$fieldName])) {
 				$data[$fieldName] = $this->localPiVars[$fieldName];
@@ -356,7 +358,7 @@ class singleFunctions extends blogList {
 			}
 			$data[$fieldName.'_label'] = $this->pi_getLL($fieldName);
 
-			if (in_array(strtolower($fieldName), $requiredFieldsArray)) {
+			if (in_array(strtolower($fieldName), $this->requiredFields)) {
 				$data[$fieldName.'_label'] .= ' ' . t3blog_div::getSingle(array(
 					'marker' => '*'
 				), 'requiredFieldMarkerWrap', $this->conf);
@@ -647,25 +649,14 @@ class singleFunctions extends blogList {
 		return $comments;
 	}
 
-
 	/**
 	 * Checks if the field is required.
 	 *
-	 * @param string $value
 	 * @param string $fieldName
-	 * @return boolean
+	 * @return bool
 	 */
-	protected function checkRequiredFieldValue($value, $fieldName) {
-		static $requiredFields = null;
-
-		if (!is_array($requiredFields)) {
-			$requiredFields = t3lib_div::trimExplode(',', strtolower($this->conf['requiredFields']), true);
-		}
-		if (in_array(strtolower($fieldName), $requiredFields)) {
-			return trim($value) != '';
-		}
-
-		return true;
+	protected function isFieldRequired($fieldName) {
+		return in_array(strtolower($fieldName), $this->requiredFields);
 	}
 
 
@@ -866,8 +857,13 @@ class singleFunctions extends blogList {
 		);
 
 		foreach ($testData as $field => $data) {
-			$isValid = $this->checkRequiredFieldValue($data['value'], $field);
-			if ($isValid && isset($data['validator'])) {
+			$isValid = true;
+
+			$fieldRequired = $this->isFieldRequired($field);
+			if ($fieldRequired) {
+				$isValid = (trim($data['value']) != '');
+			}
+			if ($isValid && isset($data['validator']) && ($fieldRequired || $data['value'] != '')) {
 				$isValid = call_user_func($data['validator'], $data['value']);
 			}
 			if (!$isValid) {
