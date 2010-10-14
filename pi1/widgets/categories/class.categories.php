@@ -210,7 +210,8 @@ class categories extends tslib_pibase {
 		// Note: no intval because the function gets only integers!
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'tx_t3blog_cat', 'parent_id=' . $parent);
 		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			$uidList = array_merge($uidList, $this->getCommaSeparatedCategories($row['uid'], $uidList));
+			$newList = $this->getCommaSeparatedCategories($row['uid'], $uidList);
+			$uidList = array_unique(array_merge($uidList, $newList));
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 

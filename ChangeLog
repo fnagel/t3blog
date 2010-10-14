@@ -1,3 +1,7 @@
+2010-10-14  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fixed bug: category widget may loop forever
+
 2010-10-06  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed bug #10089: Trackbacks do not work
