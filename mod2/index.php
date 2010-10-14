@@ -237,24 +237,23 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 	 *	@return string
 	 */
 	protected function getCategoryFilter() {
-		$filter = ' AND tx_t3blog_post.uid IN (SELECT tx_t3blog_post.uid
-					FROM tx_t3blog_post, tx_t3blog_cat, tx_t3blog_post_cat_mm
-					WHERE tx_t3blog_post.uid = tx_t3blog_post_cat_mm.uid_local
-					AND tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign';
 		$categoryName = t3lib_div::_GP('cat');
 		if ($categoryName) {
-			$filter .= ' AND tx_t3blog_cat.catname='.
+			$filter = ' AND tx_t3blog_cat.catname='.
 					$GLOBALS['TYPO3_DB']->fullQuoteStr($categoryName, 'tx_t3blog_cat');
 		}
 		else {
 			$categoryId = intval(t3lib_div::_GP('linkCat'));
 			if ($categoryId) {
-				$filter .= ' AND tx_t3blog_post_cat_mm.uid_foreign=' . $categoryId;
+				$filter = ' AND tx_t3blog_post_cat_mm.uid_foreign=' . $categoryId;
 			}
 		}
-		$filter .= ')';
-
-		$filter .= $this->getSearchSQLWhere('tx_t3blog_post');	// Get the query string for the table
+		if ($filter != '') {
+			$filter = ' AND tx_t3blog_post.uid IN (SELECT uid_local
+				FROM tx_t3blog_cat, tx_t3blog_post_cat_mm
+				WHERE tx_t3blog_cat.uid = tx_t3blog_post_cat_mm.uid_foreign' .
+				$filter . ')';
+		}
 
 		return $filter;
 	}
