@@ -2,6 +2,9 @@ plugin.tx_t3blog_pi1 {
 	categories {
 		toggle < plugin.tx_t3blog_pi1.toggle
 
+		# Set this value to the id of the category you want to start from. This category will be considered to be "root" and will NOT be included to the list but all subcategories will.
+		startFrom = 0
+
 		categories = COA
 		categories {
 			wrap = <div id="categories">|</div>

@@ -58,7 +58,7 @@ class categories extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj	= 0;
 		$categories = array(
-			'content' => $this->listCategories(),
+			'content' => $this->listCategories(intval($conf['startFrom'])),
 			'header' => $this->pi_getLL('title')
 		);
 
