@@ -21,8 +21,7 @@ CREATE TABLE tx_t3blog_post_cat_mm (
 	uid_foreign int(11) DEFAULT '0' NOT NULL,
 	tablenames varchar(30) DEFAULT '' NOT NULL,
 	sorting int(11) DEFAULT '0' NOT NULL,
-	KEY uid_local (uid_local),
-	KEY uid_foreign (uid_foreign)
+	KEY uid_all (uid_local,uid_foreign)
 );
 
 
@@ -63,8 +62,7 @@ CREATE TABLE tx_t3blog_post (
 	trackback_hash varchar(130) DEFAULT '' NOT NULL,
 	number_views int(11) DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	KEY sel01 (pid,deleted,hidden,crdate),
-	KEY listItems (pid,deleted,hidden,`date`)
+	KEY be_date (pid,`date`)
 );
 
 
@@ -139,7 +137,8 @@ CREATE TABLE tx_t3blog_cat (
 	description tinytext NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY sel01 (pid,deleted,hidden)
+	KEY sel01 (pid,deleted,hidden),
+	KEY catname (catname(24))
 );
 
 
@@ -170,7 +169,8 @@ CREATE TABLE tx_t3blog_com (
 
 	PRIMARY KEY (uid),
 	KEY sel01 (pid,deleted,hidden,crdate),
-	KEY sel02 (`date`)
+	KEY sel02 (`date`),
+	KEY be_list (fk_post,deleted)
 );
 
 

@@ -360,36 +360,74 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 		$limit = $start . ',' . $this->numberOfItemsPerPage;
 
 		// FIXME Need proper enableFields and deleteClause for all tables!
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'distinct tx_t3blog_post.uid as uid, tx_t3blog_post.title as title, tx_t3blog_post.date as date, tx_t3blog_post.hidden as hidden, count(tx_t3blog_com.fk_post) as comments',
-			'tx_t3blog_post LEFT JOIN tx_t3blog_com ON (tx_t3blog_post.uid = tx_t3blog_com.fk_post AND tx_t3blog_com.deleted=0)',
+		$databaseRows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'distinct tx_t3blog_post.uid as uid, tx_t3blog_post.title as title, tx_t3blog_post.date as date, tx_t3blog_post.hidden as hidden',
+			'tx_t3blog_post',
 			'tx_t3blog_post.deleted=0 AND tx_t3blog_post.pid=' . $this->id . $this->filter,
 			'uid',
 			$this->getListSortClause(),
-			$limit
+			$limit, 'uid'
 		);
 
 		$rows = array();
-		while (false != ($data=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			$oddEven = ((count($rows) % 2) == 0 ? 'even' : 'odd');
+		if (count($databaseRows) > 0) {
+			$postIdList = array_keys($databaseRows);
+			$commentCounts = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('fk_post, COUNT(*) AS comments', 'tx_t3blog_com',
+				'fk_post IN (' . $postIdList . ') AND deleted=0', 'fk_post', '', '', 'fk_post');
+			$categoryNames = $this->getCategoriesForPosts($postIdList);
 
-			// only if not hidden
-			if($data['hidden'] == 0){
-				$this->sendTrackbacks($this->id,$data['uid']);
+			foreach ($databaseRows as $data) {
+				$oddEven = ((count($rows) % 2) == 0 ? 'even' : 'odd');
+
+				// only if not hidden
+				if($data['hidden'] == 0){
+					$this->sendTrackbacks($this->id,$data['uid']);
+				}
+
+				// FIXME Hard-coded date format
+				$rows[] = '<tr class="' . $oddEven . '">
+						<td>' . date('d.m.y H:i:s', $data['date']) . '</td>
+						<td>' . htmlspecialchars($data['title']) . '</td>
+						<td>' . htmlspecialchars($this->getCategoryNamesFromList($data['uid'], $categoryNames)) . '</td>
+						<td><a href="../mod3/index.php?linkCom=' . $data['uid'] . '&amp;id=' . $this->id . '" title="' . $GLOBALS['LANG']->getLL('seeComments', true) . '">' . intval($commentCounts[$data['uid']]) . ' <img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') . 'icons/comments.png','width="16" height="16"').' alt="' . $GLOBALS['LANG']->getLL('seeComments', true) . '" /></a></td>
+						<td>'. $this->getFunctions('tx_t3blog_post', $data) . ' <!-- trackbacks sent: '. $trackbacksSent . '--></td>
+					</tr>';
 			}
-
-			// FIXME Hard-coded date format
-			$rows[] = '<tr class="' . $oddEven . '">
-					<td>' . date('d.m.y H:i:s', $data['date']) . '</td>
-					<td>' . htmlspecialchars($data['title']) . '</td>
-					<td>' . htmlspecialchars($this->getCategoryNames($data['uid'])) . '</td>
-					<td><a href="../mod3/index.php?linkCom=' . $data['uid'] . '&amp;id=' . $this->id . '" title="' . $GLOBALS['LANG']->getLL('seeComments', true) . '">' . htmlspecialchars($data['comments']) . ' <img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') . 'icons/comments.png','width="16" height="16"').' alt="' . $GLOBALS['LANG']->getLL('seeComments', true) . '" /></a></td>
-					<td>'. $this->getFunctions('tx_t3blog_post', $data) . ' <!-- trackbacks sent: '. $trackbacksSent . '--></td>
-				</tr>';
 		}
-		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
 		return implode(chr(10), $rows);
+	}
+
+	/**
+	 * Obtains category names for the given post from the list.
+	 *
+	 * @param int $postId
+	 * @param array $postList
+	 * @return string
+	 */
+	protected function getCategoryNamesFromList($postId, array $categoryNames) {
+		$result = array();
+		foreach ($categoryNames as $data) {
+			if ($data['uid'] == $postId) {
+				$result[] = $data['catname'];
+			}
+		}
+		return implode(', ', $result);
+	}
+
+	/**
+	 * Obtains all category names for the given post list.
+	 *
+	 * @param array $postList
+	 * @return array
+	 */
+	protected function getCategoriesForPosts(array $postList) {
+		$result = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('tx_t3blog_post_cat_mm.uid_local AS uid,catname',
+			'tx_t3blog_cat,tx_t3blog_post_cat_mm',
+			'tx_t3blog_cat.uid=tx_t3blog_post_cat_mm.uid_foreign AND ' .
+			'tx_t3blog_post_cat_mm.uid_local IN (' . implode(',', $postList) . ')' .
+			t3lib_BEfunc::deleteClause('tx_t3blog_cat'));
+		return $result;
 	}
 
 	/**

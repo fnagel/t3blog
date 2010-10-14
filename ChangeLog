@@ -5,6 +5,7 @@
 	* Fixed bug #10227: unable to add new comments
 	* Fixed bug #10229: invalid comment form field validation
 	* Added start category id for cateogry widget
+	* Speed up 'Posts' BE module for a large number of posts, categories and relations between them
 
 2010-10-06  Dmitry Dulepov  <dmitry@typo3.org>
 
