@@ -372,7 +372,7 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 		if (count($databaseRows) > 0) {
 			$postIdList = array_keys($databaseRows);
 			$commentCounts = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('fk_post, COUNT(*) AS comments', 'tx_t3blog_com',
-				'fk_post IN (' . $postIdList . ') AND deleted=0', 'fk_post', '', '', 'fk_post');
+				'fk_post IN (' . implode(',', $postIdList) . ') AND deleted=0', 'fk_post', '', '', 'fk_post');
 			$categoryNames = $this->getCategoriesForPosts($postIdList);
 
 			foreach ($databaseRows as $data) {
