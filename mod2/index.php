@@ -61,7 +61,7 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 		parent::init();
 
 		if ($this->hasAccess()) {
-			$this->filter = $this->getCategoryFilter();
+			$this->filter = $this->getCategoryFilter() . $this->getSearchSQLWhere('tx_t3blog_post');
 			$this->numberOfPosts = $this->getMaximumNumberOfPosts();
 		}
 	}

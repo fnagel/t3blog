@@ -1,6 +1,7 @@
 2010-10-26  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed SQL error when counting comments
+	* Fixed: search did not work in "Posts" module
 
 2010-10-14  Dmitry Dulepov  <dmitry@typo3.org>
 
