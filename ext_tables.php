@@ -12,7 +12,7 @@
 			'label'     			=> 'title',
 			'tstamp'    			=> 'tstamp',
 			'crdate'    			=> 'crdate',
-			'cruser_id' 			=> 'cruser_id',
+			'cruser_id' 			=> 'author',
 			'versioningWS' 			=> TRUE,
 			'origUid' 				=> 't3_origuid',
 			'languageField'            => 'sys_language_uid',

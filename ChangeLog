@@ -2,6 +2,7 @@
 
 	* Fixed SQL error when counting comments
 	* Fixed: search did not work in "Posts" module
+	* Remove cruser_id field (unused), hide auhtor field in BE forms and set it automatically
 
 2010-10-14  Dmitry Dulepov  <dmitry@typo3.org>
 
