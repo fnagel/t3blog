@@ -181,10 +181,10 @@ class t3blog_div {
 	 *
 	 * @return string 		HTML-Content to the browser
 	 */
-	static public function getPageBrowser($numOfEntries, $ident, $prefixId, $llarray, $piVars,$conf, $limit = 10, $maxPages = 20)	{
+	static public function getPageBrowser($numOfEntries, $ident, $prefixId, $llarray, $piVars, $conf, $limit = 10, $maxPages = 20)	{
   		// Get default configuration
-  		$conf = $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_pagebrowse_pi1.'];
-		if (!is_array($conf) || !isset($conf['userFunc'])) {
+  		$pageBrowserConf = $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_pagebrowse_pi1.'];
+		if (!is_array($pageBrowserConf) || !isset($pageBrowserConf['userFunc'])) {
 			// Hardcoded because:
 			// - language labels are unavailable from here
 			// - this message is for installers only, not for end users
@@ -197,18 +197,19 @@ class t3blog_div {
 			}
 			else {
 				// Modify this configuration
-				$conf = array_merge($conf, array(
+				$pageBrowserConf = array_merge($pageBrowserConf, array(
 					'pageParameterName' => 'tx_t3blog_post_pointer',
 					'numberOfPages' => $pages,
+					'numberOfLinks' => isset($conf['numberOfPageBrowserLinks']) ? intval($conf['numberOfPageBrowserLinks']) : 0
 				));
 
-				self::setPageBrowserFilters($conf);
+				self::setPageBrowserFilters($pageBrowserConf);
 
 				// Get page browser
 				$cObj = t3lib_div::makeInstance('tslib_cObj');
 				/* @var $cObj tslib_cObj */
 				$cObj->start(array(), '');
-				$result = $cObj->cObjGetSingle('USER', $conf);
+				$result = $cObj->cObjGetSingle('USER', $pageBrowserConf);
 			}
 		}
 		return $result;

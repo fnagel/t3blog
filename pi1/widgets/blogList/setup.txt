@@ -36,6 +36,8 @@ plugin.tx_t3blog_pi1 {
 		loginPid = {$PID.feuser.loginPid}
 
 		numberOfRecords = 5
+		# Set the setting below to something > 0 to have that fixed amount of links in the page browser
+		# numberOfPageBrowserLinks = 7
 		maxPages = 1000
 
 		#gravatar | ratings: g, pg, r, or x
