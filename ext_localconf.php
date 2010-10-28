@@ -20,4 +20,6 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 // eID
 $GLOBALS['TYPO3_CONF_VARS']['FE']['eID_include']['t3b_pingback'] = 'EXT:' . $_EXTKEY . '/eid/class.tx_t3blog_pingback.php';
 
+t3lib_extMgm::addPageTSConfig(file_get_contents(t3lib_extMgm::extPath('t3blog', 'static/tsconfig.txt')));
+
 ?>

@@ -57,3 +57,34 @@ plugin.tx_t3blog_pi1 {
 plugin.tx_t3blog_pi1 = USER_INT
 plugin.tx_t3blog_pi1.myblog = USER_INT
 [global]
+
+
+# Configuration for the linkhandler extension
+plugin.tx_linkhandler.tx_t3blog_post {
+        parameter.field = pid
+        additionalParams.cObject = COA
+        additionalParams.cObject {
+                10 = TEXT
+                10 {
+                        date = d
+                        field = date
+                        wrap = &tx_t3blog_pi1[blogList][day]=|
+                }
+                20 = TEXT
+                20 {
+                        date = m
+                        field = date
+                        wrap = &tx_t3blog_pi1[blogList][month]=|
+                }
+                30 = TEXT
+                30 {
+                        date = Y
+                        field = date
+                        wrap = &tx_t3blog_pi1[blogList][year]=|
+                }
+                40 = TEXT
+                40.dataWrap = &tx_t3blog_pi1[blogList][showUid]={field:uid}
+        }
+        title.field = title
+        useCacheHash = 1
+}

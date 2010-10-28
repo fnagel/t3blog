@@ -1,3 +1,7 @@
+2010-10-28  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Add configuration for the linkhandler extension
+
 2010-10-26  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fixed SQL error when counting comments

@@ -1,0 +1,8 @@
+RTE.default.tx_linkhandler.t3blog {
+	label = Blog Post
+	listTables = tx_t3blog_post
+	# Optionally set onlyPids below for blog pids
+	# onlyPids = 123
+}
+
+mod.tx_linkhandler.t3blog < RTE.default.tx_linkhandler.t3blog
