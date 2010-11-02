@@ -58,6 +58,8 @@
 			<label index="subscribe.salutation">Dear</label>
 			<label index="subscribe.notification">A new comment has been added to the post in the subject:</label>
 			<label index="subscribe.unsubscribe">If you wish to no more being notified about new comments, please click (or copy) the following link:</label>
+			<label index="subscribe.optionalTextBeforePermalink"></label>
+			<label index="subscribe.optionalFooter"></label>
 			<label index="subscribe.unsubscribe.succesfully">You unsubscribed succesfully. You will no longer receive notifications for this post.</label>
 			<label index="filter_date_format">%B %e</label>
 		</languageKey>
@@ -108,6 +110,8 @@
 			<label index="subscribe.salutation">Hallo</label>
 			<label index="subscribe.notification">Ein neuer Kommentar wurde dem im Betreff genannten Postblog hinzugefügt:</label>
 			<label index="subscribe.unsubscribe">Wenn sie nicht mehr über neue Kommentare informiert werden möchten, klicken (oder kopieren) sie bitte den folgenden Link:</label>
+			<label index="subscribe.optionalTextBeforePermalink"></label>
+			<label index="subscribe.optionalFooter"></label>
 			<label index="subscribe.unsubscribe.succesfully">Sie haben sich erfolgreich abgemeldet. In Zukunft erhalten sie keine Benachrichtigungen für diesen Post mehr.</label>
 		</languageKey>
 	</data>

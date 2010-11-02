@@ -1,3 +1,8 @@
+2010-11-02  Thomas Imboden  <timboden@snowflake.ch>
+
+	* Fixed bug: Unsubscribe link was not printend in message after first subscription
+	* Added some optional labels
+
 2010-10-28  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Add configuration for the linkhandler extension
