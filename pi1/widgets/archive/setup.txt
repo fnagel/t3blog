@@ -34,8 +34,10 @@ plugin.tx_t3blog_pi1 {
 			}
 			10 = TEXT
 			10 {
-				dataWrap = <a class="toggle" id="toggle{field:id}" href="#">|</a>
+				dataWrap = <a class="toggle" id="toggle{field:id}" href="javascript:void(0)">|</a>
 				value < plugin.tx_t3blog_pi1.archive.toggle.close
+				# To collapse elements initially use:
+				# value < plugin.tx_t3blog_pi1.archive.toggle.open
 			}
 			20 = TEXT
 			20 {
@@ -94,11 +96,13 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				dataWrap = <ul class="{field:class}" id="archive_{field:id}">|</ul>
+				# To collapse elements initially use:
+				# dataWrap = <ul class="{field:class}" style="display:none" id="archive_{field:id}">|</ul>
 				field = text
 			}
 			30 = TEXT
 			30 {
-				wrap = <script type="text/javascript">|</script>
+				wrap = <script type="text/javascript">/*<[CDATA[*/|/*]]>*/</script>
 				required = 1
 				field = js
 			}
@@ -110,6 +114,8 @@ plugin.tx_t3blog_pi1 {
 			10 = TEXT
 			10 {
 				wrap = <h3>|</h3>
+				# To collapse elements initially use:
+				# wrap = <h3 onclick="tx_t3blog_toggle('archive_')" style="cursor:pointer">|</h3>
 				field = title
 				htmlSpecialChars = 1
 			}
