@@ -388,8 +388,8 @@ class tx_t3blog_module2 extends tx_t3blog_modbase {
 						<td>' . date('d.m.y H:i:s', $data['date']) . '</td>
 						<td>' . htmlspecialchars($data['title']) . '</td>
 						<td>' . htmlspecialchars($this->getCategoryNamesFromList($data['uid'], $categoryNames)) . '</td>
-						<td><a href="../mod3/index.php?linkCom=' . $data['uid'] . '&amp;id=' . $this->id . '" title="' . $GLOBALS['LANG']->getLL('seeComments', true) . '">' . intval($commentCounts[$data['uid']]) . ' <img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') . 'icons/comments.png','width="16" height="16"').' alt="' . $GLOBALS['LANG']->getLL('seeComments', true) . '" /></a></td>
-						<td>'. $this->getFunctions('tx_t3blog_post', $data) . ' <!-- trackbacks sent: '. $trackbacksSent . '--></td>
+						<td><a href="../mod3/index.php?linkCom=' . $data['uid'] . '&amp;id=' . $this->id . '" title="' . $GLOBALS['LANG']->getLL('seeComments', true) . '">' . intval($commentCounts[$data['uid']]['comments']) . ' <img' . t3lib_iconWorks::skinImg($this->doc->backPath, t3lib_extMgm::extRelPath('t3blog') . 'icons/comments.png','width="16" height="16"').' alt="' . $GLOBALS['LANG']->getLL('seeComments', true) . '" /></a></td>
+						<td>'. $this->getFunctions('tx_t3blog_post', $data) . ' </td>
 					</tr>';
 			}
 		}

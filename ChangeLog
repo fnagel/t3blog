@@ -1,3 +1,7 @@
+2010-11-08  Dmitry Dulepov  <dmitry@typo3.org>
+
+	* Fix: comments count still does not work in BE
+
 2010-11-02  Thomas Imboden  <timboden@snowflake.ch>
 
 	* Fixed bug: Unsubscribe link was not printend in message after first subscription
