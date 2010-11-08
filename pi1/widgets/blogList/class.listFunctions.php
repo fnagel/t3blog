@@ -385,10 +385,10 @@ class listFunctions extends blogList {
 			$result .= ' AND tt_content.irre_parentid = tx_t3blog_post.uid ' .
 				'AND tt_content.irre_parenttable = \'tx_t3blog_post\'';
 			$result .= ' AND (';
-			$result .= ' tt_content.header LIKE \''.$searchWord.'%\' ';
-			$result .= ' OR tt_content.bodytext LIKE \''.$searchWord.'%\' ';
-			$result .= ' OR tx_t3blog_post.title LIKE \''.$searchWord.'%\' ';
-			$result .= ' OR tx_t3blog_post.tagClouds LIKE \''.$searchWord.'%\' ';
+			$result .= ' tt_content.header LIKE \'%'.$searchWord.'%\' ';
+			$result .= ' OR tt_content.bodytext LIKE \'%'.$searchWord.'%\' ';
+			$result .= ' OR tx_t3blog_post.title LIKE \'%'.$searchWord.'%\' ';
+			$result .= ' OR tx_t3blog_post.tagClouds LIKE \'%'.$searchWord.'%\' ';
 			$result .= ' ) ';
 			$result .= $this->localcObj->enableFields('tt_content');
 		}

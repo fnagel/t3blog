@@ -3,6 +3,7 @@
 	* Fix: comments count still does not work in BE
 	* Fix: RSS date is locale dependent
 	* Change expand/collapse to use Ext Core through Google CDN
+	* Fix: blog search did not search in the middle of text
 
 2010-11-02  Thomas Imboden  <timboden@snowflake.ch>
 
