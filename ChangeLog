@@ -1,6 +1,7 @@
 2010-11-08  Dmitry Dulepov  <dmitry@typo3.org>
 
 	* Fix: comments count still does not work in BE
+	* Fix: RSS date is locale dependent
 
 2010-11-02  Thomas Imboden  <timboden@snowflake.ch>
 

@@ -551,8 +551,7 @@ class rss extends tslib_pibase {
 				return $result;
 
 			case 'date':
-				setlocale (LC_TIME, $this->conf['feedTimeLocale']);
-				return '<pubDate>'.strftime($this->conf['feedStrftime'], $value).'</pubDate>';
+				return '<pubDate>' . date('r', $value) . '</pubDate>';
 				break;
 
 			default:

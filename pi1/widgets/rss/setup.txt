@@ -36,12 +36,6 @@ plugin.tx_t3blog_pi1 {
 	     # shorten text to this length in XML item description for RSS 2.0
 		feedItemDescLength20 = 200
 
-		# format of the feed item dates
-		feedStrftime = %a, %d %b %Y %H:%M:%S +0200
-
-		# locale for time formatting
-		feedTimeLocale = en_US.utf8
-
 	    # how many items to show in XML feed, default=all, maximum of 15 for RSS 0.91
 	    postItemCount = 5
 
