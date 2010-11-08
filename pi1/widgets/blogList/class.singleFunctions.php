@@ -40,7 +40,7 @@ class singleFunctions extends blogList {
 	/** Error message for the comment form processing */
 	protected $errorMessage = '';
 
-	protected $requiredFields = null;
+	protected $requiredFields = array();
 
 	/**
 	 * Initializes the widget.
@@ -330,31 +330,10 @@ class singleFunctions extends blogList {
 	 * @return void
 	 */
 	protected function setCommentFormFields(array &$data) {
-		$map = array(
-			'commentauthor' => array(
-				'cookie' => 'currentCommentAuthor',
-				'userField' => 'name'
-			),
-			'commentauthoremail' => array(
-				'cookie' => 'currentCommentEmail',
-				'userField' => 'email',
-			),
-			'commentauthorwebsite' => array(
-				'cookie' => 'currentCommentWebsite',
-				'userField' => 'www'
-			)
-		);
 		foreach ($this->getCommentFormFields() as $fieldName) {
-			if (isset($this->localPiVars[$fieldName])) {
+			if (isset($this->localPiVars[$fieldName]) && $_SERVER['REQUEST_METHOD'] == 'POST') {
+				// Must be uncached
 				$data[$fieldName] = $this->localPiVars[$fieldName];
-			}
-			else if (isset($map[$fieldName])) {
-				if (isset($_COOKIE[$map[$fieldName]['cookie']])) {
-					$data[$fieldName] = $_COOKIE[$map[$fieldName]['cookie']];
-				}
-				else if ($GLOBALS['TSFE']->fe_user->user['uid']) {
-					$data[$fieldName] = $GLOBALS['TSFE']->fe_user->user[$map[$fieldName]['userField']];
-				}
 			}
 			$data[$fieldName.'_label'] = $this->pi_getLL($fieldName);
 
@@ -747,8 +726,13 @@ class singleFunctions extends blogList {
 		$data['pid'] = t3blog_div::getBlogPid();
 		$data['date'] = $data['crdate'] = $GLOBALS['EXEC_TIME'];
 		$GLOBALS['TYPO3_DB']->exec_INSERTquery('tx_t3blog_com', $data);
-		$commendId = $GLOBALS['TYPO3_DB']->sql_insert_id();
+		$commentId = $GLOBALS['TYPO3_DB']->sql_insert_id();
 		$this->updateRefIndex('tx_t3blog_com', $commentId);
+
+		t3lib_div::requireOnce(PATH_t3lib . 'class.t3lib_tcemain.php');
+		$tce = t3lib_div::makeInstance('t3lib_TCEmain');
+		/* @var t3lib_TCEmain $tce */
+		$tce->clear_cacheCmd(t3blog_div::getBlogPid());
 
 		// Hook after comment insertion
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {
@@ -757,7 +741,7 @@ class singleFunctions extends blogList {
 					'data' => &$data,
 					'table' => 'tx_t3blog_com',
 					'postUid' => $data['fk_post'],
-					'commentUid' => $commendId,
+					'commentUid' => $commentId
 				);
 				t3lib_div::callUserFunction($userFunc, $params, $this);
 			}
@@ -1162,7 +1146,7 @@ class singleFunctions extends blogList {
 			$this->conf['adminsCommentsEmail'],			//email (receiver)
 			$this->pi_getLL('commentAdminMailSubject'),	//subject
 			$messageText,								//message
-			'From: ' . $this->conf['adminsCommentsEmail']
+			'From: ' . $this->conf['adminsCommentsEmailFrom']
 		);
 	}
 

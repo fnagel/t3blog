@@ -4,6 +4,7 @@
 	* Fix: RSS date is locale dependent
 	* Change expand/collapse to use Ext Core through Google CDN
 	* Fix: blog search did not search in the middle of text
+	* Fix: unitialized vars, cache is not cleared when comments are added, cookies must not be used on cached pages
 
 2010-11-02  Thomas Imboden  <timboden@snowflake.ch>
 
