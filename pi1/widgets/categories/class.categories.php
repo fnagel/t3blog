@@ -86,7 +86,7 @@ class categories extends tslib_pibase {
 
 		$data = array(
 			'content' => '',
-			'id' => 'togglecat' . $parent,
+			'id' => 'cat' . $parent,
 			'level' => $level,
 		);
 
@@ -95,12 +95,12 @@ class categories extends tslib_pibase {
 				$this->cObj->enableFields('tx_t3blog_cat'), '', 'catname');
 		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
 			$subcategories = $this->listCategories($row['uid'], $level + 1);
-			$toggleId = 'togglecat' . $row['uid'];
+			$toggleId = $row['uid'];
 
 			$row['postnum'] = $this->getNumberOfEntriesForCategory($row['uid']);
 
 			if ($subcategories) {
-				$row['catname'] = '<a href="#" id="img' . $toggleId . '" class="iconbeforetext">' .
+				$row['catname'] = '<a href="javascript:void(0)" id="togglecat' . $toggleId . '" class="iconbeforetext">' .
 					$this->conf['toggle.']['close'] . '</a>' .
 					$this->getCategoryLink($row);
 				$row['subcategories'] = $subcategories;
@@ -133,31 +133,7 @@ class categories extends tslib_pibase {
 	protected function getToggleJavaScript($toggleId) {
 		$closeMarkup = $this->conf['toggle.']['close'];
 		$openMarkup = $this->conf['toggle.']['open'];
-		return 'var mySlide' . $toggleId . ' = new Fx.Slide($(\'' . $toggleId . '\'));
-				if(Cookie.get("mySlide' . $toggleId . '")==1){
-					mySlide' . $toggleId . '.toggle();
-					if($(\'img' . $toggleId . '\').innerHTML == "' . $openMarkup . '")	{
-						$(\'img' . $toggleId . '\').innerHTML = "' . $closeMarkup . '";
-					} else {
-						$(\'img' . $toggleId . '\').innerHTML = "' . $openMarkup . '";
-					}
-				}
-
-				$(\'img' . $toggleId . '\').addEvent(\'click\', function(e) {
-					e = new Event(e);
-					mySlide' . $toggleId . '.toggle();
-					if($(\'img' . $toggleId . '\').innerHTML == "' . $openMarkup . '")	{
-						Cookie.remove("mySlide' . $toggleId . '");
-						Cookie.set("mySlide' . $toggleId . '","0",{path:"/"});
-						$(\'img' . $toggleId . '\').innerHTML = "' . $closeMarkup . '";
-					} else {
-						Cookie.set("mySlide' . $toggleId . '","1",{path:"/"});
-						$(\'img' . $toggleId . '\').innerHTML = "' . $openMarkup . '";
-					}
-					e.stop();
-				}
-			);
-		';
+		return t3blog_div::getExpandCollapseJavaScript('cat' . $toggleId, '', $openMarkup, $closeMarkup);
 	}
 
 	/**

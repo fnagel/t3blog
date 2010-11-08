@@ -7,9 +7,9 @@ page = PAGE
 page.10 < plugin.tx_t3blog_pi1.myblog
 
 
-page.includeJS {
-	10 = EXT:t3blog/static/js/mootools/mootools.js
-}
+#page.includeJS {
+#	10 = EXT:t3blog/static/js/mootools/mootools.js
+#}
 
 
 page.headerData.1000 = COA
@@ -38,13 +38,13 @@ xmlnews {
 		# Call the user function
 		userFunc = tx_t3blog_pi1->main
 		widget.rss < plugin.tx_t3blog_pi1.rss
-		
+
 		# Load "design" of the RSS-stuff
-		# Attention! This will only work, when you are 
+		# Attention! This will only work, when you are
 		# using the static template "T3BLOG Layout".
-		# The static template has included the full design of 
+		# The static template has included the full design of
 		# a blog (position of widgets and much more)
-		
+
 		template =< plugin.tx_t3blog_pi1.layoutBlog.40.80
 	}
 }

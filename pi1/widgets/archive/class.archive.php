@@ -251,38 +251,8 @@ class archive extends tslib_pibase {
 	protected function getToggleJS($id) {
 		$openBlock = t3lib_div::slashJS($this->conf['toggle.']['open']);
 		$closeBlock = t3lib_div::slashJS($this->conf['toggle.']['close']);
-		$js = '/*<![CDATA[*/
-				var mySlide'. $id. ' = new Fx.Slide($(\'archive_'. $id. '\'));
-				if(Cookie.get("mySlide'. $id. '")==1){
-					mySlide'. $id. '.toggle();
-					if($(\'toggle'. $id. '\').t3b_is_closed)	{
-						$(\'toggle'. $id. '\').innerHTML = "' . $closeBlock . '";
-						$(\'toggle'. $id. '\').t3b_is_closed = false;
-					} else {
-						$(\'toggle'.$id.'\').innerHTML = "' . $openBlock . '";
-						$(\'toggle'. $id. '\').t3b_is_closed = true;
-					}
-				}
 
-				$(\'toggle'. $id. '\').addEvent(\'click\', function(e) {
-					e = new Event(e);
-					mySlide'. $id. '.toggle();
-					if($(\'toggle'. $id. '\').t3b_is_closed) {
-						Cookie.remove("mySlide'. $id. '");
-						Cookie.set("mySlide'. $id. '","0",{path:"/"});
-						$(\'toggle'. $id. '\').innerHTML = "' . $closeBlock . '";
-						$(\'toggle'. $id. '\').t3b_is_closed = false;
-					} else {
-						Cookie.set("mySlide'. $id. '","1",{path:"/"});
-						$(\'toggle'. $id. '\').innerHTML = "' . $openBlock . '";
-						$(\'toggle'. $id. '\').t3b_is_closed = true;
-					}
-					e.stop();
-				}
-
-				);
-			/*]]>*/';
-		return $js;
+		return t3blog_div::getExpandCollapseJavaScript($id, 'archive_', $openBlock, $closeBlock);
 	}
 
 	/**

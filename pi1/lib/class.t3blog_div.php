@@ -284,6 +284,57 @@ class t3blog_div {
 		}
 		return intval($pid);
 	}
+
+	static public function getExpandCollapseJavaScript($elementId, $idPrefix, $openMarker, $closeMarker) {
+		if (!isset($GLOBALS['TSFE']->additionalHeaderData['t3blog-collapse-js'])) {
+			$GLOBALS['TSFE']->additionalHeaderData['t3blog-collapse-js'] = '<script ' .
+				'src="http://ajax.googleapis.com/ajax/libs/ext-core/3/ext-core.js" ' .
+				'type="text/javascript"></script><script type="text/javascript">/*<![CDATA[*/' .
+					t3lib_div::minifyJavaScript(
+				'function tx_t3blog_expand(element) {
+					element.slideIn();
+				}
+				function tx_t3blog_collapse(element) {
+					element.slideOut("t", {
+						useDisplay: true
+					});
+				}
+				function tx_t3blog_toggle(element, toggleElement, openMarker, closeMarker) {
+					element = Ext.get(element);
+					if (toggleElement) {
+						toggleElement = Ext.get(toggleElement);
+					}
+					if (element.dom.style.display == "none") {
+						tx_t3blog_expand(element);
+						if (toggleElement) {
+							toggleElement.dom.innerHTML = closeMarker;
+						}
+					}
+					else {
+						tx_t3blog_collapse(element);
+						if (toggleElement) {
+							toggleElement.dom.innerHTML = openMarker;
+						}
+					}
+				}
+				function tx_t3blog_expandCollapse(elementId, idPrefix, openMarker, closeMarker) {
+					Ext.get("toggle" + elementId).on("click", function() {
+						tx_t3blog_toggle(idPrefix + elementId, "toggle" + elementId, openMarker, closeMarker);
+					});
+				}'
+						)
+				. '/*]]>*/</script>';
+		}
+
+		$js = 'tx_t3blog_expandCollapse(' .
+				'"' . t3lib_div::slashJS($elementId) . '",' .
+				'"' . t3lib_div::slashJS($idPrefix) . '",' .
+				'"' . t3lib_div::slashJS($openMarker) . '",' .
+				'"' . t3lib_div::slashJS($closeMarker) . '"' .
+				');';
+
+		return $js;
+	}
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/lib/class.t3blog_div.php'])	{
