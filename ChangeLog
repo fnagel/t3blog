@@ -4,6 +4,7 @@
 	* Remove duplicate search results in blog list
 	* Sync RSS class with Snowflake changes
 	* Fix wrong comment count in BE
+	* Make e-mail subject localizable
 
 2010-11-08  Dmitry Dulepov  <dmitry@typo3.org>
 

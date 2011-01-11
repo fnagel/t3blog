@@ -953,7 +953,7 @@ class singleFunctions extends blogList {
 		$message = $this->pi_getLL('subscribe.confirmationHello') . chr(10);
 		$message.= $this->pi_getLL('subscribe.confirmationtext') . chr(10);
 		$message.= '<' . $unsubscribeLink . '>' . chr(10);
-			
+
 		// add footer (optional)
 		$message .= chr(10) . $this->pi_getLL('subscribe.optionalFooter');
 
@@ -1072,7 +1072,7 @@ class singleFunctions extends blogList {
 		// unsubscribe
 		$message .= $this->pi_getLL('subscribe.unsubscribe') . chr(10);
 		$message .= $unsubscribeLink;
-		
+
 		// add footer (optional)
 		$message .= chr(10) . $this->pi_getLL('subscribe.optionalFooter');
 
@@ -1140,11 +1140,12 @@ class singleFunctions extends blogList {
 				$markerArray[$key] = '-';
 			}
 		}
+		$messageSubject = $this->cObj->substituteMarkerArray($this->pi_getLL('commentAdminMailSubject'), $markerArray);
 		$messageText = $this->cObj->substituteMarkerArray($messageText, $markerArray);
 
 		t3lib_div::plainMailEncoded(
 			$this->conf['adminsCommentsEmail'],			//email (receiver)
-			$this->pi_getLL('commentAdminMailSubject'),	//subject
+			$messageSubject,	//subject
 			$messageText,								//message
 			'From: ' . $this->conf['adminsCommentsEmailFrom']
 		);
