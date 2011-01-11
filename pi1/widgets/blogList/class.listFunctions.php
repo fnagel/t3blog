@@ -40,7 +40,7 @@ class listFunctions extends blogList {
 	var $globalPiVars;
 
 	protected $fields = array(
-		'tx_t3blog_post.uid',
+		'DISTINCT(tx_t3blog_post.uid) AS uid',
 		'tx_t3blog_post.tagClouds',
 		'tx_t3blog_post.title',
 		'tx_t3blog_post.author',

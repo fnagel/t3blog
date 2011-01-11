@@ -1,6 +1,7 @@
 2011-01-11  Dmitry Dulepov  <dmitry.dulepov@typo3.org>
 
 	* Add sys_language_uid for compatibility reasons
+	* Remove duplicate search results in blog list
 
 2010-11-08  Dmitry Dulepov  <dmitry@typo3.org>
 
