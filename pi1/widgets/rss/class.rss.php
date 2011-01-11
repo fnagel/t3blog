@@ -536,14 +536,26 @@ class rss extends tslib_pibase {
 				break;
 
 			case 'text':
-				$description = $this->cleanString($value);
+/*				$result = '';
 
+				$result .= '<!--' . $value . '-->';
+				$description = $value;//$this->cleanString($value);
+				// Make sure HTML is ok (see K99608)
+				$setup = $GLOBALS['TSFE']->tmpl->setup['tt_content.']['text.']['20.'];
+				$config_key = $setup['parseFunc'];
+				$config_array = (array)$setup['parseFunc.'];
+				$cObj = t3lib_div::makeInstance('tslib_cObj');
+				$description = $cObj->parseFunc($description, $config_array, $config_key);
+Dmitry: see task 1406.678
+*/
+				$description = $this->cleanString(trim($value));
 				$descriptionLength = $this->conf[($this->rssVersion != '2.0' ? 'feedItemDescLength091' : 'feedItemDescLength20')];
 				$descriptionSubstr = mb_substr($description, 0, $descriptionLength, 'UTF-8');
 				if (mb_strlen($description, 'UTF-8') != mb_strlen($descriptionSubstr, 'UTF-8')) {
 					$descriptionSubstr .= '...';
 				}
 				$result = '<description>' . htmlspecialchars($descriptionSubstr) . '</description>';
+//				$result .= '<description><![CDATA[' . $description . ']]></description>';
 
 				if ($this->rssVersion == '2.0') {
 					$result .= '<content:encoded><![CDATA[' . $description . ']]></content:encoded>';
