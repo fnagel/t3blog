@@ -237,8 +237,8 @@ class tx_t3blog_module3 extends tx_t3blog_modbase {
 	 * @return string
 	 */
 	protected function getCommentList() {
-		$start = ($this->currentPage - 1)*$this->numberOfComments;
-		$limit = $start . ',' . $this->numberOfComments;
+		$start = ($this->currentPage - 1)*$this->numberOfItemsPerPage;
+		$limit = $start . ',' . $this->numberOfItemsPerPage;
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			'distinct tx_t3blog_com.uid as uid,tx_t3blog_com.fk_post as fk_post, ' .
 				'tx_t3blog_com.title as title, tx_t3blog_com.text as text, ' .
@@ -257,21 +257,9 @@ class tx_t3blog_module3 extends tx_t3blog_modbase {
 		while (false != ($data=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
 			$oddEven = ((count($rows) % 2) == 0 ? 'even' : 'odd');
 
-			// update unseen comments. Is it necessary?
-                        // FIXME: Why should we do this? Anyway, this does not work because $dsNormalList['uid'] is empty
-			/*
-                         * $GLOBALS['TYPO3_DB']->exec_UPDATEquery('tx_t3blog_com',
-
-				'uid=' . $dsNormalList['uid'], array(
-					'tstamp' => time()
-
-			));
-                         *
-                         */
-
 			// FIXME Fixed date format
 			$id = $data['uid'];
-			$rows[] = '<tr class="' . $oddeven . '">
+			$rows[] = '<tr class="' . $oddEven . '">
 				<td title="id=' . $id . '">' . date('d.m.y H:i:s', $data['date']) . '</td>
 				<td title="id=' . $id . '">' . htmlspecialchars(t3lib_div::fixed_lgd_cs($data['title'], 20)) . '</td>
 				<td title="id=' . $id . '">' . htmlspecialchars(t3lib_div::fixed_lgd_cs($data['text'], 50)) . '</td>
