@@ -234,7 +234,7 @@ $TCA['tx_t3blog_post'] = array (
 	),
 	'types' => array (
 		'0' => array(
-			'showitem' => '--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.yourposttab;;;1-1-1,date;;;;2-2-2,be_user, title;;;;3-3-3,content,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.categorize,tagClouds,cat,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.interactive,allow_comments,trackback,number_views,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access,--palette--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access;1;2-2-2,')
+			'showitem' => '--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.yourposttab;;;1-1-1,date,author;;;;2-2-2,be_user, title;;;;3-3-3,content,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.categorize,tagClouds,cat,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.interactive,allow_comments,trackback,number_views,--div--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access,--palette--;LLL:EXT:t3blog/locallang_db.xml:tx_t3blog_post.access;1;2-2-2,')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => 'starttime, endtime, fe_group, hidden','canNotCollapse'=>1)

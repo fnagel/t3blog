@@ -950,9 +950,9 @@ class singleFunctions extends blogList {
 		$headers = 'From: <' . $this->conf['senderEmail'] . '>' . chr(10) .
 			'List-Unsubscribe: ' . $unsubscribeLink;
 
-		$message = $this->pi_getLL('subscribe.confirmationHello') . chr(10);
-		$message.= $this->pi_getLL('subscribe.confirmationtext') . chr(10);
-		$message.= '<' . $unsubscribeLink . '>' . chr(10);
+		$message = $this->pi_getLL('subscribe.confirmationHello') . chr(10) .
+			$this->pi_getLL('subscribe.confirmationtext') . chr(10);
+			'<' . $unsubscribeLink . '>' . chr(10);
 
 		// add footer (optional)
 		$message .= chr(10) . $this->pi_getLL('subscribe.optionalFooter');
@@ -1065,7 +1065,7 @@ class singleFunctions extends blogList {
 
 		$message = $this->pi_getLL('subscribe.salutation') . ' ' . $subscriber['name'] . ',' . chr(10) . chr(10);
 		$message .= $this->pi_getLL('subscribe.notification') . chr(10) . chr(10);
-		$message .= $text;
+		$message .= $text . chr(10);
 		$message .= $this->pi_getLL('subscribe.optionalTextBeforePermalink');
 		$message .= '<' . t3lib_div::locationHeaderUrl($this->getPermalink($postUid, $this->getPostDate($postUid), true)) . '>' . chr(10) . chr(10);
 
