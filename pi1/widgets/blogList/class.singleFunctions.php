@@ -330,6 +330,10 @@ class singleFunctions extends blogList {
 	 * @return void
 	 */
 	protected function setCommentFormFields(array &$data) {
+		if ($GLOBALS['TSFE']->fe_user->user['uid']) {
+			$data['commentauthor'] = $GLOBALS['TSFE']->fe_user->user['username'];
+			$data['commentauthoremail'] = $GLOBALS['TSFE']->fe_user->user['email'];
+		}
 		foreach ($this->getCommentFormFields() as $fieldName) {
 			if (isset($this->localPiVars[$fieldName]) && $_SERVER['REQUEST_METHOD'] == 'POST') {
 				// Must be uncached

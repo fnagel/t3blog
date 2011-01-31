@@ -1,3 +1,7 @@
+2011-01-31	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
+
+	* Prefill FE user data to comment form
+
 2011-01-11  Dmitry Dulepov  <dmitry.dulepov@typo3.org>
 
 	* Add sys_language_uid for compatibility reasons
