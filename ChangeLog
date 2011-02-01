@@ -2,6 +2,7 @@
 
 	* Prefill FE user data to comment form
 	* Fixed wrong number of pages in the BE module for comments
+	* Snowflake task 1406.678: add content:encoded to RSS feed and make sure RSS validates
 
 2011-01-11  Dmitry Dulepov  <dmitry.dulepov@typo3.org>
 

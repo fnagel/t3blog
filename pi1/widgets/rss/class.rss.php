@@ -23,7 +23,7 @@
 ***************************************************************/
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
-
+require_once(PATH_typo3 . 'contrib/RemoveXSS/RemoveXSS.php');
 
 /**
  * Plugin 'T3BLOG' for the 't3blog' extension.
@@ -43,11 +43,15 @@ class rss extends tslib_pibase {
 	var $localPiVars;
 	var $globalPiVars;
 	var $conf;
+
+	/** @var tslib_cObj */
 	public $cObj;
 
 	protected $feedType;
 
 	protected $rssVersion = '2.0';
+
+	protected $XMLdebug = false;
 
 	/**
 	 * The main method of the PlugIn
@@ -179,19 +183,34 @@ class rss extends tslib_pibase {
 			'tx_t3blog_post', $where, '', $this->getOrderBy(), $this->getLimit());
 
 		foreach ($rows as &$row) {
-			list($contentRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-				'TRIM(CONCAT(header, \' \', bodytext)) AS text',
-				'tt_content', 'irre_parentid=' . $row['uid'] .
-				' AND irre_parenttable=\'tx_t3blog_post\'' .
-				' AND CType IN (\'text\', \'textpic\')' .
-				' AND TRIM(bodytext)<>\'\'' .
-				$this->cObj->enableFields('tt_content'), '', 'sorting', 1);
-			if (is_array($contentRow)) {
-				$row['text'] = str_replace(chr(10), chr(13), $contentRow['text']);
-			}
+			$row['text'] = $this->fetchContentForBlogPost($row['uid'], $row['pid']);
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * Fetches rendered contenbt for the post.
+	 *
+	 * @param int $postId
+	 * @param int $blogPid
+	 * @return string
+	 */
+	protected function fetchContentForBlogPost($postId, $blogPid) {
+		$conf = array(
+			'select.' => array(
+				'orderBy' => 'sorting',
+				'pidInList' => $blogPid,
+				'andWhere' => 'irre_parenttable=\'tx_t3blog_post\' AND irre_parentid=' . $postId
+			),
+			'table' => 'tt_content'
+		);
+		$cObj = t3lib_div::makeInstance('tslib_cObj');
+		/** @var tslib_cObj $cObj */
+		$cObj->start($GLOBALS['TSFE']->page, 'pages');
+		$content = $cObj->cObjGetSingle('CONTENT', $conf);
+
+		return $content;
 	}
 
 	/**
@@ -248,7 +267,7 @@ class rss extends tslib_pibase {
 		$this->lines[] = '<?xml version="1.0" encoding="' . $this->getCharset() . '"?>';
 
 		if($this->rssVersion == '2.0') {
-			$this->lines[].='<rss version="'.$this->rssVersion.'" '.$this->specialContent.'>';
+			$this->lines[].='<rss version="'.$this->rssVersion.'" '.$this->specialContent.' xmlns:atom="http://www.w3.org/2005/Atom">';
 		} else {
 			$this->lines[].='<rss version="'.$this->rssVersion.'">';
 		}
@@ -267,6 +286,10 @@ class rss extends tslib_pibase {
 				} else {
 					$this->lines[].='<docs>http://backend.userland.com/rss091</docs>';
 				}
+
+		if ($this->rssVersion == '2.0') {
+			$this->lines[] = '<atom:link href="' . htmlspecialchars(t3lib_div::getIndpEnv('TYPO3_REQUEST_URL')) . '" rel="self" type="application/rss+xml" />';
+		}
 
 		$this->lines[].='
 		<copyright>'.$this->conf['feedCopyright'].'</copyright>
@@ -365,7 +388,7 @@ class rss extends tslib_pibase {
 	function getRowInXML($table, $row) {
 		$fields = t3lib_div::trimExplode(',',$this->XML_recFields[$table],1);
 		foreach ($fields as $field) {
-			$this->lines[] = $this->Icode . $this->fieldWrap($field, $this->substNewline($row[$field]), $row['date']);
+			$this->lines[] = $this->Icode . $this->fieldWrap($field, $row);
 		}
 	}
 
@@ -432,7 +455,7 @@ class rss extends tslib_pibase {
 	 * @return 	the realName
 	 */
 	function getAuthorByPost($value) {
-		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('email, realName',
+		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('*',
 				'be_users', 'uid=' . intval($value));
 		return is_array($data) ? $data : array();
 	}
@@ -480,7 +503,10 @@ class rss extends tslib_pibase {
 	 *
 	 * @return Wraps the fields
 	 */
-	function fieldWrap($field,$value,$date)	{
+	function fieldWrap($field,array $row) {
+		$value = $this->substNewline($row[$field]);
+		$date = (int)$row['date'];
+
 		switch($field) {
 			case 'author':
 				if ($value != '') {
@@ -489,10 +515,10 @@ class rss extends tslib_pibase {
 					}
 					else {
 						$author = $this->getAuthorByPost($value);
-						list($email) = $this->cObj->getMailTo($author['email'], '');
-						$email = substr($email, 7);
-						return '<author>' . htmlspecialchars($email) .
-							($author['realName'] ? ' (' . htmlspecialchars($author['realName']) . ')' : '') . '</author>';
+						//list($email) = $this->cObj->getMailTo($author['email'], '');
+						//$email = substr($email, 7);
+						return '<author>' . htmlspecialchars($author['email']) .
+							' (' . htmlspecialchars($author['realName']) . ')' . '</author>';
 					}
 				}
 				break;
@@ -504,8 +530,7 @@ class rss extends tslib_pibase {
 				break;
 
 			case 'uid':
-				$newDate = $this->getDate($value);
-				$postid		= $this->feedType == 'comment' ? $this->getFkPostID($value) : $value;
+				$postid		= $this->feedType == 'comment' ? $this->getFkPostID(intval($value)) : $value;
 				$day 	= strftime('%d', $date);
 				$month 	= strftime('%m', $date);
 				$year	= strftime('%Y', $date);
@@ -545,7 +570,7 @@ class rss extends tslib_pibase {
 				$result = '<description>' . htmlspecialchars($descriptionSubstr) . '</description>';
 
 				if ($this->rssVersion == '2.0') {
-					$result .= '<content:encoded><![CDATA[' . $description . ']]></content:encoded>';
+					$result .= '<content:encoded><![CDATA[' . $this->getContentEncoded($row['text']) . ']]></content:encoded>';
 				}
 				return $result;
 
@@ -554,9 +579,46 @@ class rss extends tslib_pibase {
 				break;
 
 			default:
-				return '<'.$field.'>'.htmlspecialchars($value).'</'.$field.'>';
+				return '<'.$field.'>'.htmlspecialchars(strip_tags($value)).'</'.$field.'>';
 		}
 
+	}
+
+	/**
+	 * Creates the encoded content.
+	 *
+	 * @param int $uid
+	 * @return void
+	 */
+	protected function getContentEncoded($text) {
+		$text = str_replace('<', ' <', $text);
+		$text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
+		$text = preg_replace('/(<[^>]*\s)on[a-z]+="[^"]*"/', '\1', $text);
+
+		$text = strip_tags($text, '<a><b><br><em><hr><i><li><ol><p><strong><ul>');
+
+		// Remove tags with empty content
+		do {
+			$oldText = $text;
+			$text = preg_replace('/<[^\/>]*>([\s]?)*<\/[^>]*>/s', '', $text);
+		} while ($oldText != $text);
+
+		$text = preg_replace('/\s{2,}/', ' ', $text);
+		$text = str_replace(' class="bodytext"', '', $text);
+
+		$basePrefix = '';
+		if ($GLOBALS['TSFE']->config['config']['baseURL']) {
+			$basePrefix = $GLOBALS['TSFE']->config['config']['baseURL'];
+		}
+		elseif (@parse_url($GLOBALS['TSFE']->config['config']['absRefPrefix'], PHP_URL_SCHEME) != '') {
+			$basePrefix = $GLOBALS['TSFE']->config['config']['absRefPrefix'];
+		}
+		else {
+			$basePrefix = t3lib_div::getIndpEnv('TYPO3_SITE_URL');
+		}
+		$text = preg_replace('/"((?:fileadmin|typo3conf|typo3temp|uploads|typo3)//)|index\.php)', '"' . $basePrefix . '\1', $text);
+
+		return $text;
 	}
 
 	/**
@@ -577,6 +639,9 @@ class rss extends tslib_pibase {
 		$search = array('&');
 		$replace = array('+');
 		$string = str_replace($search,$replace,$string);
+
+		$string = str_replace(chr(13), chr(10), $string);
+		$string = str_replace(chr(10), ' ', $string);
 
 		return($string);
 
