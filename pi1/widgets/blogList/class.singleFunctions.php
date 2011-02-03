@@ -1128,6 +1128,12 @@ class singleFunctions extends blogList {
 	 */
 	function adminMailComment()	{
 		$pObjPiVars = t3lib_div::_POST('tx_t3blog_pi1');	// pObj piVars array
+
+		$postUid = intval($this->localPiVars['uid']);
+		list($titleRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title',
+			'tx_t3blog_post', 'uid=' . intval($postUid)
+		);
+
 		$messageText = $this->cObj->fileResource($this->conf['adminsCommentMailTemplate']);
 		$markerArray = array(
 			'###TITLE###'		=> strip_tags($pObjPiVars['blogList']['commenttitle']),
@@ -1137,6 +1143,7 @@ class singleFunctions extends blogList {
 			'###WEBSITE###'		=> $this->localPiVars['commentauthorwebsite'],
 			'###IP###'			=> t3lib_div::getIndpEnv('REMOTE_ADDR'),
 			'###TSFE###'		=> t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
+			'###POSTTITLE###'   => is_array($titleRow) ? $titleRow['title'] : '',,
 			'###LINK###'		=> $this->getPermalink($this->uid, $this->getPostDate($this->uid), true)
 		);
 		foreach ($markerArray as $key => $val) {
