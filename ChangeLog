@@ -1,3 +1,7 @@
+2011-02-22	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
+
+	* Fixed bug #13126: PHP error
+
 2011-02-03	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Snowflake task 1406.858: add post title marker to admin comment notification

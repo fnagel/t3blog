@@ -1143,7 +1143,7 @@ class singleFunctions extends blogList {
 			'###WEBSITE###'		=> $this->localPiVars['commentauthorwebsite'],
 			'###IP###'			=> t3lib_div::getIndpEnv('REMOTE_ADDR'),
 			'###TSFE###'		=> t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
-			'###POSTTITLE###'   => is_array($titleRow) ? $titleRow['title'] : '',,
+			'###POSTTITLE###'   => is_array($titleRow) ? $titleRow['title'] : '',
 			'###LINK###'		=> $this->getPermalink($this->uid, $this->getPostDate($this->uid), true)
 		);
 		foreach ($markerArray as $key => $val) {
