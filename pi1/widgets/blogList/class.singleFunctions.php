@@ -733,10 +733,7 @@ class singleFunctions extends blogList {
 		$commentId = $GLOBALS['TYPO3_DB']->sql_insert_id();
 		$this->updateRefIndex('tx_t3blog_com', $commentId);
 
-		t3lib_div::requireOnce(PATH_t3lib . 'class.t3lib_tcemain.php');
-		$tce = t3lib_div::makeInstance('t3lib_TCEmain');
-		/* @var t3lib_TCEmain $tce */
-		$tce->clear_cacheCmd(t3blog_div::getBlogPid());
+		$GLOBALS['TSFE']->clearPageCacheContent_pidList(t3blog_div::getBlogPid());
 
 		// Hook after comment insertion
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['t3blog']['aftercommentinsertion'])) {

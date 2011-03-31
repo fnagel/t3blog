@@ -1,6 +1,7 @@
 2011-03-31	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Fixed bug #13951: RSS feed content:encoded field empty
+	* Fixed bug #13245: Fatal error: Call to a member function writelog() on a non-object in typo3_src-4.5.0/t3lib/class.t3lib_tcemain.php on line 6774
 
 2011-02-22	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
