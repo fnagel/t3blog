@@ -606,7 +606,6 @@ class rss extends tslib_pibase {
 		$text = preg_replace('/\s{2,}/', ' ', $text);
 		$text = str_replace(' class="bodytext"', '', $text);
 
-		$basePrefix = '';
 		if ($GLOBALS['TSFE']->config['config']['baseURL']) {
 			$basePrefix = $GLOBALS['TSFE']->config['config']['baseURL'];
 		}
@@ -616,7 +615,7 @@ class rss extends tslib_pibase {
 		else {
 			$basePrefix = t3lib_div::getIndpEnv('TYPO3_SITE_URL');
 		}
-		$text = preg_replace('/"((?:fileadmin|typo3conf|typo3temp|uploads|typo3)//)|index\.php)', '"' . $basePrefix . '\1', $text);
+		$text = preg_replace('/"((?:fileadmin|typo3conf|typo3temp|uploads|typo3)\/)|index\.php)/', '"' . $basePrefix . '\1', $text);
 
 		return $text;
 	}
