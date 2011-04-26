@@ -327,10 +327,10 @@ class t3blog_div {
 		}
 
 		$js = 'tx_t3blog_expandCollapse(' .
-				'"' . t3lib_div::slashJS($elementId) . '",' .
-				'"' . t3lib_div::slashJS($idPrefix) . '",' .
-				'"' . t3lib_div::slashJS($openMarker) . '",' .
-				'"' . t3lib_div::slashJS($closeMarker) . '"' .
+				'"' . addslashes($elementId) . '",' .
+				'"' . addslashes($idPrefix) . '",' .
+				'"' . addslashes($openMarker) . '",' .
+				'"' . addslashes($closeMarker) . '"' .
 				');';
 
 		return $js;

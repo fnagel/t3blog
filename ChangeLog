@@ -1,3 +1,7 @@
+2011-04-26  Dmitry Dulepov	<dmitry.dulepov@gmail.com>
+
+	* Fix: JS escape did not always work for toggle JS
+
 2011-03-31	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Fixed bug #13951: RSS feed content:encoded field empty
