@@ -1,6 +1,7 @@
 2011-04-26  Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Fix: JS escape did not always work for toggle JS
+	* Released version 1.1.1
 
 2011-03-31	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
