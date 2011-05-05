@@ -952,7 +952,7 @@ class singleFunctions extends blogList {
 			'List-Unsubscribe: ' . $unsubscribeLink;
 
 		$message = $this->pi_getLL('subscribe.confirmationHello') . chr(10) .
-			$this->pi_getLL('subscribe.confirmationtext') . chr(10);
+			$this->pi_getLL('subscribe.confirmationtext') . chr(10) .
 			'<' . $unsubscribeLink . '>' . chr(10);
 
 		// add footer (optional)
@@ -1178,6 +1178,8 @@ class singleFunctions extends blogList {
 
 		$posts = $listFunctions->getClosestPosts($current);
 		$data = array(
+			'backId' => t3blog_div::getBlogPid(),
+			'backText' => $this->pi_getLL('backText'),
 			'next' => is_array($posts[0]) ? $this->getTitleLinkedFromRow($posts[0]) : '',
 			'previous' => is_array($posts[1]) ? $this->getTitleLinkedFromRow($posts[1]) : ''
 		);
