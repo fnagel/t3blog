@@ -28,7 +28,7 @@ plugin.tx_t3blog_pi1 {
 		mailReceivedCommentsToAdmin = 1
 		adminsCommentsEmail = {$plugin.tx_t3blog_pi1.blogList.adminsCommentsEmail}
 		adminsCommentMailTemplate = EXT:t3blog/pi1/widgets/blogList/adminemail.txt
-		approved = 0
+		approved = 1
 		catLinkDivider = {$plugin.tx_t3blog_pi1.blogList.catLinkDivider}
 
 		substitutePagetitle = 1
