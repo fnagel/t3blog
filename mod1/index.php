@@ -127,6 +127,7 @@ class  tx_t3blog_module1 extends t3lib_SCbase {
 				'doktype != 255 AND module=\'t3blog\''. t3lib_BEfunc::deleteClause('pages').t3lib_BEfunc::BEenableFields('pages')
 			);
 			$out = '';
+			$image = '<img alt="" height="16" src="../ext_icon.gif" style="vertical-align:middle" width="18" /> ';
 			while ($row = $TYPO3_DB->sql_fetch_assoc($res)){
 				$Pageperms_clause = $BE_USER->getPagePermsClause(1);
 				$isInMount = $GLOBALS['BE_USER']->isInWebMount($row['uid'],$Pageperms_clause);
@@ -135,8 +136,9 @@ class  tx_t3blog_module1 extends t3lib_SCbase {
 					$out .=
 						'<tr onmouseover="this.style.backgroundColor=\''.
 							t3lib_div::modifyHTMLColorAll($this->doc->bgColor,-5).'\'" onmouseout="this.style.backgroundColor=\'\'">'.
-								'<td id="t3blog_'.$row['uid'].'" ><a href="#" onclick="top.fsMod.recentIds[\'txt3blogM1\']='.$row['uid'].';jumpTo(\'id='.$row['uid'].'\',this,\'t3blog_'.$row['uid'].'\');">&nbsp;&nbsp;'.
-									t3lib_iconWorks::getIconImage('pages',$row,$BACK_PATH,'title="'.htmlspecialchars(t3lib_BEfunc::getRecordPath($row['uid'], ' 1=1',20)).'" align="top"').
+								'<td id="t3blog_'.$row['uid'].'"><a href="#" onclick="top.fsMod.recentIds[\'txt3blogM1\']='.$row['uid'].';jumpTo(\'id='.$row['uid'].'\',this,\'t3blog_'.$row['uid'].'\');">&nbsp;&nbsp;'.
+									$image .
+									' ' .
 									htmlspecialchars($row['title']).
 									'</a>'.
 								'</td>'.

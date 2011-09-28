@@ -1,6 +1,7 @@
 2011-09-28	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Fixed security issue: XSS in post comments
+	* Fixed missing icon in the BE module
 
 2011-04-26  Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
