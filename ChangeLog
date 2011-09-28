@@ -1,3 +1,7 @@
+2011-09-28	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
+
+	* Fixed security issue: XSS in post comments
+
 2011-04-26  Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
 	* Fix: JS escape did not always work for toggle JS

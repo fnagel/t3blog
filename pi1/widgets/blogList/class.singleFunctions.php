@@ -301,7 +301,7 @@ class singleFunctions extends blogList {
 		}
 
 		$data['readOnly']		= isset($GLOBALS['TSFE']->fe_user->user['uid']) && $this->conf['readOnly'] == 1 ? 'readonly="readonly"' : '';
-		$data['parentTitle']    = $this->localPiVars['comParentTitle'];
+		$data['parentTitle']    = htmlspecialchars($this->localPiVars['comParentTitle']);
 		$data['commentTitle'] 	= $this->pi_getLL('commentFormTitle');
 		$data['closeicon'] 		= '<img src="'.t3lib_extMgm::extRelPath('t3blog').'icons/window_close.png" alt="" />';
 		$data['closelink'] 		= '';
