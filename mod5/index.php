@@ -97,14 +97,16 @@ class tx_t3blog_module5 extends tx_t3blog_modbase {
 		if ($row['hidden'])	{
 			$params = '&data[tx_t3blog_blogroll]['. $row['uid'] . '][hidden]=0';
 			$title = $GLOBALS['LANG']->getLL('cm.unhide', true);
+            $image = 'button_unhide.gif';
 		}
 		else {
 			$params = '&data[tx_t3blog_blogroll]['. $row['uid'] . '][hidden]=1';
 			$title = $GLOBALS['LANG']->getLL('cm.hide', true);
+            $image = 'button_hide.gif';
 		}
 		$cells .= '<a href="#" title="' . $title . '" onclick="' .
 				htmlspecialchars('return jumpToUrl(\'' . $this->doc->issueCommand($params) . '\');'). '">' .
-				'<img' . t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/button_unhide.gif',
+				'<img' . t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/' . $image,
 				'width="11" height="10"') . ' alt="'. $title . '" /></a>';
 
 		// "delete" blogroll:
