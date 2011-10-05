@@ -1,6 +1,7 @@
 2011-10-05	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
     * [Snowflake 466.866] Hide/unhide in blogroll BE module uses the same icon for both states
+    * [Snowflake 466.864] When using "Save and new" for posts, category tree is empty
 
 2011-09-28	Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 

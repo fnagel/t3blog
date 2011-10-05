@@ -102,9 +102,15 @@ class tx_t3blog_treeview {
 				if ($config['treeView'] && $config['foreign_table']) {
                     $treeViewClass = $config['treeViewClass'] ? $config['treeViewClass'] : 'tx_t3blog_tceFunc_selectTreeView';
 					$treeViewObj = t3lib_div::makeInstance($treeViewClass);
-                    /** @var $where @var tx_t3blog_tceFunc_selectTreeView $treeViewObj */
+                    /** @var tx_t3blog_tceFunc_selectTreeView $treeViewObj */
 
-                    $where   = ' AND sys_language_uid = 0 AND l18n_parent = 0 AND pid = ' . $PA['row']['pid'];
+                    $pid = $PA['row']['pid'];
+                    if ($pid < 0) {
+                        // "Save and new" case. pid is a negative uid of the record to insert before.
+                        $recordRow = t3lib_BEfunc::getRecord($table, -$pid);
+                        $pid = $recordRow['pid'];
+                    }
+                    $where   = ' AND sys_language_uid = 0 AND l18n_parent = 0 AND pid = ' . $pid;
 					$orderBy = 'catname';
 
 					$treeViewObj->table        = $config['foreign_table'];
