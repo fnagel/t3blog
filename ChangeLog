@@ -2,6 +2,7 @@
 
 	* Fixed security issue: XSS in post comments
 	* Fixed missing icon in the BE module
+	* Released version 1.1.2
 
 2011-04-26  Dmitry Dulepov	<dmitry.dulepov@gmail.com>
 
