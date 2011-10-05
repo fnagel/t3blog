@@ -30,20 +30,21 @@
 
 class tx_t3blog_treeview {
 
+    /** @var t3lib_tceforms */
+    protected $pObj;
+
 	/**
 	 * Generation of TCEform elements of the type "select"
 	 * This will render a selector box element, or possibly a special
 	 * construction with two selector boxes. That depends on configuration.
 	 *
 	 * @param	array		$PA: the parameter array for the current field
-	 * @param	object		$fobj: Reference to the parent object
 	 * @return	string		the HTML code for the field
 	 */
-	function displayCatTree($PA, $fobj) {
+	function displayCatTree($PA) {
 		$table = $PA['table'];
 		$field = $PA['field'];
 		$row   = $PA['row'];
-
 
 		$this->pObj = &$PA['pObj'];
 
@@ -54,14 +55,21 @@ class tx_t3blog_treeview {
 
 			// Getting the selector box items from the system
 		$selItems = $this->pObj->addSelectOptionsToItemArray($this->pObj->initItemArray($PA['fieldConf']),$PA['fieldConf'],$this->pObj->setTSconfig($table,$row),$field);
-		$selItems = $this->pObj->addItems($selItems,$PA['fieldTSConfig']['addItems.']);
+        if (is_array($PA['fieldTSConfig']) && isset($PA['fieldTSConfig']['addItems.'])) {
+            $selItems = $this->pObj->addItems($selItems,$PA['fieldTSConfig']['addItems.']);
+        }
 		#if ($config['itemsProcFunc']) $selItems = $this->pObj->procItems($selItems,$PA['fieldTSConfig']['itemsProcFunc.'],$config,$table,$row,$field);
 
 			// Possibly remove some items:
-		$removeItems=t3lib_div::trimExplode(',',$PA['fieldTSConfig']['removeItems'],1);
+        if (is_array($PA['fieldTSConfig']) && isset($PA['fieldTSConfig']['removeItems'])) {
+		    $removeItems = t3lib_div::trimExplode(',',$PA['fieldTSConfig']['removeItems'],1);
+        }
+        else {
+            $removeItems = array();
+        }
 
 		foreach($selItems as $tk => $p)	{
-			if (in_array($p[1],$removeItems))	{
+			if (in_array($p[1], $removeItems))	{
 				unset($selItems[$tk]);
 			} else if (isset($PA['fieldTSConfig']['altLabels.'][$p[1]])) {
 				$selItems[$tk][0]=$this->pObj->sL($PA['fieldTSConfig']['altLabels.'][$p[1]]);
@@ -80,45 +88,34 @@ class tx_t3blog_treeview {
 
 
 			// Prepare some values:
-		$maxitems = intval($config['maxitems']);
-		$minitems = intval($config['minitems']);
+        $maxitems = t3lib_div::intInRange($config['maxitems'], 0);
+  		$minitems = t3lib_div::intInRange($config['minitems'], 0);
 		$size = intval($config['size']);
 			// If a SINGLE selector box...
-		if ($maxitems<=1 && !$config['treeView'])	{
+        $item = '';
+		if ($maxitems > 1 || $config['treeView'])	{
+				$item .= '<input type="hidden" name="'.$PA['itemFormElName'].'_mul" value="'.($config['multiple']?1:0).'" />';
 
-		} else {
+				// Register the required number of elements:
+				$this->pObj->requiredElements[$PA['itemFormElName']] = array($minitems, $maxitems, 'imgName'=>$table . '_' . $row['uid'] . '_' . $field);
 
-				$item.= '<input type="hidden" name="'.$PA['itemFormElName'].'_mul" value="'.($config['multiple']?1:0).'" />';
+				if ($config['treeView'] && $config['foreign_table']) {
+                    $treeViewClass = $config['treeViewClass'] ? $config['treeViewClass'] : 'tx_t3blog_tceFunc_selectTreeView';
+					$treeViewObj = t3lib_div::makeInstance($treeViewClass);
+                    /** @var $where @var tx_t3blog_tceFunc_selectTreeView $treeViewObj */
 
-					// Set max and min items:
-				$maxitems = t3lib_div::intInRange($config['maxitems'],0);
-				if (!$maxitems)	$maxitems=100000;
-				$minitems = t3lib_div::intInRange($config['minitems'],0);
-
-					// Register the required number of elements:
-				$this->pObj->requiredElements[$PA['itemFormElName']] = array($minitems,$maxitems,'imgName'=>$table.'_'.$row['uid'].'_'.$field);
-
-
-				if($config['treeView'] && $config['foreign_table']) {
-					global $TCA, $LANG;
-
-					if($config['treeViewClass'] && is_object($treeViewObj = &t3lib_div::getUserObj($config['treeViewClass'],'user_',false))) {
-
-					} else {
-						$treeViewObj = t3lib_div::makeInstance('tx_t3blog_tceFunc_selectTreeView');
-					}
-					$where   = ' AND sys_language_uid = 0 AND l18n_parent = 0 AND pid = '.$PA['row']['pid'];
+                    $where   = ' AND sys_language_uid = 0 AND l18n_parent = 0 AND pid = ' . $PA['row']['pid'];
 					$orderBy = 'catname';
 
 					$treeViewObj->table        = $config['foreign_table'];
 					$treeViewObj->init($where, $orderBy);
 					$treeViewObj->backPath     = $this->pObj->backPath;
-					$treeViewObj->parentField  = $TCA[$config['foreign_table']]['ctrl']['treeParentField'];
+					$treeViewObj->parentField  = $GLOBALS['TCA'][$config['foreign_table']]['ctrl']['treeParentField'];
 					$treeViewObj->expandAll    = 1;
 					$treeViewObj->expandFirst  = 1;
-					$treeViewObj->fieldArray   = array('uid','catname as title','catname as categoriename'); // those fields will be filled to the array $treeViewObj->tree
+					$treeViewObj->fieldArray   = array('uid', 'catname as title', 'catname as categoriename'); // those fields will be filled to the array $treeViewObj->tree
 					$treeViewObj->ext_IconMode = '1'; // no context menu on icons
-					$treeViewObj->title        = $LANG->sL($TCA[$config['foreign_table']]['ctrl']['title']);
+					$treeViewObj->title        = $GLOBALS['LANG']->sL($GLOBALS['TCA'][$config['foreign_table']]['ctrl']['title']);
 					//$treeViewObj->thisScript = t3lib_BEfunc::editOnClick('', $GLOBALS['BACK_PATH']);
 
 					$treeViewObj->TCEforms_itemFormElName = $PA['itemFormElName'];
@@ -127,7 +124,7 @@ class tx_t3blog_treeview {
 					$defItems = array();
 					if (is_array($config['items']) && $table == 'tt_content' && $row['CType']=='list' && $row['list_type']=='tx_t3blog_pi1' && $field == 'pi_flexform')	{
 						reset ($config['items']);
-						while (list($itemName,$itemValue) = each($config['items']))	{
+						foreach ($config['items'] as $itemName => $itemValue) {
 							if ($itemValue[0]) {
 								$ITitle = $this->pObj->sL($itemValue[0]);
 								$defItems[] = '<a href="#" onclick="setFormValueFromBrowseWin(\'data['.$table.']['.$row['uid'].']['.$field.'][data][sDEF][lDEF][groupSelection][vDEF]\','.t3lib_div::slashJS($itemValue[1]).',\''.t3lib_div::slashJS($ITitle).'\'); return false;" style="text-decoration:none;">'.$ITitle.'</a>';
@@ -166,9 +163,8 @@ class tx_t3blog_treeview {
 					$thumbnails  = '<div name="'.$PA['itemFormElName'].'_selTree" style="'.htmlspecialchars($divStyle).'">';
 					$thumbnails .= $treeContent;
 					$thumbnails .= '</div>';
-
-
-				} else {
+				}
+                else {
 
 					$sOnChange = 'setFormValueFromBrowseWin(\''.t3lib_div::slashJS($PA['itemFormElName']).'\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); '.implode('',$PA['fieldChangeFunc']);
 											// Put together the select form with selected elements:
