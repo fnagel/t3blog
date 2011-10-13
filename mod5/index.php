@@ -110,7 +110,7 @@ class tx_t3blog_module5 extends tx_t3blog_modbase {
 				'width="11" height="10"') . ' alt="'. $title . '" /></a>';
 
 		// "delete" blogroll:
-		$params = '&cmd['. $table. ']['. $row['uid']. '][delete]=1';
+		$params = '&cmd[tx_t3blog_blogroll]['. $row['uid']. '][delete]=1';
 		$title = $GLOBALS['LANG']->getLL('cm.delete', true);
 		$prompt = sprintf($GLOBALS['LANG']->getLL('mess.delete'), htmlspecialchars($row['title']));
 		$cells .= '<a href="#" onclick="' .
