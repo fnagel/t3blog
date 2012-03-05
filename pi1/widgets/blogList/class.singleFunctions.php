@@ -572,7 +572,8 @@ class singleFunctions extends blogList {
 				'fk_post' 	=> $this->localPiVars['showUid'],
 
 			);
-
+				// Send email after approving comment
+			$this->sendEmailAboutNewComments(intval($this->localPiVars['uid']));
 			$comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
 			$comments .= $this->listCommentedComments($row['uid']);
 		}
