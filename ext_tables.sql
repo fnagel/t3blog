@@ -182,6 +182,7 @@ CREATE TABLE tx_t3blog_com_nl (
 	pid int(11) DEFAULT '0' NOT NULL,
 	tstamp int(11) DEFAULT '0' NOT NULL,
 	crdate int(11) DEFAULT '0' NOT NULL,
+	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	deleted tinyint(4) DEFAULT '0' NOT NULL,
 	email tinytext NOT NULL,
 	name tinytext NOT NULL,
