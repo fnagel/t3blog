@@ -599,7 +599,7 @@ class rss extends tslib_pibase {
 		$text = str_replace(' class="bodytext"', '', $text);
 		$text = preg_replace('/style="[^"]*"/', ' ', $text);
 		$text = preg_replace('/\s{2,}/', ' ', $text);
-		$text = preg_replace('/\s*>', '>', $text);
+		$text = preg_replace('/\s*>/', '>', $text);
 
 		if ($GLOBALS['TSFE']->config['config']['baseURL']) {
 			$basePrefix = $GLOBALS['TSFE']->config['config']['baseURL'];
