@@ -588,7 +588,7 @@ class rss extends tslib_pibase {
 		$text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
 		$text = preg_replace('/(<[^>]*\s)on[a-z]+="[^"]*"/', '\1', $text);
 
-		$text = strip_tags($text, '<a><b><br><em><hr><i><li><ol><p><strong><ul>');
+		$text = strip_tags($text, '<a><b><br><em><hr><i><li><ol><p><strong><ul><img>');
 
 		// Remove tags with empty content
 		do {
