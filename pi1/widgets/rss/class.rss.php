@@ -71,7 +71,7 @@ class rss extends tslib_pibase {
 	function main($content,$conf,$piVars) {
 		$this->globalPiVars = $piVars;
 		$this->localPiVars 	= $piVars[$this->prefixId];
-		$this->feedType = $this->localPiVars['feed_type'];
+		$this->feedType = ($this->localPiVars['feed_type'] ? $this->localPiVars['feed_type'] : 'post');
 		$this->conf = $conf;
 		$this->init();
 
@@ -403,20 +403,18 @@ class rss extends tslib_pibase {
 	 * Gets posted categories
 	 *
 	 * @param 	int		$value: uid of the category
-	 * @return	categories
+	 * @return	string
 	 */
 	function getPostCategories($value) {
-		$fields	= 'uid_foreign';
-		$table = 'tx_t3blog_post_cat_mm';
-		$where = 'tx_t3blog_post_cat_mm.uid_local=' . intval($value);
-
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $table, $where);
+		$query = 'SELECT catname FROM tx_t3blog_cat WHERE uid in (' .
+			'SELECT uid_foreign FROM tx_t3blog_post_cat_mm WHERE ' .
+			'tx_t3blog_post_cat_mm.uid_local=' . intval($value) . ') ' .
+			'AND ' . $this->cObj->enableFields('tx_t3blog_cat') . ' ' .
+			'ORDER BY catname';
+		$res = $GLOBALS['TYPO3_DB']->sql_query($query);
 		$data = '';
-		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			if ($data != '') {
-				$data .= ', ';
-			}
-			$data .= t3blog_div::getCategoryNameByUid($row['uid_foreign']);
+		while (false !== ($row = $GLOBALS['TYPO3_DB']->sql_fetch_row($res))) {
+			$data .= '<category>' . htmlspecialchars($row[0]) . '</category>';
 		}
 		$GLOBALS['TYPO3_DB']->sql_free_result($res);
 
@@ -549,7 +547,7 @@ class rss extends tslib_pibase {
 				$guid = '<guid>'.$url.'</guid>';
 				$category = '';
 				if ($this->feedType == 'post') {
-					$category = '<category>'.htmlspecialchars($this->getPostCategories($value)).'</category>';
+					$category = $this->getPostCategories($value);
 				}
 
 				return $link."\n".$guid."\n".$category;
