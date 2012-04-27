@@ -333,6 +333,7 @@ class blogList extends tslib_pibase {
 		);
 		if ($onlyUrl) {
 			$typolinkConf['returnLast'] = 'url';
+			$typolinkConf['forceAbsoluteUrl'] = TRUE;
 		}
 
 		$cObj = t3lib_div::makeInstance('tslib_cObj');

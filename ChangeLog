@@ -8,6 +8,7 @@
 	* Fixed bug #27617: Non-portable SQL syntax in listFunctions
 	* Fixed bug #31075: Cleanup: Mootools still present but not used anymore
 	* Fixed bug #26845: Wrong fieldname in class.tx_t3blog_tcemain.php
+	* Fixed bug #26104: Relative link in admin notification mail
 
 2011-10-13  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
