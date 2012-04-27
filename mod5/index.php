@@ -311,7 +311,7 @@ class tx_t3blog_module5 extends tx_t3blog_modbase {
 			if (!preg_match('/^https?:\/\//i', $url)) {
 				$url = 'http://' . $url;
 			}
-			$rows[] = '<tr class="' . $oddeven . '">
+			$rows[] = '<tr class="' . $oddEven . '">
 				<td>' . htmlspecialchars(t3lib_div::fixed_lgd_cs($dataRows[$i]['title'], 80)) . '</td>
 				<td>'. ($description ? $description : '&nbsp;') . ' </td>
 				<td><a href="'. htmlspecialchars($url) . '" target="_blank">' . htmlspecialchars(t3lib_div::fixed_lgd_cs($url, 50)) . '</a></td>
