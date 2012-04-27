@@ -4,6 +4,8 @@
 	* Fixed bug #32162: Missing title and description
 	* Fixed bug #31704: Backend Plugin translation broken in TYPO3 4.6.0
 	* Fixed bug #2825: RSS: getContentEncoded misses to delete ###MORE### marker
+	* Fixed bug #27712: Some queries SQL does not execute in Postgres
+	* Fixed bug #27617: Non-portable SQL syntax in listFunctions
 
 2011-10-13  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 

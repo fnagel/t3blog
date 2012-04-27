@@ -51,7 +51,7 @@ CREATE TABLE tx_t3blog_post (
 	endtime int(11) DEFAULT '0' NOT NULL,
 	fe_group int(11) DEFAULT '0' NOT NULL,
 	title tinytext NOT NULL,
-	author tinytext NOT NULL,
+	author int(11) DEFAULT '0' NOT NULL,
 	date int(11) DEFAULT '0' NOT NULL,
 	content text NOT NULL,
 	allow_comments int(11) DEFAULT '0' NOT NULL,
