@@ -1,3 +1,7 @@
+2012-04-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
+
+	* Remove the non-working code from tca.php (issue 36338)
+
 2011-10-13  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* [Snowflake 1406.1071] Blogs cannot be deleted from the blogroll list in BE module

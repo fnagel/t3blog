@@ -135,8 +135,7 @@ $TCA['tx_t3blog_post'] = array (
 				'foreign_table_where' => 'ORDER BY be_users.username',
 				'size' => 1,
 				'minitems' => 0,
-				'maxitems' => 1,
-				'default' => $GLOBALS['BE_USER']->user['uid']
+				'maxitems' => 1
 			)
 		),
 		'date' => Array (
