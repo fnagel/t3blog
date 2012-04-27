@@ -804,6 +804,7 @@ $TCA['tx_t3blog_trackback'] = array (
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
+				'prepend_tname' => FALSE,
             )
         ),
     ),

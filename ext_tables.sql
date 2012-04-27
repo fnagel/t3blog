@@ -234,7 +234,7 @@ CREATE TABLE tx_t3blog_trackback (
 	text varchar(255) DEFAULT '' NOT NULL,
 	title varchar(50) DEFAULT '' NOT NULL,
 	blogname varchar(100) DEFAULT '' NOT NULL,
-	postid blob NOT NULL,
+	postid int(11) DEFAULT '0' NOT NULL,
 
 	PRIMARY KEY (uid),
 	KEY parent (pid)
