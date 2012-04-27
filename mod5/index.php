@@ -87,7 +87,7 @@ class tx_t3blog_module5 extends tx_t3blog_modbase {
 		// "edit" link:
 		$params = '&edit[tx_t3blog_blogroll]['. $row['uid']. ']=edit';
 		$title = $GLOBALS['LANG']->getLL('cm.edit', true);
-		$cells .= '<a href="#" title="' . $title . '" onclick="' .
+		$cells = '<a href="#" title="' . $title . '" onclick="' .
 			htmlspecialchars(t3lib_BEfunc::editOnClick($params, $this->doc->backPath)). '">' .
 			'<img' . t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/edit2.gif',
 			'width="16" height="16"') .
