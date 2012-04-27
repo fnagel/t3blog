@@ -3,6 +3,7 @@
 	* Remove the non-working code from tca.php (issue 36338)
 	* Fixed bug #32162: Missing title and description
 	* Fixed bug #31704: Backend Plugin translation broken in TYPO3 4.6.0
+	* Fixed bug #2825: RSS: getContentEncoded misses to delete ###MORE### marker
 
 2011-10-13  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 

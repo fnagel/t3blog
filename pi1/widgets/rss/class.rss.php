@@ -582,6 +582,7 @@ class rss extends tslib_pibase {
 	 * @return string
 	 */
 	protected function getContentEncoded($text) {
+		$text = str_replace('###MORE###', '', $text);
 		$text = str_replace('<', ' <', $text);
 		$text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
 		$text = preg_replace('/(<[^>]*\s)on[a-z]+="[^"]*"/', '\1', $text);
