@@ -72,7 +72,7 @@ class categories extends tslib_pibase {
 	/**
 	 * function to list the categories in FE.
 	 * 	- tree view
-	 * 	- open/closes subcategory - part with mootools-slide-object
+	 * 	- open/closes subcategory
 	 *
 	 * @author Nicolas Karrer <nkarrer@snowflake.ch>
 	 *

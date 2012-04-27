@@ -7,11 +7,6 @@ page = PAGE
 page.10 < plugin.tx_t3blog_pi1.myblog
 
 
-#page.includeJS {
-#	10 = EXT:t3blog/static/js/mootools/mootools.js
-#}
-
-
 page.headerData.1000 = COA
 page.headerData.1000 {
 	# load the .js for the blog

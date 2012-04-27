@@ -6,6 +6,7 @@
 	* Fixed bug #2825: RSS: getContentEncoded misses to delete ###MORE### marker
 	* Fixed bug #27712: Some queries SQL does not execute in Postgres
 	* Fixed bug #27617: Non-portable SQL syntax in listFunctions
+	* Fixed bug #31075: Cleanup: Mootools still present but not used anymore
 
 2011-10-13  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
