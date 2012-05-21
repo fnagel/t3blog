@@ -113,6 +113,7 @@
 			<label index="subscribe.optionalTextBeforePermalink"></label>
 			<label index="subscribe.optionalFooter"></label>
 			<label index="subscribe.unsubscribe.succesfully">Sie haben sich erfolgreich abgemeldet. In Zukunft erhalten sie keine Benachrichtigungen für diesen Post mehr.</label>
+			<label index="loginLinkText">Klicke hier um dich einzuloggen.</label>
 		</languageKey>
 	</data>
 	<orig_hash type="array">

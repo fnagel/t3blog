@@ -1,6 +1,7 @@
 2012-05-21  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #36661: Comment Layout is broken because of lost relation to parent comment id
+	* Fixed bug #10959: missing straing for label loginLinkText
 
 2012-04-27  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
