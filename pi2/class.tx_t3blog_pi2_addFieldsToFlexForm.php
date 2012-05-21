@@ -105,7 +105,7 @@ class tx_t3blog_pi2_addFieldsToFlexForm {
 		$languageKey = $BE_USER->uc['lang'] ? $BE_USER->uc['lang'] : 'default';
 		$localLang = t3lib_div::readLLfile($languageFile, $languageKey);
 		if (is_array($localLang) && isset($localLang[$languageKey])) {
-			if (version_compare(TYPO3_branch, '4.6.0', '<')) {
+			if (version_compare(TYPO3_branch, '4.6', '<')) {
 				return array($localLang[$languageKey]['title'], $localLang[$languageKey]['widgetSelector.description']);
 			}
 			else {

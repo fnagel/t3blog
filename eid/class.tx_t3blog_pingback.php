@@ -25,7 +25,7 @@
  * $Id$
  *
  */
- 
+
  /**
   * This class implents a pingback handler
   *
@@ -33,8 +33,8 @@
   * @package TYPO3
   * @subpackage tx_t3blog
   */
- 
-if (version_compare(TYPO3_branch, '4.3.0', '>=')) {
+
+if (version_compare(TYPO3_branch, '4.3', '>=')) {
 	// See http://bugs.typo3.org/view.php?id=13745
 	require_once(PATH_t3lib . 'error/class.t3lib_error_exception.php');
 }
@@ -43,23 +43,23 @@ require_once(t3lib_extMgm::extPath('t3blog', 'lib/xmlrpc-2.2/lib/xmlrpc.inc'));
 require_once(t3lib_extMgm::extPath('t3blog', 'lib/xmlrpc-2.2/lib/xmlrpcs.inc'));
 
 class tx_t3blog_pingback {
-	
+
 	/** @var string */
 	protected $sourceArticleURI;
 
 	/** @var string */
 	protected $t3blogArticleURI;
 
-	
+
 	/** @var string */
 	protected $contentTitle;
-	
+
 	/** @var string */
 	protected $contentExcerpt;
 
 	/**
 	 * Checks that target URI is valid
-	 * 
+	 *
 	 * @return void
 	 */
 	protected function checkBlogURI() {
@@ -71,7 +71,7 @@ class tx_t3blog_pingback {
 		if (!is_array($urlParts) && $parts['host'] !== t3lib_div::getIndpEnv('HTTP_HOST')) {
 			throw new Exception('Access denied', 49);
 		}
-		
+
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('COUNT(uid) AS counter',
 			'tx_t3blog_pingback',
 			'url=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($this->sourceArticleURI, 'tx_t3blog_pingback') .
@@ -80,7 +80,7 @@ class tx_t3blog_pingback {
         if ($row['counter'] > 0) { # Pingback already registered
 			throw new Exception('The pingback has already been registered', 48);
         }
-		
+
 		// We can check if it points to a blog or to some other resouce because
 		// RealURL can be involved. So we skip this check here.
 	}
@@ -98,16 +98,16 @@ class tx_t3blog_pingback {
 			}
 		}
 	}
-	
+
 	/**
 	 * Creates URI content excerpt
-	 * 
+	 *
 	 * @param string $uriContent
 	 * @return void
 	 */
 	protected function createExcerpt($uriContent) {
 		$this->contentTitle = $this->getTitleFromHTML($uriContent);
-		$this->contentExcerpt = '<a href="' . 
+		$this->contentExcerpt = '<a href="' .
 			htmlspecialchars($this->sourceArticleURI) . '">' .
 			htmlspecialchars($this->contentTitle) .
 			'</a>';
@@ -115,7 +115,7 @@ class tx_t3blog_pingback {
 
 	/**
 	 * Loads source URI content
-	 * 
+	 *
 	 * @return string
 	 */
 	protected function getSourceURIContent() {
@@ -125,20 +125,20 @@ class tx_t3blog_pingback {
 		}
 		return $content;
 	}
-	
+
 	/**
 	 * Obtains title from html
-	 * 
+	 *
 	 * @param string $html
 	 * @return string
 	 */
 	protected function getTitleFromHTML($html) {
 		return preg_replace('/^.*<title>(.*)<\/title>.*$/is', '\1', $html);
 	}
-	
+
 	/**
 	 * Handles XML-RPC call
-	 * 
+	 *
 	 * @return void
 	 */
 	protected function handleXmlRpcCall() {
@@ -150,10 +150,10 @@ class tx_t3blog_pingback {
 		);
 		$server = new xmlrpc_server($methods);
 	}
-	
+
 	/**
 	 * Runs this script
-	 * 
+	 *
 	 * @return void
 	 */
 	public function main() {
@@ -161,16 +161,16 @@ class tx_t3blog_pingback {
 
 		$this->handleXmlRpcCall();
 	}
-	
+
 	/**
 	 * Processes pingback request
-	 * 
+	 *
 	 * @param $message
 	 */
 	public function pingback(xmlrpcmsg $message) {
 		$sourceArticleURI = $message->getParam(0);
 		$t3blogArticleURI = $message->getParam(1);
-		
+
 		if (!($sourceArticleURI instanceof xmlrpcval)) {
 			$response = new xmlrpcresp(0, 16, 'Source URI does not exist');
 		}
@@ -180,16 +180,16 @@ class tx_t3blog_pingback {
 		else {
 			$this->sourceArticleURI = $sourceArticleURI->scalarval();
 			$this->t3blogArticleURI = $t3blogArticleURI->scalarval();
-			$response = $this->processPingback();			
+			$response = $this->processPingback();
 		}
-		
+
 		return $response;
 	}
-	
+
 	/**
 	 * Prepares source URI content for adding to the database. This function
 	 * will fetch the content and search for the link to our blog
-	 * 
+	 *
 	 * @return void
 	 * @throws Exception if something is wrong
 	 */
@@ -201,7 +201,7 @@ class tx_t3blog_pingback {
 
 	/**
 	 * Processes pingbacks
-	 * 
+	 *
 	 * @return void
 	 */
 	protected function processPingback() {
@@ -216,9 +216,9 @@ class tx_t3blog_pingback {
 			$response = new xmlrpcresp(0, $e->getCode(), $e->getMessage());
 		}
 
-		return $response; 
+		return $response;
 	}
-	
+
 	/**
 	 * Stores pingback information to the database
 	 */
