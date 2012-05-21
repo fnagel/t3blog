@@ -335,7 +335,7 @@ class singleFunctions extends blogList {
 			$data['commentauthoremail'] = $GLOBALS['TSFE']->fe_user->user['email'];
 		}
 		foreach ($this->getCommentFormFields() as $fieldName) {
-			if (isset($this->localPiVars[$fieldName]) && $_SERVER['REQUEST_METHOD'] == 'POST') {
+			if (isset($this->localPiVars[$fieldName])) {
 				// Must be uncached
 				$data[$fieldName] = $this->localPiVars[$fieldName];
 			}
@@ -572,7 +572,7 @@ class singleFunctions extends blogList {
 				'fk_post' 	=> $this->localPiVars['showUid'],
 
 			);
-			
+
 			$comments .= t3blog_div::getSingle($dataCom, 'comment', $this->conf);
 			$comments .= $this->listCommentedComments($row['uid']);
 		}
