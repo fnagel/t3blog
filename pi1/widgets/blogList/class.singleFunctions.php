@@ -1126,9 +1126,8 @@ class singleFunctions extends blogList {
 	function adminMailComment()	{
 		$pObjPiVars = t3lib_div::_POST('tx_t3blog_pi1');	// pObj piVars array
 
-		$postUid = intval($this->localPiVars['uid']);
 		list($titleRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title',
-			'tx_t3blog_post', 'uid=' . intval($postUid)
+			'tx_t3blog_post', 'uid=' . intval($this->uid)
 		);
 
 		$messageText = $this->cObj->fileResource($this->conf['adminsCommentMailTemplate']);
