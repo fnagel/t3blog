@@ -1,0 +1,21 @@
+# TYPO3 default
+*.bak
+*.idea
+*.project
+*.swp
+.buildpath
+.cache
+.project
+.session
+.settings
+.TemporaryItems
+.webprj
+nbproject
+
+# Felix Nagel
+/patches
+*~
+*.diff
+*.patch
+.DS_Store
+*.db
