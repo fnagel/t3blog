@@ -269,7 +269,7 @@ class blogList extends tslib_pibase {
 		if(!$avatar){
 
 			// Default needed if user don't have a gravatar and don't have a local pic, but email is stated
-			$default 	= t3lib_div::locationHeaderUrl(t3lib_extMgm::siteRelPath($this->extKey). 'icons/nopic_50_f.jpg');
+			$default 	= $this->getDefaultGravatar();
 			$size 		= $this->conf['gravatarsize']?$this->conf['gravatarsize']:50;
 			$grav_url 	= 'http://www.gravatar.com/avatar/'. md5($email).	'?d='. urlencode($default).'&amp;s='.intval($size).'&amp;r='.$this->conf['gravatarRating'];
 			$avatar 	= '<img src="'. $grav_url. '" alt="Gravatar: '. htmlspecialchars($username) . '" title="Gravatar: '. htmlspecialchars($username) . '" />';
@@ -409,7 +409,21 @@ class blogList extends tslib_pibase {
 			}
 		}
 	}
-
+	
+	/**
+	 * Obtains a link to the default gravatar image
+	 *
+	 * @return string
+	 */
+	protected function getDefaultGravatar() {
+		if (!empty($this->conf['gravatarDefaultIcon'])) {
+			$gravatar = $this->conf['gravatarDefaultIcon'];
+		}
+		else {
+			$gravatar = t3lib_extMgm::siteRelPath($this->extKey) . 'icons/nopic_50_f.jpg';
+		}
+		return t3lib_div::locationHeaderUrl($gravatar);
+	}
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/pi1/widgets/blogList/class.blogList.php'])	{
