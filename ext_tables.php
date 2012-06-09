@@ -205,6 +205,7 @@
 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM3', 'bottom', $extPath. 'mod3/');
 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM4', 'bottom', $extPath. 'mod4/');
 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM5', 'bottom', $extPath. 'mod5/');
+		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM6', 'bottom', $extPath. 'mod6/');
 	}
 
 	// the static templates
