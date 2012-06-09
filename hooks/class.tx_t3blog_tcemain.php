@@ -44,6 +44,52 @@ class tx_t3blog_tcemain {
 			$this->deletePostData(intval($id));
 		}
 	}
+	
+	/**
+	 * Generate a different preview link
+	 *
+	 * @param string $status status
+	 * @param string $table tablename
+	 * @param integer $recordUid id of the record
+	 * @param array $fieldArray fieldArray
+	 * @param t3lib_TCEmain $parentObject parent Object
+	 * @return void
+	 */
+	public function processDatamap_afterDatabaseOperations($status, $table, $recordUid, array $fieldArray, t3lib_TCEmain $parentObject) {
+			// Preview link
+		if ($table === 'tx_t3blog_post') {
+
+				// direct preview
+			if (!is_numeric($recordUid)) {
+				$recordUid = $parentObject->substNEWwithIDs[$recordUid];
+			}
+
+			if (isset($GLOBALS['_POST']['_savedokview_x']) && !$fieldArray['type'] && !$GLOBALS['BE_USER']->workspace) {
+					// if "savedokview" has been pressed and current article has "type" 0 (= normal news article)
+					// and the beUser works in the LIVE workspace open current record in single view
+				$pagesTsConfig = t3lib_BEfunc::getPagesTSconfig($GLOBALS['_POST']['popViewId']);
+				if ($pagesTsConfig['tx_t3blog_pi1.']['singlePid']) {
+					$record = t3lib_BEfunc::getRecord('tx_t3blog_post', $recordUid);
+
+					$params = '&no_cache=1';
+					if ($record['sys_language_uid'] > 0) {
+						if ($record['l10n_parent'] > 0) {
+							$params .= '&tx_t3blog_pi1[blogList][showUidPerma]=' . $record['l10n_parent'];
+						} else {
+							$params .= '&tx_t3blog_pi1[blogList][showUidPerma]=' . $record['uid'];
+						}
+
+						$params .= '&L=' . $record['sys_language_uid'];
+					} else {
+							$params .= '&tx_t3blog_pi1[blogList][showUidPerma]=' . $record['uid'];
+					}
+
+					$GLOBALS['_POST']['popViewId_addParams'] = $params;
+					$GLOBALS['_POST']['popViewId'] = $pagesTsConfig['tx_t3blog_pi1.']['singlePid'];
+				}
+			}
+		}
+	}
 
 	/**
 	 * Checks if TemplaVoila references should be disabled for this record
