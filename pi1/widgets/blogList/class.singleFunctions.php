@@ -83,16 +83,16 @@ class singleFunctions extends blogList {
 		if ($this->uid) {
 			$this->riseViewNumber();
 
-			$row = $this->fetchPostDataFromDatabase();
+			if ($this->isBEUserLoggedIn()) {
+				// Allow preview for hidden posts
+				$showHiddenPosts = 1;
+			} else {
+				$showHiddenPosts = 0;
+			}
+
+			$row = $this->fetchPostDataFromDatabase($showHiddenPosts);
 
 			if (is_array($row)) {
-
-				$showHiddenRecords = $GLOBALS['TSFE']->showHiddenRecords;
-				if ($this->isBEUserLoggedIn()) {
-					// Allow preview for hidden posts
-					$GLOBALS['TSFE']->showHiddenRecords = true;
-				}
-
 				$this->updatePageTitle($row['title']);
 				$this->setSomePiVarValues($row);
 
@@ -172,11 +172,11 @@ class singleFunctions extends blogList {
 	 *
 	 * @return mixed Array or null if no data
 	 */
-	protected function fetchPostDataFromDatabase() {
+	protected function fetchPostDataFromDatabase($showHiddenRecords = 0) {
 		list($row) = t3blog_db::getRecFromDbJoinTables(
 			'tx_t3blog_post, be_users',  //  TABLES
 			'tx_t3blog_post.uid as postuid, tx_t3blog_post.title, tx_t3blog_post.tagClouds,tx_t3blog_post.author, tx_t3blog_post.date, tx_t3blog_post.cat, tx_t3blog_post.allow_comments,tx_t3blog_post.number_views, be_users.uid, be_users.username, be_users.email, be_users.admin, be_users.admin, be_users.realName, be_users.uid AS useruid, be_users.lastlogin, be_users.tx_t3blog_avatar',
-			'tx_t3blog_post.uid='.t3lib_div::intval_positive($this->uid).' AND (be_users.uid=tx_t3blog_post.author)'
+			'tx_t3blog_post.uid='.t3lib_div::intval_positive($this->uid).' AND (be_users.uid=tx_t3blog_post.author)', '', '', $showHiddenRecords
 		);
 		return $row;
 	}

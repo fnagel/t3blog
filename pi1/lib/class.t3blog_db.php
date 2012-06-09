@@ -52,9 +52,9 @@ class t3blog_db {
 	 * @param	string	$limit: sql-limit clause
 	 * @return 	array	if has, db records from the db, else return false boolean
 	 */
-	static public function getRecFromDbJoinTables($table, $selectFields , $where = '1=1', $order='', $limit = ''){
+	static public function getRecFromDbJoinTables($table, $selectFields , $where = '1=1', $order='', $limit = '', $showHidden = 0){
 		$tablePost = 'tx_t3blog_post';
-		$where .= self::$cObj->enableFields($tablePost);
+		$where .= self::$cObj->enableFields($tablePost, $showHidden);
 
 		$result = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($selectFields,
 			$table, $where, '', $order, $limit
