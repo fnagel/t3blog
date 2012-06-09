@@ -29,12 +29,22 @@ table.recordlist tr.odd {
 	background:#fff;
 }
 table.recordlist tr.even {
-	background:#DFDFDF;
+	background:#EFEFEF;
 }
 
 
 table.recordlist tr:hover {
-	background:#EFEFEF;
+	background:#DFDFDF;
+}
+
+table.recordlist th:last-child,
+table.recordlist td:last-child {
+	width: 80px;
+}
+
+#ext-t3blog-mod3-index-php table.recordlist th:last-child,
+#ext-t3blog-mod3-index-php table.recordlist td:last-child {
+	width: 90px;
 }
 
 td.highlight{
