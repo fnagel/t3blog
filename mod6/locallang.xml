@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>module</type>
+		<description>Language labels for module &quot;txt3blogM3&quot;</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="moduleTitle">T3BLOG - TYPO3 based blogging</label>
+			<label index="title">Titel</label>
+			<label index="author">Author</label>
+			<label index="post">Post</label>
+			<label index="blogname">Blog-Name</label>
+			<label index="createNewTrackback">Create a new Trackback</label>
+			<label index="sectionTitle">Trackback management</label>
+		</languageKey>
+	</data>
+</T3locallang>
