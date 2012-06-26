@@ -1,3 +1,7 @@
+2012-06-26  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
+
+	* Fixed bug #37741: SQL error in getPostCategories (class.rss.php)
+
 2012-05-21  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #36661: Comment Layout is broken because of lost relation to parent comment id

@@ -409,7 +409,7 @@ class rss extends tslib_pibase {
 		$query = 'SELECT catname FROM tx_t3blog_cat WHERE uid in (' .
 			'SELECT uid_foreign FROM tx_t3blog_post_cat_mm WHERE ' .
 			'tx_t3blog_post_cat_mm.uid_local=' . intval($value) . ') ' .
-			'AND ' . $this->cObj->enableFields('tx_t3blog_cat') . ' ' .
+			$this->cObj->enableFields('tx_t3blog_cat') . ' ' .
 			'ORDER BY catname';
 		$res = $GLOBALS['TYPO3_DB']->sql_query($query);
 		$data = '';
