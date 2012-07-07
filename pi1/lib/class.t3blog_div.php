@@ -24,37 +24,47 @@
 
 class t3blog_div {
 
-
 	/**
 	 * Crops the text at divider's position with respect to the HTML structure.
 	 *
 	 * @param array $row
 	 * @param int $dividerPosition
 	 * @return string
+	 
+	 07.03.12: does not work perfectly, sometimes unwanted tags with chars left	 
+	 http://forge.typo3.org/issues/10121
+	 
 	 */
 	static public function cropText(array $row, $dividerPosition) {
 		$cObj = t3lib_div::makeInstance('tslib_cObj');
 		if (method_exists($cObj, 'cropHTML')) {
-			// Algorithm:
-			// - render text correctly
-			// - make sure there is no empty paragraphs for ###MORE###
-			$renderedText = t3blog_div::getSingle($row, 'tt_content', $GLOBALS['TSFE']->tmpl->setup);
-			$textBeforeDivider = $cObj->cropHTML($renderedText,
-				($dividerPosition + 10). '|');
+			$bodytext = $row['bodytext'];
+			// workarround for cropHTML
+			$replaceToken = '<div>###MORE###</div>';
+			
+			// make sure there is no empty paragraphs for ###MORE###
 			$regExp = '/<p(?:\s[^>]*)?>\s*###MORE###\s*<\/p>/';
-			if (preg_match($regExp, $textBeforeDivider)) {
-				$textBeforeDivider = preg_replace($regExp, '', $textBeforeDivider);
+			if (preg_match($regExp, $bodytext)) {
+				$textBeforeDivider = preg_replace($regExp, $replaceToken, $bodytext);
 			}
 			else {
-				$textBeforeDivider = str_replace('###MORE###', '', $textBeforeDivider);
+				$textBeforeDivider = str_replace('###MORE###', $replaceToken, $bodytext);
 			}
+			// get correct divider position for cropHTML
+			$dividerPosition = strpos(strip_tags($textBeforeDivider), '###MORE###');
+			$textBeforeDivider = $cObj->cropHTML($textBeforeDivider, ( $dividerPosition + 7 ) . '||1');
 		}
 		else {
-			$textBeforeDivider = substr($row['bodytext'], 0, $dividerPosition);
+			$textBeforeDivider = substr($bodytext, 0, $dividerPosition);
 		}
-		return $textBeforeDivider;
-	}
-
+		
+		$replaceToken = '/<div(?:\s[^>]*)?>\s*###MORE###\s*<\/div>/';
+		$row["bodytext"] = preg_replace($replaceToken, '', $textBeforeDivider);
+		$renderedText = t3blog_div::getSingle($row, 'tt_content', $GLOBALS['TSFE']->tmpl->setup);
+		
+		return $renderedText;
+	} 
+	 
 	/**
 	 * Fetches content data for the current post.
 	 *
