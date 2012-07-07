@@ -29,6 +29,7 @@
 			'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY).'tca.php',
 			'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY).'icons/page.png',
 			'dividers2tabs'			=>	TRUE,
+			'searchFields' => 'title',
 		),
 		'feInterface' => array (
 			'fe_admin_fieldList' => 'sys_language_uid, l18n_parent, l18n_diffsource, hidden, starttime, endtime, fe_group, title, author, date, content,allow_comments, cat, trackback,number_views',
@@ -62,6 +63,7 @@
 			'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php',
 			'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY). 'icons/chart_organisation.png',
 			'dividers2tabs'			=>	TRUE,
+			'searchFields' => 'catname,description',
 		),
 		'feInterface' => array (
 			'fe_admin_fieldList' => 'sys_language_uid, l18n_parent, l18n_diffsource, hidden, starttime, endtime, fe_group, parent_id, catname, description',
@@ -89,6 +91,7 @@
 			),
 			'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php',
 			'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY). 'icons/comment.png',
+			'searchFields' => 'title,author,email,website,text',
 		),
 		'feInterface' => array (
 			'fe_admin_fieldList' => 'hidden, starttime, endtime, fe_group, title, author, email, website, date, text, approved, spam, fk_post',
@@ -134,6 +137,7 @@
 	        'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php',
 	        'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY).'icons/icon_tx_t3blog_blogroll.png',
 			'dividers2tabs'			=>	TRUE,
+			'searchFields' => 'title,description',
 	    ),
 	    'feInterface' => array (
 	        'fe_admin_fieldList' => 'sys_language_uid, l18n_parent, l18n_diffsource, hidden, starttime, endtime, fe_group, title, url, image, description, xfn ',
@@ -156,6 +160,7 @@
 	        ),
 	        'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php',
 	        'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY). 'icons/icon_tx_t3blog_pingback.gif',
+			'searchFields' => 'title,url,text,',
 	    ),
 	    'feInterface' => array (
 	        'fe_admin_fieldList' => 'hidden, starttime, endtime, title, url, date, text',
@@ -176,6 +181,7 @@
 	        ),
 	        'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY). 'tca.php',
 	        'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY). 'icons/icon_tx_t3blog_trackback.gif',
+			'searchFields' => 'title,fromurl,text,blogname',
 	    ),
 	    'feInterface' => array (
 	        'fe_admin_fieldList' => 'hidden, fromurl, text, title, postid, id',

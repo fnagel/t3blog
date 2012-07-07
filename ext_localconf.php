@@ -22,4 +22,10 @@ $GLOBALS['TYPO3_CONF_VARS']['FE']['eID_include']['t3b_pingback'] = 'EXT:' . $_EX
 
 t3lib_extMgm::addPageTSConfig(file_get_contents(t3lib_extMgm::extPath('t3blog', 'static/tsconfig.txt')));
 
+// BE search
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']['t3blog'] = 'tx_t3blog_post';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']['t3blog_blogroll'] = 'tx_t3blog_blogroll';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']['t3blog_com'] = 'tx_t3blog_com';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']['t3blog_pingback'] = 'tx_t3blog_pingback';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']['t3blog_trackback'] = 'tx_t3blog_trackback';
 ?>
