@@ -1,0 +1,41 @@
+From 726ebf54ec7da21abfb1d2c961f0a994473b9f48 Mon Sep 17 00:00:00 2001
+From: Felix Nagel <info@felixnagel.com>
+Date: Thu, 31 May 2012 23:41:53 +0200
+Subject: [PATCH 2/8] added: gitignore file
+
+---
+ .gitignore |   21 +++++++++++++++++++++
+ 1 files changed, 21 insertions(+), 0 deletions(-)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..01620c9
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,21 @@
++# TYPO3 default
++*.bak
++*.idea
++*.project
++*.swp
++.buildpath
++.cache
++.project
++.session
++.settings
++.TemporaryItems
++.webprj
++nbproject
++
++# Felix Nagel
++/patches
++*~
++*.diff
++*.patch
++.DS_Store
++*.db
+\ No newline at end of file
+-- 
+1.7.5.GIT
+

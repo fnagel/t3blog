@@ -13,10 +13,8 @@
 nbproject
 
 # Felix Nagel
-/patches
 *~
 *.diff
-*.patch
 .DS_Store
 *.db
 README.txt

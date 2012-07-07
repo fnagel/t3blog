@@ -1,0 +1,510 @@
+From 18a30a9bbef8176fa4a4bd0b9b62ede63f5e19d4 Mon Sep 17 00:00:00 2001
+From: Felix Nagel <info@felixnagel.com>
+Date: Sun, 10 Jun 2012 00:21:42 +0200
+Subject: [PATCH 4/8] added: trackback module
+
+---
+ ext_tables.php                                     |    1 +
+ mod6/conf.php                                      |   16 +
+ mod6/index.php                                     |  344 ++++++++++++++++++++
+ mod6/locallang.xml                                 |   18 +
+ mod6/locallang_mod.xml                             |   23 ++
+ mod6/moduleicon.gif                                |  Bin 0 -> 82 bytes
+ ...6105-POSTTITLE-marker-in-admin-notificati.patch |   28 ++
+ 7 files changed, 430 insertions(+), 0 deletions(-)
+ create mode 100644 mod6/conf.php
+ create mode 100644 mod6/index.php
+ create mode 100644 mod6/locallang.xml
+ create mode 100644 mod6/locallang_mod.xml
+ create mode 100644 mod6/moduleicon.gif
+ create mode 100644 patches/0001-Fixed-bug-26105-POSTTITLE-marker-in-admin-notificati.patch
+
+diff --git a/ext_tables.php b/ext_tables.php
+index 4025335..a519df5 100644
+--- a/ext_tables.php
++++ b/ext_tables.php
+@@ -205,6 +205,7 @@
+ 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM3', 'bottom', $extPath. 'mod3/');
+ 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM4', 'bottom', $extPath. 'mod4/');
+ 		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM5', 'bottom', $extPath. 'mod5/');
++		t3lib_extMgm::addModule('txt3blogM1', 'txt3blogM6', 'bottom', $extPath. 'mod6/');
+ 	}
+ 
+ 	// the static templates
+diff --git a/mod6/conf.php b/mod6/conf.php
+new file mode 100644
+index 0000000..3fa8acd
+--- /dev/null
++++ b/mod6/conf.php
+@@ -0,0 +1,16 @@
++<?php
++
++	// DO NOT REMOVE OR CHANGE THESE 3 LINES:
++define('TYPO3_MOD_PATH', '../typo3conf/ext/t3blog/mod6/');
++$BACK_PATH='../../../../typo3/';
++$MCONF['name']='txt3blogM6';
++
++	
++$MCONF['access']='user,group';
++$MCONF['script']='index.php';
++
++$MLANG['default']['tabs_images']['tab'] = '../icons/comment.png';
++$MLANG['default']['ll_ref']='LLL:EXT:t3blog/mod6/locallang_mod.xml';
++
++
++?>
+\ No newline at end of file
+diff --git a/mod6/index.php b/mod6/index.php
+new file mode 100644
+index 0000000..f620791
+--- /dev/null
++++ b/mod6/index.php
+@@ -0,0 +1,344 @@
++<?php
++/***************************************************************
++*  Copyright notice
++*
++*  (c) 2007 snowflake <typo3@snowflake.ch>
++*  All rights reserved
++*
++*  This script is part of the TYPO3 project. The TYPO3 project is
++*  free software; you can redistribute it and/or modify
++*  it under the terms of the GNU General Public License as published by
++*  the Free Software Foundation; either version 2 of the License, or
++*  (at your option) any later version.
++*
++*  The GNU General Public License can be found at
++*  http://www.gnu.org/copyleft/gpl.html.
++*
++*  This script is distributed in the hope that it will be useful,
++*  but WITHOUT ANY WARRANTY; without even the implied warranty of
++*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++*  GNU General Public License for more details.
++*
++*  This copyright notice MUST APPEAR in all copies of the script!
++***************************************************************/
++
++/*
++ * $Id: index.php 30926 2010-03-09 13:19:37Z dmitry $
++ */
++unset($MCONF);
++require_once('conf.php');
++require_once($GLOBALS['BACK_PATH'] . 'init.php');
++require_once($GLOBALS['BACK_PATH'] . 'template.php');
++
++require_once(t3lib_extMgm::extPath('t3blog', 'lib/class.tx_t3blog_modbase.php'));
++
++$LANG->includeLLFile('EXT:t3blog/mod6/locallang.xml');
++
++/**
++ * Module 'T3BLOG' for the 't3blog' extension.
++ * Returns the Trackback administration
++ *
++ * @author		snowflake <typo3@snowflake.ch>
++ * @package		TYPO3
++ * @subpackage	tx_t3blog
++ */
++class tx_t3blog_module6 extends tx_t3blog_modbase {
++
++	/**
++	 * Number of trackbacks for this view
++	 *
++	 * @var int
++	 */
++	protected $numberOfTrackbacks;
++
++	/**
++	 * Initializes the module.
++	 *
++	 * @return void
++	 */
++	public function init() {
++		$this->defaultSort = 'crdate DESC';
++		$this->validSortFields = 'crdate,title,text,blogname,post_title';
++
++		parent::init();
++
++		if ($this->hasAccess())	{
++			$this->numberOfTrackbacks = $this->getNumberOfTrackbacks();
++		}
++	}
++
++	/**
++	 * Obtains the content for this module
++	 *
++	 * @return string
++	 * @see tx_t3blog_modbase::getModuleContent()
++	 */
++	protected function getModuleContent() {
++		return $this->getTrackbacks();
++	}
++
++	/**
++	 * Obtains a tital number of items for this view
++	 *
++	 * @return int
++	 * @see tx_t3blog_modbase::getNumberOfItems()
++	 */
++	protected function getNumberOfItems() {
++		return $this->numberOfTrackbacks;
++	}
++
++	/**
++	 * Returns a function bar for the record list
++	 *
++	 * @param 	string 			$table: Table name
++	 * @param 	string 			$row: Datarow
++	 * @return 	function bar
++	 */
++	function getFunctions($table, $row){
++
++		// "Edit" link: ( Only if permissions to edit the page-record of the content of the parent page ($this->id)
++		$params	= '&edit['. $table. ']['. $row['uid']. ']=edit';
++		$editTitle = $GLOBALS['LANG']->getLL('cm.edit', true);
++		$cells .= '<a href="#" title="' . $editTitle . '" onclick="' .
++					htmlspecialchars(t3lib_BEfunc::editOnClick($params, $this->doc->backPath)) . '">' .
++					'<img'. t3lib_iconWorks::skinImg($this->doc->backPath,
++					t3lib_extMgm::extRelPath('t3blog') . 'icons/comment_edit.png',
++					'width="16" height="16"') . ' alt="' . $editTitle . '" />'.
++					'</a>';
++
++		// "Hide/Unhide" links:
++		if ($row['hidden'])	{
++			$params	= '&data['. $table. ']['. $row['uid']. ']['. 'hidden'. ']=0';
++			$cells .= $this->makeCells($params, 'button_unhide.gif', 'cm.unhide');
++
++		} else {
++
++			$params	=	'&data['. $table.']['. $row['uid']. ']['. 'hidden'. ']=1';
++			$cells .= 	$this->makeCells($params, 'button_hide.gif', 'cm.hide');
++		}
++
++		// "Delete" link:
++		$deleteMessage = sprintf($GLOBALS['LANG']->getLL('mess.delete'), htmlspecialchars($row['title']));
++		$params	= '&cmd['.$table.']['.$row['uid'].'][delete]=1';
++		$deleteTitle = $GLOBALS['LANG']->getLL('cm.delete', true);
++		$cells .= '<a href="#" title="' . $deleteTitle . '" onclick="' .
++					htmlspecialchars('if (confirm(' .
++					$GLOBALS['LANG']->JScharCode($deleteMessage) .
++					')) {jumpToUrl(\'' . $GLOBALS['SOBE']->doc->issueCommand($params) .
++					'\');} return false;').'">'.
++					'<img'.
++					t3lib_iconWorks::skinImg($this->doc->backPath, 'gfx/garbage.gif',
++					'width="11" height="12"') .
++					' alt="' . $deleteTitle . '" />'.
++					'</a>';
++
++		return $cells;
++	}
++
++	/**
++	 * Makes specific links with icons
++	 * @author 	Thomas Imboden <timboden@snowflake.ch>
++	 *
++	 * @param string $params Parameters for this icon
++	 * @param string $icon Name of the icon inclusive datatype
++	 * @param string $alt Alt tag language code
++	 *
++	 * @return	string	link with images
++	 */
++	protected function makeCells($params, $icon, $alt) {
++		$title = $GLOBALS['LANG']->getLL($alt, true);
++		return '<a href="#" title="' . $title . '" onclick="' .
++				htmlspecialchars('return jumpToUrl(\'' . $GLOBALS['SOBE']->doc->issueCommand($params) .'\');') . '">' .
++					'<img '. t3lib_iconWorks::skinImg($this->doc->backPath,
++					t3lib_extMgm::extRelPath('t3blog') . 'icons/' . $icon,' width="18" height="16"') .
++					' alt="' . $title . '" /></a>';
++	}
++
++	/**
++	 * Obtains information for new "Create new XYZ" link
++	 *
++	 * @return array
++	 * @see tx_t3blog_modbase::getNewRecordLinkData()
++	 */
++	protected function getNewRecordLinkData() {
++		return array(
++			'icon' => t3lib_extMgm::extRelPath('t3blog'). 'icons/comment_add.png',
++			'iconSize' => '16x16',
++			'table' => 'tx_t3blog_trackback',
++			'title' => $GLOBALS['LANG']->getLL('createNewTrackback')
++		);
++	}
++
++	/**
++	 * Creates additional SQL WHERE statement if we have to limit trackback by
++	 * certain post
++	 *
++	 * @return string
++	 */
++	protected function getTrackbackLimitByPost() {
++		$trackbackUid = intval(t3lib_div::_GP('linkTra'));
++		return ($trackbackUid ? ' AND tx_t3blog_post.uid=' . $trackbackUid : '');
++	}
++
++	/**
++	 * Creates SQL where statement for trackbacks
++	 *
++	 * @return string
++	 */
++	protected function getSQLWhereForTrackbacks() {
++		return 'tx_t3blog_trackback.postid=tx_t3blog_post.uid' .
++			' AND tx_t3blog_trackback.pid=' . $this->id .
++			$this->getTrackbackLimitByPost() .
++			$this->getSearchSQLWhere('tx_t3blog_trackback') .
++			t3lib_BEfunc::deleteClause('tx_t3blog_trackback') .
++			t3lib_BEfunc::deleteClause('tx_t3blog_post');
++	}
++
++	/**
++	 * Obtains a total visible number of trackbacks for this page
++	 *
++	 * @return int
++	 */
++	protected function getNumberOfTrackbacks() {
++		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
++			'COUNT(DISTINCT(tx_t3blog_trackback.uid)) as counter',
++			'tx_t3blog_post,tx_t3blog_trackback',
++			$this->getSQLWhereForTrackbacks()
++		);
++		return $row['counter'];
++	}
++
++	/**
++	 * Obtains a list of trackbacks
++	 *
++	 * @return string
++	 */
++	protected function getTrackbackList() {
++		$start = ($this->currentPage - 1)*$this->numberOfTrackbacks;
++		$limit = $start . ',' . $this->numberOfTrackbacks;
++		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
++			'distinct tx_t3blog_trackback.uid as uid,tx_t3blog_trackback.postid as postid, ' .
++				'tx_t3blog_trackback.title as title, tx_t3blog_trackback.text as text, ' .
++				'tx_t3blog_trackback.blogname as blogname, ' .
++				'tx_t3blog_post.title as post_title, ' .
++				'tx_t3blog_trackback.hidden as hidden, ' .
++				'tx_t3blog_trackback.tstamp as tstamp, tx_t3blog_trackback.crdate as crdate',
++			'tx_t3blog_post,tx_t3blog_trackback',
++			$this->getSQLWhereForTrackbacks(),
++			'',
++			$this->getListSortClause(),
++			$limit
++		);
++
++		$rows = array();
++		while (false != ($data=$GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
++			$oddEven = ((count($rows) % 2) == 0 ? 'even' : 'odd');
++
++			// FIXME Fixed date format
++			$id = $data['uid'];
++			$rows[] = '<tr class="' . $oddeven . '">
++				<td title="id=' . $id . '">' . date('d.m.y H:i:s', $data['crdate']) . '</td>
++				<td title="id=' . $id . '">' . htmlspecialchars(t3lib_div::fixed_lgd_cs($data['title'], 20)) . '</td>
++				<td title="id=' . $id . '">' . htmlspecialchars(t3lib_div::fixed_lgd_cs($data['text'], 50)) . '</td>
++				<td title="id=' . $id . '">' . htmlspecialchars($data['blogname']) . '</td>
++				<td title="id=' . $data['postid'] . '">' . htmlspecialchars($data['post_title']) . '</td>
++				<td>' . $this->getFunctions('tx_t3blog_trackback', $data) . '</td>
++			</tr>';
++		}
++		$GLOBALS['TYPO3_DB']->sql_free_result($res);
++
++		return implode(chr(10), $rows);
++	}
++
++
++	/**
++	 * Creates URL format string for header. This function takes into account
++	 * various request parameters to build the URL.
++	 *
++	 * @return string
++	 */
++	protected function getUrlFormatForHeader() {
++		$urlParameters = array(
++			'id' => $this->id
++		);
++		if ($this->currentPage > 1) {
++			$urlParameters['curPage'] = $this->currentPage;
++		}
++		if (($searchField = t3lib_div::_GP('search_field'))) {
++			$urlParameters['search_field'] = $searchField;
++		}
++		$parameters = t3lib_div::implodeArrayForUrl('', $urlParameters);
++		$parameters = str_replace('%', '%%', $parameters);
++		return 'index.php?' . $this->sortParameterName . '=%1$s&' . $this->sortDirectionParameterName . '=%2$s' . $parameters;
++	}
++
++	/**
++	 * Generates table header for trackbacks
++	 *
++	 * @return void
++	 */
++	protected function getTableHeader() {
++		$urlFormat = $this->getUrlFormatForHeader();
++		$iconAsc = '<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
++						'gfx/redup.gif', 'width="11" height="12"') .' title="ASC" alt="" />';
++		$iconDesc = '<img' . t3lib_iconWorks::skinImg($this->doc->backPath,
++						'gfx/reddown.gif', 'width="11" height="12"') .' title="ASC" alt="" />';
++		$result = '<table cellspacing="0" cellpadding="0" class="recordlist">
++			<tr>
++				<th>
++					<b>' . $GLOBALS['LANG']->getLL('dateAndTime', true) . '</b>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'crdate', 'ASC')) . '">' . $iconAsc . '</a>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'crdate', 'DESC')) . '">' . $iconDesc . '</a>
++				</th>
++				<th>
++					<b>' . $GLOBALS['LANG']->getLL('title', true) . '</b>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'title', 'ASC')) . '">' . $iconAsc . '</a>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'title', 'DESC')) . '">' . $iconDesc . '</a>
++				</th>
++				<th>
++					<b>' . $GLOBALS['LANG']->getLL('text', true) . '</b>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'text', 'ASC')) . '">' . $iconAsc . '</a>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'text', 'DESC')) . '">' . $iconDesc . '</a>
++				</h>
++				<th>
++					<b>' . $GLOBALS['LANG']->getLL('blogname', true) . '</b>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'blogname', 'ASC')) . '">' . $iconAsc . '</a>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'blogname', 'DESC')) . '">' . $iconDesc . '</a>
++				</th>
++				<th>
++					<b>' . $GLOBALS['LANG']->getLL('post', true) . '</b>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'post_title', 'ASC')) . '">' . $iconAsc . '</a>
++					<a href="' . htmlspecialchars(sprintf($urlFormat, 'post_title', 'DESC')) . '">' . $iconDesc . '</a>
++			</th>
++			<th><b>' . $GLOBALS['LANG']->getLL('functions', true) . '</b></th>
++		</tr>';
++		return $result;
++	}
++
++	/**
++	 * Obtains a table with trackbacks
++	 *
++	 * @return string
++	 */
++	protected function getTrackbacks() {
++		return $this->getTableHeader() . $this->getTrackbackList() . '</table>';
++	}
++}
++
++if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/mod6/index.php'])	{
++	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/t3blog/mod6/index.php']);
++}
++
++// Make instance:
++$SOBE = t3lib_div::makeInstance('tx_t3blog_module6');
++$SOBE->init();
++
++// Include files?
++foreach($SOBE->include_once as $INC_FILE) {
++	include_once($INC_FILE);
++}
++
++$SOBE->main();
++$SOBE->printContent();
++
++?>
+\ No newline at end of file
+diff --git a/mod6/locallang.xml b/mod6/locallang.xml
+new file mode 100644
+index 0000000..3fd1445
+--- /dev/null
++++ b/mod6/locallang.xml
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
++<T3locallang>
++	<meta type="array">
++		<type>module</type>
++		<description>Language labels for module &quot;txt3blogM3&quot;</description>
++	</meta>
++	<data type="array">
++		<languageKey index="default" type="array">
++			<label index="moduleTitle">T3BLOG - TYPO3 based blogging</label>
++			<label index="title">Titel</label>
++			<label index="author">Author</label>
++			<label index="post">Post</label>
++			<label index="blogname">Blog-Name</label>
++			<label index="createNewTrackback">Create a new Trackback</label>
++			<label index="sectionTitle">Trackback management</label>
++		</languageKey>
++	</data>
++</T3locallang>
+\ No newline at end of file
+diff --git a/mod6/locallang_mod.xml b/mod6/locallang_mod.xml
+new file mode 100644
+index 0000000..6c01861
+--- /dev/null
++++ b/mod6/locallang_mod.xml
+@@ -0,0 +1,23 @@
++<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
++<T3locallang>
++	<meta type="array">
++		<type>module</type>
++		<description>Language labels for module &quot;txt3blogM3&quot; - header, description</description>
++	</meta>
++	<data type="array">
++		<languageKey index="default" type="array">
++			<label index="mlang_tabs_tab">Trackbacks</label>
++			<label index="mlang_labels_tabdescr">Modular Blog Extension for TYPO3. </label>
++			<label index="mlang_labels_tablabel">Modular Blog</label>
++		</languageKey>
++		<languageKey index="de" type="array">
++			<label index="mlang_tabs_tab">Trackbacks</label>
++			<label index="mlang_labels_tabdescr">Modulare Blog Extension für TYPO3.</label>
++			<label index="mlang_labels_tablabel">Modularer Blog</label>
++		</languageKey>
++	</data>
++	<orig_hash type="array">
++	</orig_hash>
++	<orig_text type="array">
++	</orig_text>
++</T3locallang>
+\ No newline at end of file
+diff --git a/mod6/moduleicon.gif b/mod6/moduleicon.gif
+new file mode 100644
+index 0000000000000000000000000000000000000000..3c43d2766a5ba63c82a505fb44eb8d06679d8bdc
+GIT binary patch
+literal 82
+zcmZ?wbhEHb<Y(Yvn8*ME|NsC0{`onORQ$=p$iTqNpaT*G$ulr1-)UHxpvk|m%S7pw
+f&H?uII)=wKRwgf3RNuKKS#u|^di|pa1_o;YT%Q}s
+
+literal 0
+HcmV?d00001
+
+diff --git a/patches/0001-Fixed-bug-26105-POSTTITLE-marker-in-admin-notificati.patch b/patches/0001-Fixed-bug-26105-POSTTITLE-marker-in-admin-notificati.patch
+new file mode 100644
+index 0000000..a355670
+--- /dev/null
++++ b/patches/0001-Fixed-bug-26105-POSTTITLE-marker-in-admin-notificati.patch
+@@ -0,0 +1,28 @@
++From dd7217f256b446d70c5c4b8867d7afdef470c847 Mon Sep 17 00:00:00 2001
++From: Felix Nagel <info@felixnagel.com>
++Date: Sat, 26 May 2012 20:22:40 +0200
++Subject: [PATCH] Fixed bug #26105: ###POSTTITLE### marker in admin
++ notification mail is not filled
++
++---
++ pi1/widgets/blogList/class.singleFunctions.php |    3 +--
++ 1 files changed, 1 insertions(+), 2 deletions(-)
++
++diff --git a/pi1/widgets/blogList/class.singleFunctions.php b/pi1/widgets/blogList/class.singleFunctions.php
++index 6a52474..cef32ab 100644
++--- a/pi1/widgets/blogList/class.singleFunctions.php
+++++ b/pi1/widgets/blogList/class.singleFunctions.php
++@@ -1126,9 +1126,8 @@ class singleFunctions extends blogList {
++ 	function adminMailComment()	{
++ 		$pObjPiVars = t3lib_div::_POST('tx_t3blog_pi1');	// pObj piVars array
++ 
++-		$postUid = intval($this->localPiVars['uid']);
++ 		list($titleRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title',
++-			'tx_t3blog_post', 'uid=' . intval($postUid)
+++			'tx_t3blog_post', 'uid=' . intval($this->uid)
++ 		);
++ 
++ 		$messageText = $this->cObj->fileResource($this->conf['adminsCommentMailTemplate']);
++-- 
++1.7.5.GIT
++
+-- 
+1.7.5.GIT
+

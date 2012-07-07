@@ -1,0 +1,29 @@
+From 0521581fcdb8aa39752cf8451b941adf2225c952 Mon Sep 17 00:00:00 2001
+From: Felix Nagel <info@felixnagel.com>
+Date: Sun, 10 Jun 2012 01:42:48 +0200
+Subject: [PATCH 8/8] fixed: SQL error in getPostCategories (class.rss.php),
+ see: http://forge.typo3.org/issues/37741
+
+---
+ pi1/widgets/rss/class.rss.php |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pi1/widgets/rss/class.rss.php b/pi1/widgets/rss/class.rss.php
+index 87999bb..c43e4c6 100644
+--- a/pi1/widgets/rss/class.rss.php
++++ b/pi1/widgets/rss/class.rss.php
+@@ -407,9 +407,9 @@ class rss extends tslib_pibase {
+ 	 */
+ 	function getPostCategories($value) {
+ 		$query = 'SELECT catname FROM tx_t3blog_cat WHERE uid in (' .
+-			'SELECT uid_foreign FROM tx_t3blog_post_cat_mm WHERE ' .
++			'SELECT uid_foreign FROM tx_t3blog_post_cat_mm WHERE 1=1' .
+ 			'tx_t3blog_post_cat_mm.uid_local=' . intval($value) . ') ' .
+-			'AND ' . $this->cObj->enableFields('tx_t3blog_cat') . ' ' .
++			$this->cObj->enableFields('tx_t3blog_cat') . ' ' .
+ 			'ORDER BY catname';
+ 		$res = $GLOBALS['TYPO3_DB']->sql_query($query);
+ 		$data = '';
+-- 
+1.7.5.GIT
+
