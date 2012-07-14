@@ -507,9 +507,8 @@ class rss extends tslib_pibase {
 					}
 					else {
 						$author = $this->getAuthorByPost($value);
-						//list($email) = $this->cObj->getMailTo($author['email'], '');
-						//$email = substr($email, 7);
-						return '<author>' . htmlspecialchars($author['email']) .
+						list($email) = $this->cObj->getMailTo($author['email'], '');
+						return '<author>' . htmlspecialchars($email) .
 							' (' . htmlspecialchars($author['realName']) . ')' . '</author>';
 					}
 				}
