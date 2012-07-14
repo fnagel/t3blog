@@ -39,7 +39,7 @@ class tx_t3blog_sendtrackback {
 	 *
 	 * @return boolean true if one or more trackbacks were sent
 	 */
-	public function sendTrackbacks($blogUid,$uid) {
+	public function sendTrackbacks($blogUid, $uid) {
 		$count = 0;
 
 		require_once(t3lib_extMgm::extPath('t3blog') . 'pi1/lib/trackback_cls.php');
@@ -56,9 +56,9 @@ class tx_t3blog_sendtrackback {
 				$title = $row['title'];
 				$text = $this->getBlogEntryText($row['uid']);
 				$text = t3lib_div::fixed_lgd_cs($text, 250);
-				$permalink = $this->getBlogURL($pid, $row['uid']);
+				$permalink = $this->getBlogPostURL($blogUid, $row['uid']);
 				$author = $this->getBlogEntryAuthorName($row['author']);
-				$t3blogName = $this->getBlogName($pid);
+				$t3blogName = $this->getBlogName($blogUid);
 
 				// initialize trackback
 				$trackback 	= new Trackback($t3blogName, $author, 'UTF-8');
@@ -83,17 +83,50 @@ class tx_t3blog_sendtrackback {
 	 * @param    	string  $blogId Blog id
 	 * @return		string  the link url, not being htmlspecialchar'ed yet
 	 */
-	protected function getBlogURL($pageId, $blogId) {
+	protected function getBlogPostURL($pageId, $blogId) {	
+		// get blog post date 
+		$date = $this->getBlogEntryDate($blogId);
+		$day 	= strftime('%d', $date);
+		$month 	= strftime('%m', $date);
+		$year	= strftime('%Y', $date);	
+		$permaLinkParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'blogList' => array(
+				'day' => $day,
+				'month' => $month,
+				'year' => $year,
+				'showUidPerma' => $blogId
+			)
+		));		
 		if (t3lib_extMgm::isLoaded('pagepath')) {
 			t3lib_div::requireOnce(t3lib_extMgm::extPath('pagepath', 'class.tx_pagepath_api.php'));
-			$link = tx_pagepath_api::getPagePath($pageId, array(
-				'bid' => $blogId
-			));
+			$link = tx_pagepath_api::getPagePath($pageId, $permaLinkParameters);			
 		}
-		else {
-			$link = t3lib_div::getIndpEnv('TYPO3_SITE_URL') . '/?id=' . $pageId . '&bid=' . $blogId;
+		else {		
+			// BUG link does not work with wordpress cause of [] braces
+			$link = t3lib_div::getIndpEnv('TYPO3_SITE_URL') . '?id=' . $pageId . $permaLinkParameters;
 		}
 		return $link;
+	}
+	
+	/**
+	 * Obtains the date of the blog entry
+	 *
+	 * @param int uid of the blog entry
+	 * @return timetamp int
+	 */
+	protected function getBlogEntryDate($blogEntryUid) {		
+		$where = 'uid=' . intval($blogEntryUid) . 
+			t3lib_BEfunc::BEenableFields('tx_t3blog_post') .
+			t3lib_BEfunc::deleteClause('tx_t3blog_post');
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			'date', 'tx_t3blog_post', $where);
+			
+		$result = '';
+		if (is_array($row)) {
+			$result = $row['date'];
+		}
+
+		return $result;
 	}
 
 	/**
@@ -103,19 +136,20 @@ class tx_t3blog_sendtrackback {
 	 * @return string
 	 */
 	protected function getBlogEntryText($blogEntryUid) {
-		$where = 'irre_parenttable=\'tx_t3blog_post\' AND ' .
-			'irre_parentid=' . intval($blogEntryUid) . ' AND ' .
-			'(CType=\'text%\' OR CType=\'textpic\') AND ' .
-			'bodytext<>\'\'' .
-			t3lib_BEfunc::BEenableFields('tt_content') .
-			t3lib_BEfunc::deleteClause('tt_content');
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			'header,bodytext', 'tt_content', $where, '', 'sorting', '1');
-
+			'TRIM(CONCAT(header, \' \', bodytext)) AS text',
+			'tt_content', 'irre_parentid=' . intval($blogEntryUid) .
+			' AND irre_parenttable=\'tx_t3blog_post\'' .
+			' AND CType IN (\'text\', \'textpic\')' .
+			' AND TRIM(bodytext)<>\'\'' .
+			t3lib_BEfunc::BEenableFields('tt_content') .
+			t3lib_BEfunc::deleteClause('tt_content'), '', 'sorting', 1);
+			
 		// if the post has content, set text
 		$result = '';
 		if (is_array($row)) {
-			$result = trim($row['header'] . ' ' . $row['bodytext']);
+			// we dont like typo3 rte tags in our text
+			$result = strip_tags($row['text']);
 		}
 
 		return $result;
