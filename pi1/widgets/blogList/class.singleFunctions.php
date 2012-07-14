@@ -683,7 +683,7 @@ class singleFunctions extends blogList {
 			}
 			
 			if ($this->conf['mailReceivedCommentsToAdmin']) {
-				$this->adminMailComment();
+				$this->adminMailComment($data);
 			}
 
 			if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
@@ -1132,25 +1132,25 @@ class singleFunctions extends blogList {
 	 * Sends a received comment per email to the given admin's email address
 	 * @author kay stenschke <kstenschke@snowflake.ch>
 	 */
-	function adminMailComment()	{
-		$pObjPiVars = t3lib_div::_POST('tx_t3blog_pi1');	// pObj piVars array
-
+	function adminMailComment($data)	{
 		list($titleRow) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('title',
 			'tx_t3blog_post', 'uid=' . intval($this->uid)
 		);
 
 		$messageText = $this->cObj->fileResource($this->conf['adminsCommentMailTemplate']);
 		$markerArray = array(
-			'###TITLE###'		=> strip_tags($pObjPiVars['blogList']['commenttitle']),
-			'###TEXT###'		=> strip_tags($pObjPiVars['blogList']['commenttext']),
-			'###AUTHOR###'		=> $this->localPiVars['commentauthor'],
-			'###EMAIL###'		=> $this->localPiVars['commentauthoremail'],
-			'###WEBSITE###'		=> $this->localPiVars['commentauthorwebsite'],
+			'###TITLE###'		=> $data['title'],
+			'###TEXT###'		=> $data['text'],
+			'###AUTHOR###'		=> $data['author'],
+			'###EMAIL###'		=> $data['email'],
+			'###WEBSITE###'		=> $data['website'],
 			'###IP###'			=> t3lib_div::getIndpEnv('REMOTE_ADDR'),
 			'###TSFE###'		=> t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
 			'###POSTTITLE###'   => is_array($titleRow) ? $titleRow['title'] : '',
-			'###LINK###'		=> $this->getPermalink($this->uid, $this->getPostDate($this->uid), true)
+			'###LINK###'		=> $this->getPermalink($this->uid, $this->getPostDate($this->uid), true),
+			'###SPAM###'		=> $data['spam']
 		);
+
 		foreach ($markerArray as $key => $val) {
 			if (strlen(trim($val)) < 1) {
 				$markerArray[$key] = '-';

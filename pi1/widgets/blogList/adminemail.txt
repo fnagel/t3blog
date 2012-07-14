@@ -1,5 +1,7 @@
 The following comment has just been received on ###TSFE###.
 
+Blogpost: ###POSTTITLE###
+
 Title: ###TITLE###
 
 Text:
@@ -10,3 +12,4 @@ Author name: ###AUTHOR###
 Author Email: ###EMAIL###
 Author Website: ###WEBSITE###
 Author IP-Address: ###IP###
+Marked as SPAM: ###SPAM###
