@@ -404,20 +404,37 @@ class singleFunctions extends blogList {
 	 * @param array $data
 	 * @return void
 	 */
-	protected function setCaptchaFields(array &$data) {
+	protected function setCaptchaFields(array &$data) {			
 		if ($this->conf['useCaptcha'] == 1) {
 			$data['captcha'] = 'tx_t3blog_pi1[blogList][captcha]';
-			$data['captchaimage'] = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
-				'pi1/widgets/blogList/captcha/captcha.php?' .
-				'font=' . htmlspecialchars($this->conf['captchaFont']) .
-				'&amp;fontSize=' . htmlspecialchars($this->conf['captchaFontSize']) .
-				'&amp;fontColor=' . htmlspecialchars($this->conf['captchaFontColor']) .
-				'&amp;fontEreg=' . htmlspecialchars($this->conf['captchaEreg']) .
-				'&amp;image=' . htmlspecialchars($this->conf['captchaBackgroundPNGImage']) .
-				'&amp;showImage=' . htmlspecialchars($this->conf['captchaShowImage']) .
-				'&amp;backgroundColor=' . htmlspecialchars($this->conf['captchaBackgroundColor']) .
-				'&amp;lines=' . htmlspecialchars($this->conf['captchaLines']) .
-				'" alt="" />';
+			
+			$captchaType = trim($this->conf['captchaType']);
+			// backfall if configured extension is not available
+			if ($captchaType != "default" && !t3lib_extMgm::isLoaded($captchaType)) {
+				$this->conf['captchaType'] = "default";
+			}
+			
+			switch ($captchaType) {			
+				case 'jm_recaptcha':					
+						t3lib_div::requireOnce(t3lib_extMgm::extPath('jm_recaptcha')."class.tx_jmrecaptcha.php");
+						$this->tx_jmrecaptcha = t3lib_div::makeInstance('tx_jmrecaptcha');	
+						$data['captchaimage'] = $this->tx_jmrecaptcha->getReCaptcha();
+					break;
+			
+				default:
+					$data['captchaimage'] = '<img src="' . t3lib_extMgm::siteRelPath('t3blog') .
+						'pi1/widgets/blogList/captcha/captcha.php?' .
+						'font=' . htmlspecialchars($this->conf['captchaFont']) .
+						'&amp;fontSize=' . htmlspecialchars($this->conf['captchaFontSize']) .
+						'&amp;fontColor=' . htmlspecialchars($this->conf['captchaFontColor']) .
+						'&amp;fontEreg=' . htmlspecialchars($this->conf['captchaEreg']) .
+						'&amp;image=' . htmlspecialchars($this->conf['captchaBackgroundPNGImage']) .
+						'&amp;showImage=' . htmlspecialchars($this->conf['captchaShowImage']) .
+						'&amp;backgroundColor=' . htmlspecialchars($this->conf['captchaBackgroundColor']) .
+						'&amp;lines=' . htmlspecialchars($this->conf['captchaLines']) .
+						'" alt="" />';
+					break;			
+			}			
 		}
 	}
 
@@ -860,11 +877,27 @@ class singleFunctions extends blogList {
 
 		// captcha
 		if ($this->conf['useCaptcha'] == 1) {
-			session_start();
-			$captchaStr = $_SESSION['tx_captcha_string'];
-			$_SESSION['tx_captcha_string'] = '';
+			$captchaError = false;
+		
+			switch ($this->conf['captchaType']) {			
+				case 'jm_recaptcha':
+					$status = $this->tx_jmrecaptcha->validateReCaptcha();
+					if (!$status['verified']) {
+						$captchaError = true;
+					}				
+					break;
+			
+				default:							
+					session_start();
+					$captchaStr = $_SESSION['tx_captcha_string'];
+					$_SESSION['tx_captcha_string'] = '';
+					if (!strlen($captchaStr) || $this->localPiVars['captcha'] != $captchaStr) {
+						$captchaError = true;
+					}				
+					break;			
+			}	
 
-			if (!strlen($captchaStr) || $this->localPiVars['captcha'] != $captchaStr) {
+			if ($captchaError) {
 				$errorMessage .= t3blog_div::getSingle(array(
 					'value' => $this->pi_getLL('error_captcha')
 				), 'errorWrap', $this->conf);
