@@ -97,14 +97,14 @@
 	// sets rg color scheme into function
  	$i = 1;
   	foreach($fontColor as $key) {
-	   	${fontColor.$i} = $key;
+	   	${'fontColor'.$i} = $key;
     	$i++;
    	}
 
    	// sets rg color scheme into function
    	$j = 1;
    	foreach($backgroundColor as $colorkey) {
-   		${backgroundColor.$j} = $colorkey;
+   		${'backgroundColor'.$j} = $colorkey;
    		$j++;
    	}
 
