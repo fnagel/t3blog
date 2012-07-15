@@ -47,6 +47,8 @@ plugin.tx_t3blog_pi1 {
 
 		#captcha
 		useCaptcha = 1
+		# default or jm_recaptcha 
+		captchaType = default
 		captchaFont = x-files.ttf
 		captchaFontSize = 25
 		captchaFontColor = 000000
