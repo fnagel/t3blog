@@ -43,6 +43,7 @@
 			<label index="notAllowedToComment">Sorry, you must be logged in to comment. Please login or register to comment.</label>
 			<label index="loginLinkText">Click here to login.</label>
 			<label index="toBeApproved">Thank you for the comment. An admin will approve it as soon as possible.</label>
+			<label index="toBeApprovedSpam">Thanks you for the comment. Your comment was marked as SPAM and needs to be approved by an admin.</label>
 			<label index="noResult">Sorry, we could not find any posts with specified filter. Please try another one.</label>
 			<label index="permalinkDesc">Copy this link if you want it to use as your permalink.</label>
 			<label index="trackbackLinkDesc">Copy this link into your trackback field of your own blog</label>
@@ -96,6 +97,7 @@
 			<label index="notAllowedToComment">Sie haben keine Berechtigung einen Kommentar zu hinterlassen.</label>
 			<label index="backText">Zurück zur Listenansicht</label>
 			<label index="toBeApproved">Danke für den Kommentar. Wir werden Ihren Kommentar möglichst rasch anschauen und aufschalten.</label>
+			<label index="toBeApprovedSpam">Danke für den Kommentar. Ihr Kommentar wurde als SPAM erkannt und muss vor Freigabe überprüft werden.</label>
 			<label index="noResult">Kein Resultat gefunden.</label>
 			<label index="permalinkDesc">Kopieren Sie diesen Link um ihn als Permalink zu verwenden.</label>
 			<label index="trackbackLinkDesc">Kopieren Sie diesen Link in das Trackback Feld in Ihrem Blog.</label>
