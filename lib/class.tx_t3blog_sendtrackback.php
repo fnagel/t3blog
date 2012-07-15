@@ -94,7 +94,7 @@ class tx_t3blog_sendtrackback {
 				'day' => $day,
 				'month' => $month,
 				'year' => $year,
-				'showUidPerma' => $blogId
+				'showUid' => $blogId
 			)
 		));		
 		if (t3lib_extMgm::isLoaded('pagepath')) {
