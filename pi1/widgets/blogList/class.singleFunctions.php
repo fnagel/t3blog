@@ -482,7 +482,7 @@ class singleFunctions extends blogList {
 		for ($i = 0; false != ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)); $i++) {
 
 			$link = '';
-			$permaidPos = strpos($row['fromurl'], 'bid=');
+			$permaidPos = strpos($row['fromurl'], 'pid=');
 			if ($permaidPos !== false) {
 				$permaid = intval(substr($row['fromurl'], $permaidPos + 4));
 				if ($permaid) {
