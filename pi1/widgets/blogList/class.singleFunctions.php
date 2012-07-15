@@ -1265,6 +1265,12 @@ class singleFunctions extends blogList {
 				$this->cObj->enableFields($table),
 			'', 'uid', '0,1'
 		);
+		
+		if ($this->conf['approvedTrackback'] == 1) {
+			$isHidden = 0;
+		} else {
+			$isHidden = 1;
+		}
 
 		$data = array(
 			'pid' => $GLOBALS['TSFE']->id,
@@ -1273,6 +1279,9 @@ class singleFunctions extends blogList {
 			'postid' => intval($this->uid),
 			'blogname' => $GLOBALS['TYPO3_DB']->quoteStr($trackbackBlogName, $table),
 			'text' => $GLOBALS['TYPO3_DB']->quoteStr(strip_tags($trackbackExcerpt), $table),
+			'hidden' => $isHidden,
+			'tstamp'	=> $GLOBALS['SIM_ACCESS_TIME'],
+			'crdate'	=> $GLOBALS['SIM_ACCESS_TIME'],
 		);
 
 		// New if there is no data found, else an update
