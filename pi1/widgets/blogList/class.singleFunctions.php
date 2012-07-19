@@ -417,8 +417,8 @@ class singleFunctions extends blogList {
 			switch ($captchaType) {			
 				case 'jm_recaptcha':					
 						t3lib_div::requireOnce(t3lib_extMgm::extPath('jm_recaptcha')."class.tx_jmrecaptcha.php");
-						$this->tx_jmrecaptcha = t3lib_div::makeInstance('tx_jmrecaptcha');	
-						$data['captchaimage'] = $this->tx_jmrecaptcha->getReCaptcha();
+						$tx_jmrecaptcha = t3lib_div::makeInstance('tx_jmrecaptcha');	
+						$data['captchaimage'] = $tx_jmrecaptcha->getReCaptcha();
 					break;
 			
 				default:
@@ -881,8 +881,8 @@ class singleFunctions extends blogList {
 		
 			switch ($this->conf['captchaType']) {			
 				case 'jm_recaptcha':
-					$status = $this->tx_jmrecaptcha->validateReCaptcha();
-					if (!$status['verified']) {
+					t3lib_div::requireOnce(t3lib_extMgm::extPath('jm_recaptcha')."class.tx_jmrecaptcha.php");
+					$tx_jmrecaptcha = t3lib_div::makeInstance('tx_jmrecaptcha');						$status = $tx_jmrecaptcha->validateReCaptcha();					if (!$status['verified']) {
 						$captchaError = true;
 					}				
 					break;
