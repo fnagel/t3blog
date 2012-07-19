@@ -10,14 +10,14 @@ FEATURES & BUGFIXES
 
 An uncomplete list of the changes (see commits for full list):
 
-* improved adminemail (fnagel@dd7217f256b446d70c5c4b8867d7afdef470c847, fnagel@a7c75d97dbb94aa5aaae91ec0cffd8caa07fb9d4)
-* fixed BE module CSS (fnagel@76f1760052961d279c2a4c8e8dfde50d3aa6fa61, http://forge.typo3.org/issues/81)
+* improved adminemail
+* fixed BE module CSS (http://forge.typo3.org/issues/81)
 * add trackback module (https://github.com/fnagel/t3blog/commits/trackback_module)
-* trackbacks can be apporved before displaying (fnagel@4f8d4667823e59d473a97bfd6afad2c93f5ad343)
-* fixed save and preview (fnagel@c5257ffa6d7da5fd7fe3eadf508903151ef114c2, fnagel@f39225414a98adef4b01dc82caf791066a8c9e0d, http://forge.typo3.org/issues/326139)
-* make default Gravatar picture configurable (fnagel@af6b99b8153dc2bb37956f4f0c8e5a028a96a214, http://forge.typo3.org/issues/8347)
-* add t3blog to BE search (fnagel@c105a0e5ccc865c0bcc3ec70b2d9de4ca973e248 )
-* fix sendtrackback (fnagel@083feac9cd9e6d492c71b5ccf6415685bf4b2491, fnagel@7fab20f26bf95f8404cc5b80a8c5f20bbbf736b6 and others
+* trackbacks can be apporved before displaying
+* fixed save and preview (http://forge.typo3.org/issues/326139)
+* make default Gravatar picture configurable (http://forge.typo3.org/issues/8347)
+* add t3blog to BE search
+* fix sendtrackback
 * recaptcha support and fix default captcha (https://github.com/fnagel/t3blog/commits/captcha)
 
 
