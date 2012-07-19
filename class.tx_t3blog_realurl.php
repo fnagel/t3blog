@@ -173,6 +173,16 @@ class tx_t3blog_realurl {
 							'GETvar' => 'tx_t3blog_pi1[blogList][uid]',
 						)
 					)
+					'unsubscribe' => array (
+						array(
+							'GETvar' => 'tx_t3blog_pi1[blogList][unsubscribe]',
+						),
+					),
+					'code' => array (
+						array(
+							'GETvar' => 'tx_t3blog_pi1[blogList][code]',
+						),
+					),
 				)
 			)
 		);
