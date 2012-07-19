@@ -353,12 +353,12 @@ class blogList extends tslib_pibase {
 	protected function getTrackbackLink($uid, $date, $urlOnly = false) {
 		$dateInfo = getdate($date);
 		$trackBackParameters = t3lib_div::implodeArrayForUrl('tx_t3blog_pi1', array(
+			'trackback' => 1,
 			'blogList' => array(
 				'day' => sprintf('%02d', $dateInfo['mday']),
 				'month' => sprintf('%02d', $dateInfo['mon']),
 				'year' => $dateInfo['year'],
-				'showUid' => $uid,
-				'trackback' => 1
+				'showUid' => $uid
 			)
 		));
 		$typolinkConf = array(
