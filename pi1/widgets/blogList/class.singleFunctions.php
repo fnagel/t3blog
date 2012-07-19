@@ -124,8 +124,6 @@ class singleFunctions extends blogList {
 
 				$content = t3blog_div::getSingle($data, 'single', $this->conf);
 				$content = str_replace('###MORE###', '', $content);
-
-				$GLOBALS['TSFE']->showHiddenRecords = $showHiddenRecords;
 			}
 		}
 
