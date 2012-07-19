@@ -1,0 +1,11 @@
+T3BLOG:::::::::::::::::::::::
+pi1/blogList/singleFunctions: Trackbacks empfangen -> funktioniert
+    checkForTrackbacks
+        trackback
+            trackbackAddData: updated bzw. fügt Trackback der DB hinzu
+            trackbackSendResponse: sendet ein ok an den Blog
+mod2 -> testen, selbst und mit bennis WP
+    getPostList
+        tx_t3blog_sendtrackback/sendTrackbacks: für jeden post aufgerufen, sendet bei geändertem Feld (Hash) einen pingback zu allen im BE eingetragenen links
+            -> problem mit WP?
+          
