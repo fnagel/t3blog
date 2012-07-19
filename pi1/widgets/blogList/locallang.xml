@@ -42,6 +42,7 @@
 			<label index="commentAdminMailSubject">New T3BLOG comment received</label>
 			<label index="notAllowedToComment">Sorry, you must be logged in to comment. Please login or register to comment.</label>
 			<label index="loginLinkText">Click here to login.</label>
+			<label index="approved">Thank you for the comment!</label>
 			<label index="toBeApproved">Thank you for the comment. An admin will approve it as soon as possible.</label>
 			<label index="toBeApprovedSpam">Thanks you for the comment. Your comment was marked as SPAM and needs to be approved by an admin.</label>
 			<label index="noResult">Sorry, we could not find any posts with specified filter. Please try another one.</label>
@@ -96,6 +97,7 @@
 			<label index="commentAdminMailSubject">Neuer T3BLOG Kommentar</label>
 			<label index="notAllowedToComment">Sie haben keine Berechtigung einen Kommentar zu hinterlassen.</label>
 			<label index="backText">Zurück zur Listenansicht</label>
+			<label index="approved">Danke für den Kommentar!</label>
 			<label index="toBeApproved">Danke für den Kommentar. Wir werden Ihren Kommentar möglichst rasch anschauen und aufschalten.</label>
 			<label index="toBeApprovedSpam">Danke für den Kommentar. Ihr Kommentar wurde als SPAM erkannt und muss vor Freigabe überprüft werden.</label>
 			<label index="noResult">Kein Resultat gefunden.</label>

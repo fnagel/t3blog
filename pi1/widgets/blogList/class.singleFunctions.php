@@ -151,10 +151,19 @@ class singleFunctions extends blogList {
 	 */
 	protected function insertCommentIfNecessary($message) {
 		if ($this->localPiVars['insert']) {
-			if ($this->insertComment()) {
+			$result = $this->insertComment();
+			if ($result['sucess']) {			
+				// if its spam, contact the writer
+				if ($result['isSpam']) {
+					$message = $this->pi_getLL('toBeApprovedSpam');
+				}
 				// if it first has to be approved, contact the writer
 				if (!$this->conf['approved']) {
 					$message = $this->pi_getLL('toBeApproved');
+				}
+				// add a notice if displayed at once
+				if ($message == "") {
+					$message = $this->pi_getLL('approved');
 				}
 			}
 		}
@@ -658,7 +667,7 @@ class singleFunctions extends blogList {
 	 *
 	 * @author manu Oehler <moehler@snowflake.ch>
 	 *
-	 * @return bool true on success
+	 * @return array with success and isSpam values
 	 */
 	function insertComment() {
 		$postUid = intval($this->localPiVars['uid']);
@@ -674,10 +683,14 @@ class singleFunctions extends blogList {
 			$commentAuthor, $commentTitle, $authorEmail, $authorWebsite, $commentText
 		);
 
-		$result = false;
+		$result = array( 'sucess' => false, 'isSpam' => false );
 
 		if ($this->errorMessage == '') {
-			$result = true;
+			$result['sucess'] = true;
+			// if valid but marked as SPAM add notice
+			if ($isSpam) {
+				$result['isSpam'] = true;
+			}
 
 			$this->setCommentAuthorCookies($commentAuthor, $authorEmail, $authorWebsite);
 			$this->unsetLocalPiVarsBeforeAddingComment();
@@ -686,8 +699,7 @@ class singleFunctions extends blogList {
 
 			if ($this->allowedToEditComment($editUid)) {
 				$this->updateCommentData($editUid, $data);
-			}
-			else {
+			} else {
 				$this->insertNewComment($data);
 			}
 
@@ -703,14 +715,7 @@ class singleFunctions extends blogList {
 
 			if (isset($_POST['tx_t3blog_pi1']['blogList']['subscribe'])) {
 				$this->subscribeToPostNotifications($postUid, $commentAuthor, $authorEmail);
-			}
-			
-			// if valid but marked as SPAM add notice
-			if ($isSpam) {
-				$this->errorMessage .= t3blog_div::getSingle(array(
-					'value' => $this->pi_getLL('toBeApprovedSpam')
-				), 'errorWrap', $this->conf);
-			}
+			}			
 		}
 
 		return $result;
@@ -726,7 +731,7 @@ class singleFunctions extends blogList {
 	 * @param string $authorWebsite
 	 * @return array
 	 */
-	protected function prepareCommentData($postUid, $commentAuthor, $commentTitle, $commentText, $authorEmail, $authorWebsite, $isSPam) {
+	protected function prepareCommentData($postUid, $commentAuthor, $commentTitle, $commentText, $authorEmail, $authorWebsite, $isSpam) {
 		$data = array(
 			'tstamp'	=> $GLOBALS['EXEC_TIME'],
 			'title'		=> $commentTitle,
@@ -738,7 +743,7 @@ class singleFunctions extends blogList {
 			'approved'	=> intval($this->conf['approved']),
 			'parent_id' => intval($this->localPiVars['comParentId']),
 			'fk_post' => $postUid,
-			'spam' => $isSPam
+			'spam' => $isSpam
 		);
 		return $data;
 	}
