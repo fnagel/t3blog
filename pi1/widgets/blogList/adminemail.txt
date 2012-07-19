@@ -1,6 +1,7 @@
 The following comment has just been received on ###TSFE###.
 
 Blogpost: ###POSTTITLE###
+Link: ###LINK###
 
 Title: ###TITLE###
 
