@@ -57,6 +57,29 @@ class tx_t3blog_realurl {
 							'GETvar' => 'tx_t3blog_pi1[blogList][comParentTitle]',
 						),
 					),
+					'response' => array (
+						array(
+							'GETvar' => 'tx_t3blog_pi1[blogList][comParentId]',
+							'lookUpTable' => array(
+								'table' => 'tx_t3blog_com',
+								'id_field' => 'uid',
+								'alias_field' => 'title',
+								'addWhereClause' => ' AND deleted !=1 AND hidden !=1',
+								'useUniqueCache' => 1,
+								'useUniqueCache_conf' => array(
+									'strtolower' => 1,
+									'spaceCharacter' => '-',
+								)
+							)
+						),
+
+					),
+					'on-comment' => array (
+						array(
+							'GETvar' => 'tx_t3blog_pi1[blogList][comParentTitle]',
+						),
+
+					),
 					'blog-category' => array (
 						array (
 							'GETvar' => 'tx_t3blog_pi1[blogList][category]',
