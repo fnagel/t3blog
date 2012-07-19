@@ -31,6 +31,9 @@
  * all sites again if a new link is added to the post. In practice it should
  * send only new links. The best solution is to get rid of tilde�separated
  * list and make a serialized array with send/not�sent flag -- Dmitry.
+ *
+ * An additional imrpovement would be moving sendTrackbacks call from mod2 
+ * to a hook so we only check changed posts not all we render -- fnagel
  */
 class tx_t3blog_sendtrackback {
 
