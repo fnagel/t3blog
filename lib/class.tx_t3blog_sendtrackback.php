@@ -151,8 +151,8 @@ class tx_t3blog_sendtrackback {
 		// if the post has content, set text
 		$result = '';
 		if (is_array($row)) {
-			// we dont like typo3 rte tags in our text
-			$result = strip_tags($row['text']);
+			// we dont like MORE marker or TYPO3 rte tags in our text
+			$result = str_replace('###MORE###','',strip_tags($row['text']));
 		}
 
 		return $result;
