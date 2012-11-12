@@ -614,7 +614,7 @@ plugin.tx_t3blog_pi1 {
 		time {
 			wrap = <div class="time">|</div>
 			field = time
-			strftime = %R
+			strftime = %H:%M
 			required = 1
 		}
 		# Format a textrow

@@ -137,36 +137,20 @@ class blogList extends tslib_pibase {
 
 
 	/**
-	 * returns the date formated with the config timeformat or G:i:s a'
+	 * Returns the date formatted by the typoscript '$config' object
 	 *
-	 * @author 	snowflake <typo3@snowflake.ch>
-	 * @param 	date 	$date: date to be formated
-	 *
-	 * @return 	string
-	 */
-	function getTime($date){
-		$format = ($this->conf['timeformat']) ? $this->conf['timeformat'] : 'G:i:s a';
-		$data 	= array(
-			'time'	=> $date
-		);
-		return t3blog_div::getSingle($data, 'time', $this->conf);
-	}
-
-
-	/**
-	 * Returns the date formated by the typoscript 'date' object
-	 *
-	 * @author 	snowflake <typo3@snowflake.ch>
-	 * @param 	date 	$date: date to be formated
+	 * @author 	feanorelf <feanorelf@gmail.com>
+	 * @param 	date 	$date: date to be formatted
+	 * @param 	string 	$config: name of the TypoScript configuration object
 	 *
 	 * @return 	string
 	 */
-	function getDate($date) {
+	function getDate($date, $config='date') {
 		$data = array(
-			'date'	=> $date
+			$config	=> $date
 		);
 
-		return t3blog_div::getSingle($data, 'date', $this->conf);
+		return t3blog_div::getSingle($data, $config, $this->conf);
 	}
 
 

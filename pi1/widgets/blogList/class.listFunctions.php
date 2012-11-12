@@ -269,7 +269,7 @@ class listFunctions extends blogList {
 			'email' 		=> $row['email'],
 			'showMore'		=> $hasDivider ? $this->getShowMore($textBeforeDivider, $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink')) : '',
 			'contentUids'	=> implode(',', $contentUidArray),
-			'time'			=> $this->getTime($row['date']),
+			'time'			=> $this->getDate($row['date'],'time'),
 			'categories'	=> $this->getCategoriesLinked($row['uid']),
 			'comments'		=> $this->getCommentsLink($row['uid'], $row['date']),
 			'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
