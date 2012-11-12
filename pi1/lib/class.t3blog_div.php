@@ -198,7 +198,7 @@ class t3blog_div {
 			else {
 				// Modify this configuration
 				$pageBrowserConf = array_merge($pageBrowserConf, array(
-					'pageParameterName' => 'tx_t3blog_post_pointer',
+					'pageParameterName' => $ident . '_pointer',
 					'numberOfPages' => $pages,
 					'numberOfLinks' => isset($conf['numberOfPageBrowserLinks']) ? intval($conf['numberOfPageBrowserLinks']) : 0
 				));
