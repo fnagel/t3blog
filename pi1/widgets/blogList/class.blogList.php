@@ -338,6 +338,9 @@ class blogList extends tslib_pibase {
 
 		$cObj = t3lib_div::makeInstance('tslib_cObj');
 		$permaLink = $cObj->typoLink($this->pi_getLL('permalinkTitle'), $typolinkConf);
+		if ($onlyUrl) {
+			$permaLink =  str_replace(array('[', ']'),array('%5B', '%5D'),htmlspecialchars($permaLink));
+		}
 
 		return $permaLink;
 	}

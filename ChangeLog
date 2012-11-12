@@ -1,3 +1,6 @@
+2012-11-12	Luciano	<feanorelf@gmail.com>
+	* Fixed getPermalink function to return valid HTML5 when called with $onlyUrl set to true
+
 2012-06-26  Dmitry Dulepov  <dmitry.dulepov@gmail.com>
 
 	* Fixed bug #37741: SQL error in getPostCategories (class.rss.php)
