@@ -3,7 +3,8 @@
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::testInt()
 	* TYPO3 6.1 compatibility: t3lib_div::loadTCA()
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::intval_positive()
-	* TYPO3 6.1 compatibility: replace calls to t3lib_div::intInRange
+	* TYPO3 6.1 compatibility: replace calls to t3lib_div::intInRange()
+	* TYPO3 6.1 compatibility: replace calls to t3lib_div::readLLXMLfile()
 
 2012-11-12	Luciano	<feanorelf@gmail.com>
 	* Issue 42864:	Replaced getTime with a more flexible implementation of getDate
