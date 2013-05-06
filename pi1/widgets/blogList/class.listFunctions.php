@@ -124,7 +124,7 @@ class listFunctions extends blogList {
 	public function getNumberOfListItems() {
 		$where = $this->getWhere();
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			'COUNT(tx_t3blog_post.uid) AS t',
+			'COUNT(DISTINCT tx_t3blog_post.uid) AS t',
 			implode(',', $this->tables),
 			$where
 		);
