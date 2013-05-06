@@ -107,16 +107,16 @@ class tx_t3blog_tcemain {
 	 *
 	 * @param array $incomingFieldArray
 	 * @param mixed $recordId
-	 * @return void
+	 * @return int
 	 */
 	protected function getPid(array $incomingFieldArray, $recordId) {
 		$pid = 0;
 		if (isset($incomingFieldArray['pid']) &&
-				t3lib_div::testInt($incomingFieldArray['pid']) &&
+				t3blog_div::testInt($incomingFieldArray['pid']) &&
 				$incomingFieldArray['pid'] > 0) {
 			$pid = $incomingFieldArray['pid'];
 		}
-		elseif (t3lib_div::testInt($recordId) && $recordId > 0) {
+		elseif (t3blog_div::testInt($recordId) && $recordId > 0) {
 			$record = t3lib_BEfunc::getRecord('tt_content', $recordId,  'pid');
 			$pid = $record['pid'];
 		}

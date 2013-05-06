@@ -185,7 +185,7 @@ class tx_t3blog_modbase extends t3lib_SCbase {
 	 */
 	protected function getCurrentPage() {
 		$page = t3lib_div::_GP('curPage');
-		if (!t3lib_div::testInt($page)) {
+		if (!t3blog_div::testInt($page)) {
 			$page = 1;
 		}
 		return max(1, intval($page));

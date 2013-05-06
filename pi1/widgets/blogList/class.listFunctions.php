@@ -436,7 +436,7 @@ class listFunctions extends blogList {
 	 */
 	protected function getAuthorCondition() {
 		$result = '';
-		if (t3lib_div::testInt($this->localPiVars['author'])) {
+		if (t3blog_div::testInt($this->localPiVars['author'])) {
 			$result = ' AND tx_t3blog_post.author=' . $this->localPiVars['author'];
 		}
 		return $result;
@@ -556,14 +556,14 @@ class listFunctions extends blogList {
 	 */
 	protected function getListItemsLimit() {
 		$postPointer = t3lib_div::_GET('tx_t3blog_post_pointer');
-		if (t3lib_div::testInt($postPointer)) {
+		if (t3blog_div::testInt($postPointer)) {
 			$limit = intval($postPointer) * $this->conf['numberOfRecords'];
 		}
 		else {
 			$limit = '0';
 		}
 		$limit .= ',';
-		if (t3lib_div::testInt($this->conf['numberOfRecords'])) {
+		if (t3blog_div::testInt($this->conf['numberOfRecords'])) {
 			$limit .= $this->conf['numberOfRecords'];
 		}
 		else {

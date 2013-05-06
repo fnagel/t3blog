@@ -215,7 +215,7 @@ class rss extends tslib_pibase {
 	 */
 	protected function getLimit() {
 		$limit = '';
-		if (t3lib_div::testInt($this->conf['postItemCount'])) {
+		if (t3blog_div::testInt($this->conf['postItemCount'])) {
 			$limit = $this->conf['postItemCount'];
 			if ($this->rssVersion == '0.91' && $limit > 15) {
 				$limit = 15;

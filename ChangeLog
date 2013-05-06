@@ -1,3 +1,7 @@
+2013-05-06  Dmitry Dulepov <dmitry.dulepov@gmail.com?
+
+	* TYPO3 6.1 compatibility: replace calls to t3lib_div::testInt()
+
 2012-11-12	Luciano	<feanorelf@gmail.com>
 	* Issue 42864:	Replaced getTime with a more flexible implementation of getDate
 	*             	Fixed time object in bloglist setup: strftime %R does not work on some compilers.
