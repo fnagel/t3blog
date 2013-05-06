@@ -5,6 +5,7 @@
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::intval_positive()
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::intInRange()
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::readLLXMLfile()
+	* Change TYPO3 compatibility version to 6.1.999 max
 
 2012-11-12	Luciano	<feanorelf@gmail.com>
 
