@@ -1,4 +1,4 @@
-2013-05-06  Dmitry Dulepov <dmitry.dulepov@gmail.com?
+2013-05-06  Dmitry Dulepov <dmitry.dulepov@gmail.com>
 
 	* TYPO3 6.1 compatibility: replace calls to t3lib_div::testInt()
 	* TYPO3 6.1 compatibility: t3lib_div::loadTCA()
