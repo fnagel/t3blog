@@ -430,7 +430,7 @@ class rss extends tslib_pibase {
 	 */
 	function getDate($value) {
 		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('date','tx_t3blog_post',
-			'uid=' . t3lib_div::intval_positive($value) .
+			'uid=' . intval($value) .
 			$this->cObj->enableFields('tx_t3blog_post'));
 
 		// format the timestamp

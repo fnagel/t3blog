@@ -324,8 +324,7 @@ class tx_t3blog_treeview {
 	 * @return	string		Returns a label
 	 */
 	function getLabel($uid)	{
-		$where = "uid = '".t3lib_div::intval_positive($uid)."'";
-		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('catname', 'tx_t3blog_cat', $where);
+		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('catname', 'tx_t3blog_cat', 'uid='. intval($uid));
 
 		return ($row['catname']) ? $row['catname'] : 'default';
 	}

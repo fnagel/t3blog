@@ -176,7 +176,7 @@ class singleFunctions extends blogList {
 		list($row) = t3blog_db::getRecFromDbJoinTables(
 			'tx_t3blog_post, be_users',  //  TABLES
 			'tx_t3blog_post.uid as postuid, tx_t3blog_post.title, tx_t3blog_post.tagClouds,tx_t3blog_post.author, tx_t3blog_post.date, tx_t3blog_post.cat, tx_t3blog_post.allow_comments,tx_t3blog_post.number_views, be_users.uid, be_users.username, be_users.email, be_users.admin, be_users.admin, be_users.realName, be_users.uid AS useruid, be_users.lastlogin, be_users.tx_t3blog_avatar',
-			'tx_t3blog_post.uid='.t3lib_div::intval_positive($this->uid).' AND (be_users.uid=tx_t3blog_post.author)'
+			'tx_t3blog_post.uid='.intval($this->uid).' AND (be_users.uid=tx_t3blog_post.author)'
 		);
 		return $row;
 	}
@@ -460,7 +460,7 @@ class singleFunctions extends blogList {
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			'uid,crdate,fromurl,text,title,blogname',																										// SELECT ...
 			'tx_t3blog_trackback',																															// FROM ...
-			'pid = '.$GLOBALS['TSFE']->id.' AND postid = '.t3lib_div::intval_positive($this->uid).' '.$this->cObj->enableFields('tx_t3blog_trackback'),		// WHERE ...
+			'pid = '.$GLOBALS['TSFE']->id.' AND postid = '.intval($this->uid).' '.$this->cObj->enableFields('tx_t3blog_trackback'),		// WHERE ...
 			'uid',																																			// GROUP BY ...
 			'crdate'																																		// ORDER BY ...
 			//''																																			// LIMIT ...
@@ -581,7 +581,7 @@ class singleFunctions extends blogList {
 		$data = array(
 			'pageBrowser' 	=> '',
 			'comments' 		=> $comments,
-			'nrComments'	=> t3blog_db::getNumberOfCommentsByPostUid(t3lib_div::intval_positive($this->uid)),
+			'nrComments'	=> t3blog_db::getNumberOfCommentsByPostUid(intval($this->uid)),
 			'title' 		=> $this->pi_getLL('commentsTitle'),
 		);
 		$content = t3blog_div::getSingle($data, 'commentList', $this->conf);
@@ -1100,7 +1100,7 @@ class singleFunctions extends blogList {
 	 * @return 	string	splitted string
 	 */
 	function splitLongWordsInText($text) {
-		$stringLength = t3lib_div::intval_positive($this->conf['comment.']['splitLongWordsInComment']);
+		$stringLength = max(0, intval($this->conf['comment.']['splitLongWordsInComment']));
 		// if the value is set to 0 return lines unsplitted
 		if (!$stringLength) {
 			return $text;
