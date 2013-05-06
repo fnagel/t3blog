@@ -88,8 +88,8 @@ class tx_t3blog_treeview {
 
 
 			// Prepare some values:
-        $maxitems = t3lib_div::intInRange($config['maxitems'], 0);
-  		$minitems = t3lib_div::intInRange($config['minitems'], 0);
+        $maxitems = max(intval($config['maxitems']), 0);
+  		$minitems = max(intval($config['minitems']), 0);
 		$size = intval($config['size']);
 			// If a SINGLE selector box...
         $item = '';
@@ -160,8 +160,8 @@ class tx_t3blog_treeview {
 						$width = 320;
 					}
 
-					$config['autoSizeMax'] = t3lib_div::intInRange($config['autoSizeMax'],0);
-					$height = $config['autoSizeMax'] ? t3lib_div::intInRange($treeItemC+2,t3lib_div::intInRange($size,1),$config['autoSizeMax']) : $size;
+					$config['autoSizeMax'] = max(intval($config['autoSizeMax']), 0);
+					$height = $config['autoSizeMax'] ? min(max($treeItemC+2,max($size,1)),$config['autoSizeMax']) : $size;
 						// hardcoded: 16 is the height of the icons
 					$height = $height*16;
 
@@ -175,7 +175,7 @@ class tx_t3blog_treeview {
 					$sOnChange = 'setFormValueFromBrowseWin(\''.t3lib_div::slashJS($PA['itemFormElName']).'\',this.options[this.selectedIndex].value,this.options[this.selectedIndex].text); '.implode('',$PA['fieldChangeFunc']);
 											// Put together the select form with selected elements:
 					$selector_itemListStyle = isset($config['itemListStyle']) ? ' style="'.htmlspecialchars($config['itemListStyle']).'"' : ' style="'.$this->pObj->defaultMultipleSelectorStyle.'"';
-					$size = $config['autoSizeMax'] ? t3lib_div::intInRange(count($itemArray)+1,t3lib_div::intInRange($size,1),$config['autoSizeMax']) : $size;
+					$size = $config['autoSizeMax'] ? min(max(count($itemArray)+1,max($size,1)),$config['autoSizeMax']) : $size;
 					$thumbnails = '<select style="width:150px;" name="'.$PA['itemFormElName'].'_sel"'.$this->pObj->insertDefStyle('select').($size?' size="'.$size.'"':'').' onchange="'.htmlspecialchars($sOnChange).'"'.$PA['onFocus'].$selector_itemListStyle.'>';
 					#$thumbnails = '<select                       name="'.$PA['itemFormElName'].'_sel"'.$this->pObj->insertDefStyle('select').($size?' size="'.$size.'"':'').' onchange="'.htmlspecialchars($sOnChange).'"'.$PA['onFocus'].$selector_itemListStyle.'>';
 
@@ -203,7 +203,7 @@ class tx_t3blog_treeview {
 
 				$params=array(
 					'size' => $size,
-					'autoSizeMax' => t3lib_div::intInRange($config['autoSizeMax'],0),
+					'autoSizeMax' => max(intval($config['autoSizeMax']),0),
 					#'style' => isset($config['selectedListStyle']) ? ' style="'.htmlspecialchars($config['selectedListStyle']).'"' : ' style="'.$this->pObj->defaultMultipleSelectorStyle.'"',
 					'style' => ' style="width: 150px;"',
 					'dontShowMoveIcons' => ($maxitems<=1),
