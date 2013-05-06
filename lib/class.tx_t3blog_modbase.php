@@ -354,7 +354,9 @@ class tx_t3blog_modbase extends t3lib_SCbase {
 	 * @return array
 	 */
 	protected function getSearchFields($table) {
-		t3lib_div::loadTCA($table);
+		if (version_compare(TYPO3_branch, '6.1', '<')) {
+			t3lib_div::loadTCA($table);
+		}
 
 		$searchFields[] = $table . '.uid'; // Adding "uid" by default
 
