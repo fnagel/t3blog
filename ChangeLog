@@ -9,6 +9,7 @@
 	* Fixed bug #47819: No pagetree in t3blog TYPO3 4.7
 	* Fixed bug #47719: File not found: /rss/static/setup.txt
 	* Fixed bug #47055: Wrong paging with t3-blog search
+	* Fixed bug #11062: Captcha does not work with PHP 5.3
 
 2012-11-12	Luciano	<feanorelf@gmail.com>
 
