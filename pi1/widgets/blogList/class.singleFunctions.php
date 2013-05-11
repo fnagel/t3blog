@@ -101,7 +101,7 @@ class singleFunctions extends blogList {
 					'blogPid'		=>	t3blog_div::getBlogPid(),
 					'title'			=>	$this->getTitleLinked($row['title'], $this->uid, $row['date']),
 					'date'			=>	$this->getDate($row['date']),
-					'time'			=>	$this->getTime($row['date']),
+					'time'			=>	$this->getDate($row['date'],'time'),
 					'author'		=>	$this->getAuthor($row['realName']),
 					'authorId'		=>	$row['author'],
 					'gravatar'		=>	!$this->conf['gravatar'] ? '' : $this->getGravatar($row['useruid'], $row['email'], $row['realName']),
@@ -511,7 +511,7 @@ class singleFunctions extends blogList {
 				'title'		=> htmlspecialchars($row['title']),
 				'author'	=> htmlspecialchars($row['blogname']),
 				'date'		=> $this->getDate($row['crdate']),
-				'time'		=> $this->getTime($row['crdate']),
+				'time'		=> $this->getDate($row['crdate'],'time'),
 				'url'		=> $link,
 				'text'		=> htmlspecialchars(strip_tags($row['text']) . '...')
 			);
@@ -575,7 +575,7 @@ class singleFunctions extends blogList {
 				'author'	=> $this->getAuthor($row['author']),
 				'gravatar'	=> $gravatar,
 				'date'		=> $this->getDate($row['date']),
-				'time'		=> $this->getTime($row['date']),
+				'time'		=> $this->getDate($row['date'],'time'),
 				'email'		=> $row['email'],
 				'website'	=> $row['website'],
 				'text'		=> $row['text'],
@@ -600,7 +600,7 @@ class singleFunctions extends blogList {
 		$data = array(
 			'pageBrowser' 	=> '',
 			'comments' 		=> $comments,
-			'nrComments'	=> t3blog_db::getNumberOfCommentsByPostUid(t3lib_div::intval_positive($this->uid)),
+			'nrComments'	=> t3blog_db::getNumberOfCommentsByPostUid(intval($this->uid)),
 			'title' 		=> $this->pi_getLL('commentsTitle'),
 		);
 		$content = t3blog_div::getSingle($data, 'commentList', $this->conf);
@@ -637,7 +637,7 @@ class singleFunctions extends blogList {
 				'author'                => $this->getAuthor($row['author']),
 				'gravatar'              => !$this->conf['gravatar'] ? '' : $this->getGravatar('', $row['email'], $row['author']),
 				'date'                  => $this->getDate($row['date']),
-				'time'                  => $this->getTime($row['date']),
+				'time'                  => $this->getDate($row['date'],'time'),
 				'email'                 => $row['email'],
 				'website'               => $row['website'],
 				'text'                  => $row['text'],
@@ -1147,7 +1147,7 @@ class singleFunctions extends blogList {
 	 * @return 	string	splitted string
 	 */
 	function splitLongWordsInText($text) {
-		$stringLength = t3lib_div::intval_positive($this->conf['comment.']['splitLongWordsInComment']);
+		$stringLength = max(0, intval($this->conf['comment.']['splitLongWordsInComment']));
 		// if the value is set to 0 return lines unsplitted
 		if (!$stringLength) {
 			return $text;

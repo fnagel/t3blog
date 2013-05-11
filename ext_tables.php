@@ -1,8 +1,13 @@
 <?php
 	if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
 
+	if (version_compare(TYPO3_branch, '6.1', '<')) {
+		t3lib_div::loadTCA('pages');
+		t3lib_div::loadTCA('be_users');
+		t3lib_div::loadTCA('tt_content');
+	}
+
 	t3lib_extMgm::allowTableOnStandardPages('tx_t3blog_post');
-	t3lib_div::loadTCA('pages');
 	$TCA['pages']['columns']['module']['config']['items'][] = Array('T3Blog', 't3blog');
 	t3lib_extMgm::addToInsertRecords('tx_t3blog_post');
 
@@ -227,7 +232,6 @@
 	}
 
 	// be_users modification, to upload an image/avatar
-	t3lib_div::loadTCA('be_users');
 	$tx_t3blog_avatar = Array(
 	 	'tx_t3blog_avatar' => txdam_getMediaTCA('image_field', 'tx_t3blog_avatar'),
 	);
@@ -235,7 +239,6 @@
 	t3lib_extMgm::addToAllTCATypes('be_users', 'tx_t3blog_avatar', '', 'after:realName');
 
 
-	t3lib_div::loadTCA('tt_content');
 	$TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY. '_pi2'] = 'layout,select_key';
 
 	t3lib_extMgm::addPlugin(array('LLL:EXT:t3blog/locallang_db.xml:tt_content.list_type_pi2', $_EXTKEY. '_pi2'), 'list_type');

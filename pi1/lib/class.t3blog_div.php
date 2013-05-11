@@ -208,7 +208,7 @@ class t3blog_div {
 			else {
 				// Modify this configuration
 				$pageBrowserConf = array_merge($pageBrowserConf, array(
-					'pageParameterName' => 'tx_t3blog_post_pointer',
+					'pageParameterName' => $ident . '_pointer',
 					'numberOfPages' => $pages,
 					'numberOfLinks' => isset($conf['numberOfPageBrowserLinks']) ? intval($conf['numberOfPageBrowserLinks']) : 0
 				));
@@ -258,7 +258,7 @@ class t3blog_div {
 		static $cachedPid = 0;
 
 		if (isset($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid']) &&
-				t3lib_div::testInt($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid'])) {
+				t3blog_div::testInt($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid'])) {
 			return $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_t3blog_pi1.']['blogPid'];
 		}
 
@@ -344,6 +344,27 @@ class t3blog_div {
 				');';
 
 		return $js;
+	}
+
+	/**
+	 * A portable testInset implementation.
+	 *
+	 * @param mixed $value
+	 * @return bool
+	 */
+	static public function testInt($value) {
+		static $useOldGoodTestInt = null;
+
+		if (is_null($useOldGoodTestInt)) {
+			$useOldGoodTestInt = !class_exists('t3lib_utility_Math');
+		}
+		if ($useOldGoodTestInt) {
+			$result = t3lib_div::testInt($value);
+		}
+		else {
+			$result = t3lib_utility_Math::canBeInterpretedAsInteger($value);
+		}
+		return $result;
 	}
 }
 

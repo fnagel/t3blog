@@ -215,7 +215,7 @@ class rss extends tslib_pibase {
 	 */
 	protected function getLimit() {
 		$limit = '';
-		if (t3lib_div::testInt($this->conf['postItemCount'])) {
+		if (t3blog_div::testInt($this->conf['postItemCount'])) {
 			$limit = $this->conf['postItemCount'];
 			if ($this->rssVersion == '0.91' && $limit > 15) {
 				$limit = 15;
@@ -430,7 +430,7 @@ class rss extends tslib_pibase {
 	 */
 	function getDate($value) {
 		list($data) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('date','tx_t3blog_post',
-			'uid=' . t3lib_div::intval_positive($value) .
+			'uid=' . intval($value) .
 			$this->cObj->enableFields('tx_t3blog_post'));
 
 		// format the timestamp

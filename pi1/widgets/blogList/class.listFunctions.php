@@ -124,7 +124,7 @@ class listFunctions extends blogList {
 	public function getNumberOfListItems() {
 		$where = $this->getWhere();
 		list($row) = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
-			'COUNT(tx_t3blog_post.uid) AS t',
+			'COUNT(DISTINCT tx_t3blog_post.uid) AS t',
 			implode(',', $this->tables),
 			$where
 		);
@@ -269,7 +269,7 @@ class listFunctions extends blogList {
 			'email' 		=> $row['email'],
 			'showMore'		=> $hasDivider ? $this->getShowMore($textBeforeDivider, $this->getTitleLinked($this->pi_getLL('moreText'),$row['uid'],$row['date'],'moreLink')) : '',
 			'contentUids'	=> implode(',', $contentUidArray),
-			'time'			=> $this->getTime($row['date']),
+			'time'			=> $this->getDate($row['date'],'time'),
 			'categories'	=> $this->getCategoriesLinked($row['uid']),
 			'comments'		=> $this->getCommentsLink($row['uid'], $row['date']),
 			'tipafriendlinkText'=>	($this->conf['useTipAFriend']?$this->pi_getLL('tipafriendlinkText'):''),
@@ -436,7 +436,7 @@ class listFunctions extends blogList {
 	 */
 	protected function getAuthorCondition() {
 		$result = '';
-		if (t3lib_div::testInt($this->localPiVars['author'])) {
+		if (t3blog_div::testInt($this->localPiVars['author'])) {
 			$result = ' AND tx_t3blog_post.author=' . $this->localPiVars['author'];
 		}
 		return $result;
@@ -556,14 +556,14 @@ class listFunctions extends blogList {
 	 */
 	protected function getListItemsLimit() {
 		$postPointer = t3lib_div::_GET('tx_t3blog_post_pointer');
-		if (t3lib_div::testInt($postPointer)) {
+		if (t3blog_div::testInt($postPointer)) {
 			$limit = intval($postPointer) * $this->conf['numberOfRecords'];
 		}
 		else {
 			$limit = '0';
 		}
 		$limit .= ',';
-		if (t3lib_div::testInt($this->conf['numberOfRecords'])) {
+		if (t3blog_div::testInt($this->conf['numberOfRecords'])) {
 			$limit .= $this->conf['numberOfRecords'];
 		}
 		else {
