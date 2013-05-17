@@ -31,6 +31,7 @@ if (!defined('TYPO3_MODE')) {
 }
 
 require_once(PATH_t3lib.'class.t3lib_scbase.php');
+require_once(t3lib_extMgm::extPath('t3blog') . 'pi1/lib/class.t3blog_div.php');
 
 $LANG->includeLLFile('EXT:lang/locallang_core.xml');
 $LANG->includeLLFile('EXT:t3blog/lib/locallang.xml');
